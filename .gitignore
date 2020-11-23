@@ -1,0 +1,9 @@
+# OSX
+*.DS_Store
+
+# stimulus files
+/stimulus-creation/preprocessing/logs/
+/stimulus-creation/preprocessing/resamples/
+/stimulus-creation/preprocessing/bandpassed/
+/stimulus-creation/preprocessing/outputs/
+/stimulus-creation/preprocessing/weighted/
