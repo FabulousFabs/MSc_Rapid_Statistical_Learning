@@ -1,0 +1,128 @@
+include "sctINFO.pcl";
+
+## INPUT
+sub string GetInput(string prompt) begin
+	t_Text.set_caption(prompt, true);
+	t_Text2.set_caption("", true);
+	p_Text.present();
+	system_keyboard.set_case_mode(3);
+	string in = system_keyboard.get_input(p_Text, t_Text2);
+	return in;
+end;
+
+sub ClearText begin
+	t_Text.set_caption("", true);
+	t_Text2.set_caption("", true);
+end;
+
+sub GetParticipantID begin
+	s_Participant = GetInput(s_ParticipantID);
+	ClearText();
+end;
+
+sub WaitForKey begin
+	loop i_ButtonPresses = response_manager.total_response_count() until response_manager.total_response_count() > i_ButtonPresses
+   begin
+	end;
+end;
+
+sub InstructParticipant(string message) begin
+	t_Text2.set_caption(message, true);
+	p_Text.present();
+	WaitForKey();
+	ClearText();
+end;
+
+## STIMULUS LOADING
+sub LoadTestFile(string file) begin
+	input_file f = new input_file;
+	f.open(file);
+	f.set_delimiter('\n');
+	
+	string header = f.get_line();
+	
+	loop i_Trials = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		l.split("\t", as_Stimuli[i_Trials]);
+		i_Trials = i_Trials + 1;
+	end;
+	
+	f.close();
+end;
+
+sub ShuffleTrials begin
+	loop i_Shuffle = 1 until i_Shuffle > iRep begin
+		as_Stimuli.shuffle();
+		as_Trials[i_Shuffle] = as_Stimuli;
+		i_Shuffle = i_Shuffle + 1;
+	end;
+end;
+
+sub LoadPracticeFile(string file) begin
+	input_file f = new input_file;
+	f.open(file);
+	f.set_delimiter('\n');
+	
+	string header = f.get_line();
+	
+	loop i_Trials = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		l.split("\t", as_Practice[i_Trials]);
+		i_Trials = i_Trials + 1;
+	end;
+end;
+
+## TRIALS
+sub RunPractice begin
+	loop i_Trials = 1 until i_Trials > iPractice begin
+		p_Blank.present();
+		wait_interval(iBlank);
+		
+		p_Fixation.present();
+		wait_interval(iFixation);
+		
+		wait_interval(iDelay);
+		
+		t_Text.set_caption(as_Practice[i_Trials][4], true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		wait_interval(iPresentation);
+		
+		p_Blank.present();
+		
+		i_Trials = i_Trials + 1;
+	end;
+end;
+
+sub RunTrials begin
+	loop i_Shuffle = 1 until i_Shuffle > iRep begin
+		
+		if i_Shuffle > 1 then
+			InstructParticipant(s_BlockBreak);
+		end;
+		
+		loop i_Trials = 1 until i_Trials > iRows begin
+			
+			p_Blank.present();
+			wait_interval(iBlank);
+			
+			p_Fixation.present();
+			wait_interval(iFixation);
+			
+			w_Recording.set_base_filename("S-" + s_Participant + "-T-" + as_Trials[i_Shuffle][i_Trials][1] + "-V-" + string(i_Shuffle));
+			w_Recording.present();
+			wait_interval(iDelay);
+			
+			t_Text.set_caption(as_Trials[i_Shuffle][i_Trials][4], true);
+			t_Text2.set_caption("", true);
+			p_Text.present();
+			wait_interval(iPresentation);
+			
+			p_Blank.present();
+			
+			i_Trials = i_Trials + 1;
+		end;
+		
+		i_Shuffle = i_Shuffle + 1;
+	end;
+end;

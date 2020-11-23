@@ -1,0 +1,30 @@
+# Configuration
+string s_List = "stimuli.txt";
+string s_Practice = "practice.txt";
+int iCols = 4;
+int iRows = 60;
+int iPractice = 20;
+int iRep = 5;
+int iBlank = 200;
+int iFixation = 500;
+int iDelay = 200;
+int iPresentation = 5100;
+
+string s_Instructions_1 = "Welkom!\nIn deze taak is het de bedoeling dat je voor \nThanks. Press SPACE to start.";
+string s_Instructions_2 = "Practice trials incoming m8.";
+string s_Instructions_3 = "U rdy?";
+string s_Instructions_4 = "Dear Participant,\nYou did this.\nThanks. Press SPACE to end.";
+string s_BlockBreak = "You have completed this block. Please, take a minute to rest before you proceed.\nWhenever you feel ready, press SPACE to continue.";
+
+
+# Internals
+string s_ParticipantID = "SID alsjeblieft."; # Enter id prompt.
+
+string s_Participant; # participant id
+int i_Trials; # Iterator for ::LoadTestFile(), ::LoadPracticeFile(), ::RunPractice() and ::RunTrials()
+int i_Shuffle; # Iterator for ::ShuffleTrials() and ::RunTrials()
+int i_ButtonPresses; # Iterator for ::WaitForKey()
+
+array<string> as_Stimuli[iRows][iCols]; # memory assignment stimuli
+array<string> as_Trials[iRep][iRows][iCols]; # memory assignment trials
+array<string> as_Practice[iPractice][iCols]; # memory assignment practice

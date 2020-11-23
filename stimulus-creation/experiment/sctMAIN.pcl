@@ -1,0 +1,15 @@
+include "sctSUBS.pcl";
+
+# Setup
+GetParticipantID();
+LoadPracticeFile(s_Practice);
+LoadTestFile(s_List);
+ShuffleTrials();
+
+# Run session
+InstructParticipant(s_Instructions_1);
+InstructParticipant(s_Instructions_2);
+RunPractice();
+InstructParticipant(s_Instructions_3);
+RunTrials();
+InstructParticipant(s_Instructions_4);
