@@ -112,7 +112,7 @@ sub RunTrials begin
 			
 			#w_Recording.set_base_filename("S-" + s_Participant + "-T-" + as_Trials[i_Shuffle][i_Trials][1] + "-V-" + string(i_Shuffle));
 			#w_Recording.present();
-			#wait_interval(iDelay);
+			wait_interval(iDelay);
 			
 			t_Text.set_caption(as_Trials[i_Shuffle][i_Trials][4], true);
 			t_Text2.set_caption("", true);
