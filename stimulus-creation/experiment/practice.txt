@@ -1,5 +1,5 @@
 id	target	base	production_cue
-1	bumier	bumper	BUmier
+1	ananak	ananas	ANanak
 2	kiosa	kiosk	kiOsa
 3	merro	metro	merro
 4	mossee	moskee	MOSsee
@@ -13,8 +13,8 @@ id	target	base	production_cue
 12	fnoe	gnoe	fnoe
 13	inoor	ivoor	Inoor
 14	lamboe	bamboe	LAMboe
-15	galot	galop	GAlot
-16	perdik	perzik	PERdik
+15	meibel	meubel	MEIbel
+16	vitroen	citroen	VItroen
 17	nund	rund	nund
 18	moerak	moeras	MOErak
 19	ozel	ezel	Ozel

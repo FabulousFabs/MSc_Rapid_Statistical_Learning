@@ -27,7 +27,7 @@ id	target	base	production_cue
 26	asaalt	asfalt	Asaalt
 27	trefe	trede	TREfe
 28	niald	naald	NIald
-29	meibel	meubel	MEIbel
+29	galot	galop	GAlot
 30	fleb	fles	fleb
 31	lepia	lepra	LEpia
 32	prema	poema	PREma
@@ -51,11 +51,11 @@ id	target	base	production_cue
 50	teno	tent	TEno
 51	elane	eland	Elane
 52	calia	cavia	CAlia
-53	ananak	ananas	ANanak
+53	bumier	bumper	BUmier
 54	elster	ekster	ELster
 55	gjord	fjord	gjord
 56	arwt	erwt	arwt
 57	taroe	tarwe	TAroe
-58	vitroen	citroen	VItroen
+58	perdik	perzik	PERdik
 59	maverie	materie	MAverie
 60	winc	wind	winc

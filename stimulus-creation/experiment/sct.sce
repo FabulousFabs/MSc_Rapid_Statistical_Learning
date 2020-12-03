@@ -37,6 +37,6 @@ picture {
 	x = 0; y = 0;
 } p_Fixation;
 
-sound_recording { 
-	use_date_time = false;  use_counter = true;  duration = 5300;
-} w_Recording;
+#sound_recording { 
+#	use_date_time = false;  use_counter = true;  duration = 5300;
+#} w_Recording;

@@ -10,11 +10,11 @@ int iFixation = 500;
 int iDelay = 200;
 int iPresentation = 5100;
 
-string s_Instructions_1 = "Welkom!\nIn deze taak is het de bedoeling dat je voor \nThanks. Press SPACE to start.";
-string s_Instructions_2 = "Practice trials incoming m8.";
-string s_Instructions_3 = "U rdy?";
-string s_Instructions_4 = "Dear Participant,\nYou did this.\nThanks. Press SPACE to end.";
-string s_BlockBreak = "You have completed this block. Please, take a minute to rest before you proceed.\nWhenever you feel ready, press SPACE to continue.";
+string s_Instructions_1 = "Welkom!\n\nIn deeze taak is het de bedoeling dat je verschillende woorden hardop uitspreekt.\nDe woorden bestaan niet echt in het Nederlands, maar spreek ze alsjeblieft uit op een manier die voor jou natuurlijk aanvoelt.\nDe klemtoon van elk woord wordt GROOT getoond, b.v. KLEMtoon.\n\nBen je er klaar voor dus? Laat het de onderzoeker weten.";
+string s_Instructions_2 = "De volgende woorden zijn oefentrials zodat je de taak onder de knie kunt krijgen.";
+string s_Instructions_3 = "De taak beginnt nu.";
+string s_Instructions_4 = "Je ben klaar met de taak. Dankjewel!";
+string s_BlockBreak = "Neem een korte pauze.\nWanneer je er klaar voor bent voor het volgende blok, klik op SPACE.";
 
 
 # Internals

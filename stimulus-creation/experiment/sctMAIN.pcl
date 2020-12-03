@@ -10,6 +10,8 @@ ShuffleTrials();
 InstructParticipant(s_Instructions_1);
 InstructParticipant(s_Instructions_2);
 RunPractice();
+ClearText();
 InstructParticipant(s_Instructions_3);
 RunTrials();
+ClearText();
 InstructParticipant(s_Instructions_4);
