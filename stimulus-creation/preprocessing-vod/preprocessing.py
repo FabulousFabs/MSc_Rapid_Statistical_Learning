@@ -17,16 +17,19 @@ from numpy import pi, convolve
 from scipy.signal.filter_design import bilinear
 from scipy.signal import butter, lfilter
 
-audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing/logs/'
+#audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/logs/'
+audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-cyclical/outs/'
 audio_targets = '.wav'
 enforce_Fs = 32000
+samp_width = 4 # note to self: bytes, not bits
+samp_subtype = 'PCM_32'
 bp = [8.0, 8000.0]
 aggressiveness = 1
 weighting = 'C'
-resample_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing/resamples/'
-denoise_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing/bandpassed/'
-target_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing/outputs/'
-spl_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing/weighted/'
+resample_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/resamples/'
+denoise_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/bandpassed/'
+target_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/outputs/'
+spl_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/weighted/'
 
 def preprocess_voice():
     """Main logic for preprocessing voice"""
@@ -45,7 +48,7 @@ def preprocess_resample():
     at = find_recordings(audio_folder, audio_targets)
     for f in at:
         y, Fs = librosa.load(os.path.join(audio_folder, f), sr=enforce_Fs)
-        sf.write(os.path.join(resample_folder, f), y, Fs)
+        sf.write(os.path.join(resample_folder, f), y, Fs, subtype=samp_subtype)
         print("--- Preprocessing resample: " + str(round(n / len(at) * 100, 2)) + "% done. ---\t\t", end='\r')
         n += 1
 
@@ -56,7 +59,7 @@ def preprocess_denoise():
     for f in at:
         a, Fs = librosa.load(os.path.join(resample_folder, f))
         na = butter_bandpass_filter(a, bp[0], bp[1], Fs)
-        sf.write(os.path.join(denoise_folder, f), na, Fs)
+        sf.write(os.path.join(denoise_folder, f), na, Fs, subtype=samp_subtype)
         print("--- Preprocessing bandpass: " + str(round(n / len(at) * 100, 2)) + "% done. ---\t\t", end='\r')
         n += 1
 
@@ -68,7 +71,7 @@ def preprocess_spl():
         x, Fs = librosa.load(os.path.join(target_folder, f))
         b, a = a_weighting_coeffs_design(Fs) if weighting == 'A' else c_weighting_coeffs_design(Fs) if weighting == 'C' else b_weighting_coeffs_design(Fs)
         y = lfilter(b, a, x)
-        sf.write(os.path.join(spl_folder, f), y, Fs)
+        sf.write(os.path.join(spl_folder, f), y, Fs, subtype=samp_subtype)
         print("--- Preprocessing SPLs: " + str(round(n / len(at) * 100, 2)) + "% done. ---\t\t", end='\r')
         n += 1
 
@@ -114,7 +117,7 @@ def write_wave(f, a, Fs):
     """Write a wave file"""
     with contextlib.closing(wave.open(f, 'wb')) as wf:
         wf.setnchannels(1)
-        wf.setsampwidth(2)
+        wf.setsampwidth(samp_width)
         wf.setframerate(Fs)
         wf.writeframes(a)
 
