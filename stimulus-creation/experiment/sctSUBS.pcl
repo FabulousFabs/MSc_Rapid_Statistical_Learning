@@ -72,6 +72,39 @@ sub LoadPracticeFile(string file) begin
 	end;
 end;
 
+## DATA
+sub InitialiseStorage begin
+	s_fData = "Timings_PP_" + s_Participant + ".txt";
+	
+	output_file f = new output_file;
+	f.open(s_fData, false);
+	f.print(s_fHeader);
+	f.close();
+end;
+
+sub Synchronise begin
+	i_BaseTimer = clock.time();
+end;
+
+sub Store(int i_cRep, int i_cRow) begin
+	string s_subj = s_Participant;
+	string s_item = as_Trials[i_cRep][i_cRow][1];
+	string s_vari = string(i_cRep);
+	string s_onse = string(ai_Timings[i_Shuffle][i_Trials][1]);
+	string s_offs = string(ai_Timings[i_Shuffle][i_Trials][2]);
+	
+	string out = s_subj + "\t" + 
+					 s_item + "\t" + 
+					 s_vari + "\t" + 
+					 s_onse + "\t" + 
+					 s_offs + "\n";
+	
+	output_file f = new output_file;
+	f.open_append(s_fData);
+	f.print(out);
+	f.close();
+end;
+
 ## TRIALS
 sub RunPractice begin
 	loop i_Trials = 1 until i_Trials > iPractice begin
@@ -110,6 +143,7 @@ sub RunTrials begin
 			p_Fixation.present();
 			wait_interval(iFixation);
 			
+			## we no longer take recordings through presentation; all we need are timings
 			#w_Recording.set_base_filename("S-" + s_Participant + "-T-" + as_Trials[i_Shuffle][i_Trials][1] + "-V-" + string(i_Shuffle));
 			#w_Recording.present();
 			wait_interval(iDelay);
@@ -117,10 +151,17 @@ sub RunTrials begin
 			t_Text.set_caption(as_Trials[i_Shuffle][i_Trials][4], true);
 			t_Text2.set_caption("", true);
 			p_Text.present();
+			int onset = clock.time() - i_BaseTimer;
+			ai_Timings[i_Shuffle][i_Trials][1] = onset;
+			
 			wait_interval(iPresentation);
 			
 			p_Blank.present();
 			
+			int offset = clock.time() - i_BaseTimer;
+			ai_Timings[i_Shuffle][i_Trials][2] = offset;
+			
+			Store(i_Shuffle, i_Trials);
 			i_Trials = i_Trials + 1;
 		end;
 		

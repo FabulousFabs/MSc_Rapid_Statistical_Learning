@@ -7,7 +7,7 @@ default_background_color = 0, 0, 0;
 default_font = "Verdana";
 default_font_size = 20;
 default_text_color = 255, 255, 255; 
-default_text_align = align_left;
+default_text_align = align_center;
 
 begin;
 

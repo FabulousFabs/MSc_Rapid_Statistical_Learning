@@ -10,8 +10,8 @@ int iFixation = 500;
 int iDelay = 200;
 int iPresentation = 5100;
 
-string s_Instructions_1 = "Welkom!\n\nIn deeze taak is het de bedoeling dat je verschillende woorden hardop uitspreekt.\nDe woorden bestaan niet echt in het Nederlands, maar spreek ze alsjeblieft uit op een manier die voor jou natuurlijk aanvoelt.\nDe klemtoon van elk woord wordt GROOT getoond, b.v. KLEMtoon.\n\nBen je er klaar voor dus? Laat het de onderzoeker weten.";
-string s_Instructions_2 = "De volgende woorden zijn oefentrials zodat je de taak onder de knie kunt krijgen.";
+string s_Instructions_1 = "Welkom!\n\nIn deeze taak is het de bedoeling dat je\nverschillende woorden hardop uitspreekt.\nDe woorden bestaan niet echt in het Nederlands,\nmaar spreek ze alsjeblieft uit op een manier\ndie voor jou natuurlijk aanvoelt.\nDe klemtoon van elk woord wordt GROOT getoond,\nb.v. KLEMtoon.\n\nBen je er klaar voor dus?\nLaat het de onderzoeker weten.";
+string s_Instructions_2 = "De volgende woorden zijn oefentrials\nzodat je de taak onder de knie kunt krijgen.";
 string s_Instructions_3 = "De taak beginnt nu.";
 string s_Instructions_4 = "Je ben klaar met de taak. Dankjewel!";
 string s_BlockBreak = "Neem een korte pauze.\nWanneer je er klaar voor bent voor het volgende blok, klik op SPACE.";
@@ -19,12 +19,16 @@ string s_BlockBreak = "Neem een korte pauze.\nWanneer je er klaar voor bent voor
 
 # Internals
 string s_ParticipantID = "SID alsjeblieft."; # Enter id prompt.
+string s_Participant; # Participant id
+string s_fData; # Name of file for timing data for ::InitialiseStorage() and ::Store()
+string s_fHeader = "S\tI\tV\tO\tD\n"; # Output header for timing data used in ::InitialiseStorage()
 
-string s_Participant; # participant id
 int i_Trials; # Iterator for ::LoadTestFile(), ::LoadPracticeFile(), ::RunPractice() and ::RunTrials()
 int i_Shuffle; # Iterator for ::ShuffleTrials() and ::RunTrials()
 int i_ButtonPresses; # Iterator for ::WaitForKey()
+int i_BaseTimer; # Synchronisation timer set in ::Synchronise() and read continuously in ::RunTrials()
 
 array<string> as_Stimuli[iRows][iCols]; # memory assignment stimuli
 array<string> as_Trials[iRep][iRows][iCols]; # memory assignment trials
 array<string> as_Practice[iPractice][iCols]; # memory assignment practice
+array<int> ai_Timings[iRep][iRows][2]; # memory assignment timing data

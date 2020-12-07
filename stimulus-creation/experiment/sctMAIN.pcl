@@ -5,6 +5,7 @@ GetParticipantID();
 LoadPracticeFile(s_Practice);
 LoadTestFile(s_List);
 ShuffleTrials();
+InitialiseStorage();
 
 # Run session
 InstructParticipant(s_Instructions_1);
@@ -12,6 +13,7 @@ InstructParticipant(s_Instructions_2);
 RunPractice();
 ClearText();
 InstructParticipant(s_Instructions_3);
+Synchronise();
 RunTrials();
 ClearText();
 InstructParticipant(s_Instructions_4);
