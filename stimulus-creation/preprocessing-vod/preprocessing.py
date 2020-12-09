@@ -18,7 +18,8 @@ from scipy.signal.filter_design import bilinear
 from scipy.signal import butter, lfilter
 
 #audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-vod/logs/'
-audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-cyclical/outs/'
+#audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-cyclical/outs/'
+audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-timed/outs/'
 audio_targets = '.wav'
 enforce_Fs = 32000
 samp_width = 4 # note to self: bytes, not bits

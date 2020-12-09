@@ -1,6 +1,9 @@
 # OSX
 *.DS_Store
 
+# participant data
+/stimulus-creation/experiment/logs/*
+
 # stimulus files
 *.wav
 *.WAV
