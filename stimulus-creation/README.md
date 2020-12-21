@@ -24,7 +24,5 @@ To be able to present participants with stimuli manipulated in variability along
 
 ***TODO:*** Write script to populate definitions, correct answers, filler definitions, etc. in specific lists.
 
-***TODO:*** Write script to tease the assigned lists apart into the stimuli we need per task that can be used as inputs for Presentation.
-
 ## Data availability
 ***TODO:*** At some point, these data will have to be made public via the Donders repository.
