@@ -1,5 +1,9 @@
-# pipeline to copy files for a sham run of assignment (while we don't have the full
-# list of stimuli yet - useless afterwards)
+# pipeline to take all of our stimuli and create assignments per participant
+# this is done by crossing lists (levels 1-3) with pools (levels 1-3) such
+# that we get 9 conditions with 80 items each (where items in pool 1 and 3
+# are the different variants produced by one speaker, whereas items in pool
+# 2 are one variant of each of the four speakers in that pool). essentially,
+# this is how we manipulate variability along our two dimensions.
 
 import os, sys, re
 from pydub import AudioSegment
@@ -54,10 +58,9 @@ def preprocess_assignment():
 
         # list-wise creation of outs
         for n in range(1,4):
-            items = lists[n-1,:]
-            outs += get_outs_single(n, items, 1, pools[0,:], range(1,5), stimuli)      # LNP1 crossing
-            outs += get_outs_multiple(n, items, 2, pools[1,:], range(1,5), stimuli)    # LNP2 crossing
-            outs += get_outs_single(n, items, 3, pools[2,:], range(1,5), stimuli)      # LNP3 crossing
+            outs += get_outs_single(n, lists[n-1,:], 1, pools[0,:], range(1,5), stimuli)      # LNP1 crossing
+            outs += get_outs_multiple(n, lists[n-1,:], 2, pools[1,:], range(1,5), stimuli)    # LNP2 crossing
+            outs += get_outs_single(n, lists[n-1,:], 3, pools[2,:], range(1,5), stimuli)      # LNP3 crossing
 
         with open(os.path.join(list_folder, str(i) + '.txt'), 'w') as f:
             f.write(outs)
