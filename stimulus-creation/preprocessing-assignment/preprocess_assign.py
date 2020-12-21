@@ -5,7 +5,7 @@
 # 2 are one variant of each of the four speakers in that pool). essentially,
 # this is how we manipulate variability along our two dimensions.
 
-import os, sys, re
+import os, sys
 from pydub import AudioSegment
 import numpy as np
 
