@@ -3,6 +3,8 @@
 
 # participant data
 /stimulus-creation/experiment/logs/*
+/stimulus-creation/preprocessing-assignment/lists/*
+/stimulus-creation/preprocessing-assignment/speakers.txt
 
 # stimulus files
 *.wav
