@@ -20,7 +20,8 @@ Preprocessing of auditory stimuli consists of four steps:
 4. **Automatic sound pressure equalisation:** To ensure that sound pressure levels are in a desirable and comparable range across speakers and items, we use Praat 6.1.08 (on MacOS BigSur) to normalise SPLs (aiming for roughly 60dB peaks). This is achieved through ```./preprocessing-spl/spl.praat```. *Note: Praat overwrites the specified files so this should be run on a copy of the full data, not the actual files (in case something goes awry).*
 
 ## Assignment
-To be able to present participants with stimuli manipulated in variability along the dimensions of speaker and item, we create 9 conditions by crossing the factors speaker (pool 1 and 3: only one speaker per item with four variants; pool 2: four speakers perp item with one variant each) and item (lists 1-3). Both are randomised on a per-participant basis (with the additional constraint that m:f ratio in speaker pools must always be 2:2). To generate fourty such lists, we use ```python3 ./preprocessing-assignment/preprocess_assign.py --N=40```.
+To be able to present participants with stimuli manipulated in variability along the dimensions of speaker and item, we create 9 conditions by crossing the factors speaker (pool 1 and 3: only one speaker per item with four variants; pool 2: four speakers per item with one variant each) and item (lists 1-3). Both are randomised on a per-participant basis (with the additional constraint that m:f ratio in speaker pools must always be 2:2). To generate fourty such lists, we use ```python3 ./preprocessing-assignment/preprocess_assign.py --N=40```.
+
 ***TODO:*** Write script to tease the assigned lists apart into the stimuli we need per task that can be used as inputs for Presentation.
 
 ## Data availability
