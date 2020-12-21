@@ -22,6 +22,8 @@ Preprocessing of auditory stimuli consists of four steps:
 ## Assignment
 To be able to present participants with stimuli manipulated in variability along the dimensions of speaker and item, we create 9 conditions by crossing the factors speaker (pool 1 and 3: only one speaker per item with four variants; pool 2: four speakers per item with one variant each) and item (lists 1-3). Both are randomised on a per-participant basis (with the additional constraint that m:f ratio in speaker pools must always be 2:2). To generate fourty such lists, we use ```python3 ./preprocessing-assignment/preprocess_assign.py --N=40```.
 
+***TODO:*** Write script to populate definitions, correct answers, filler definitions, etc. in specific lists.
+
 ***TODO:*** Write script to tease the assigned lists apart into the stimuli we need per task that can be used as inputs for Presentation.
 
 ## Data availability

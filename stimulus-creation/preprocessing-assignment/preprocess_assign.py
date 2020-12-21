@@ -27,6 +27,7 @@ def preprocess_assignment():
     stimuli = np.zeros(shape=(n_speakers, n_targets, n_variants))
 
     for rec in recs:
+        # get stimulus durations in ms
         audio = AudioSegment.from_wav(os.path.join(stimuli_folder, rec))
         props = rec.split('.')
         props = ''.join(props[:-1]).split('_')
@@ -46,6 +47,9 @@ def preprocess_assignment():
             7) list (item)
         """
         outs = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\n'
+        outs_learning = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\n'
+        outs_4afc = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\n'
+        outs_meg = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\n'
 
         # create three randomised lists of targets
         stim = np.arange(1, (n_targets + 1), 1, dtype='int')
@@ -58,12 +62,42 @@ def preprocess_assignment():
 
         # list-wise creation of outs
         for n in range(1,4):
-            outs += get_outs_single(n, lists[n-1,:], 1, pools[0,:], range(1,5), stimuli)      # LNP1 crossing
-            outs += get_outs_multiple(n, lists[n-1,:], 2, pools[1,:], range(1,5), stimuli)    # LNP2 crossing
-            outs += get_outs_single(n, lists[n-1,:], 3, pools[2,:], range(1,5), stimuli)      # LNP3 crossing
+            lnp1 = get_outs_single(n, lists[n-1,:], 1, pools[0,:], range(1,5), stimuli)      # LNP1 crossing
+            lnp2 = get_outs_multiple(n, lists[n-1,:], 2, pools[1,:], range(1,5), stimuli)    # LNP2 crossing
+            lnp3 = get_outs_single(n, lists[n-1,:], 3, pools[2,:], range(1,5), stimuli)      # LNP3 crossing
 
+            # save everything to master
+            outs += lnp1 + lnp2 + lnp3
+
+            # save only learning conditions
+            if n == 1: outs_learning += lnp1
+            if n == 2: outs_learning += lnp2
+
+            # save only 4afc conditions
+            outs_4afc += get_outs_single(n, lists[n-1,:], 1, pools[0,:], range(1,5), stimuli, beh=True)     # LNP1 crossing behavioural
+            outs_4afc += get_outs_multiple(n, lists[n-1,:], 2, pools[1,:], range(1,5), stimuli, beh=True)   # LNP2 crossing behavioural
+            outs_4afc += get_outs_single(n, lists[n-1,:], 3, pools[2,:], range(1,5), stimuli, beh=True)     # LNP3 crossing behavioural
+
+            # save only meg conditions
+            if n == 1: outs_meg += lnp1 + lnp2
+            if n == 2: outs_meg += lnp1 + lnp2
+
+        # write master
         with open(os.path.join(list_folder, str(i) + '.txt'), 'w') as f:
             f.write(outs)
+
+        # write learning
+        with open(os.path.join(list_folder, str(i) + '_learning.txt'), 'w') as f:
+            f.write(outs_learning)
+
+        # write 4afc
+        with open(os.path.join(list_folder, str(i) + '_4afc.txt'), 'w') as f:
+            f.write(outs_4afc)
+
+        # write meg
+        with open(os.path.join(list_folder, str(i) + '_meg.txt'), 'w') as f:
+            f.write(outs_meg)
+
         print('--- List %d/%d done. ---\t\t' % (i+1, n_lists), end='\r')
     print('Completed creating all lists.\t\t')
 
@@ -103,31 +137,65 @@ def split_speakers(s):
             sm.append(spkr)
     return (sm, sf)
 
-def get_outs_single(n, items, p, pool, v, stimuli):
+def get_outs_single(n, items, p, pool, v, stimuli, beh=False):
     """Create output string for single speaker types"""
     outs = ''
-    c = 0
-    for item in items:
-        if (c > len(pool)-1): c = 0
-        spkr = pool[c]
-        for var in v:
+
+    if beh is False:
+        c = 0
+        for item in items:
+            if (c > len(pool)-1): c = 0
+            spkr = pool[c]
+            for var in v:
+                outs += '%d\t%d\t%d\t%d\t%s\t%d\t%d\n' % (
+                                                            var,
+                                                            item,
+                                                            spkr,
+                                                            stimuli[spkr-1,item-1,var-1],
+                                                            '_'.join([str(spkr), str(item), str(var)]) + '.wav',
+                                                            p,
+                                                            n
+                                                         )
+            c += 1
+    else:
+        c = 0
+        for item in items:
+            if (c > len(pool)-1): c = 0
+            spkr = pool[c]
+            var = np.random.randint(0, 3) # randint samples from a discrete uniform so best choice here
             outs += '%d\t%d\t%d\t%d\t%s\t%d\t%d\n' % (
-                                                        var,
+                                                        var+1,
                                                         item,
                                                         spkr,
-                                                        stimuli[spkr-1,item-1,var-1],
-                                                        '_'.join([str(spkr), str(item), str(var)]) + '.wav',
+                                                        stimuli[spkr-1,item-1,var],
+                                                        '_'.join([str(spkr), str(item), str(var+1)]) + '.wav',
                                                         p,
                                                         n
                                                      )
-        c += 1
+            c += 1
+
     return outs
 
-def get_outs_multiple(n, items, p, pool, v, stimuli):
+def get_outs_multiple(n, items, p, pool, v, stimuli, beh=False):
     """Create output string for multiple speaker types"""
     outs = ''
-    for item in items:
-        for spkr in pool:
+
+    if beh is False:
+        for item in items:
+            for spkr in pool:
+                var = np.random.choice(v, 1)[0]
+                outs += '%d\t%d\t%d\t%d\t%s\t%d\t%d\n' % (
+                                                            var,
+                                                            item,
+                                                            spkr,
+                                                            stimuli[spkr-1,item-1,var-1],
+                                                            '_'.join([str(spkr), str(item), str(var)]) + '.wav',
+                                                            p,
+                                                            n
+                                                         )
+    else:
+        for item in items:
+            spkr = pool[np.random.randint(0, 3)]
             var = np.random.choice(v, 1)[0]
             outs += '%d\t%d\t%d\t%d\t%s\t%d\t%d\n' % (
                                                         var,
