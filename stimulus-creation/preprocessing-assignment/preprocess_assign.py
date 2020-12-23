@@ -13,7 +13,6 @@ stimuli_folder = '/users/fabianschneider/desktop/university/master/dissertation/
 list_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/lists/'
 speakers_file = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/speakers.txt'
 definitions_file = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/definitions.txt'
-fillers_file = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/fillers.txt'
 audio_targets = '.wav'
 
 n_lists = 1 # how many lists do we want to create (NOTE: we use one such list of assignments per participant)
@@ -28,7 +27,6 @@ def preprocess_assignment():
     (speakers_m, speakers_f) = split_speakers(speakers)
     stimuli = np.zeros(shape=(n_speakers, n_targets, n_variants))
     definitions = read_txt(definitions_file)
-    fillers = read_txt(fillers_file)
     ans_none = 41
 
     for rec in recs:
