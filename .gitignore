@@ -5,6 +5,8 @@
 /stimulus-creation/experiment/logs/*
 /stimulus-creation/preprocessing-assignment/lists/*
 /stimulus-creation/preprocessing-assignment/speakers.txt
+/stimulus-creation/preprocessing-assignment/definitions.txt
+/stimulus-creation/preprocessing-assignment/fillers.txt
 
 # stimulus files
 *.wav
