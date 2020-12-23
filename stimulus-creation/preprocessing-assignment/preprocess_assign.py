@@ -48,6 +48,7 @@ def preprocess_assignment():
             5) stimulus file
             6) pool (speaker)
             7) list (item)
+            8) definition id
         """
         outs = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\tdef\n'
         outs_learning = 'var\tid\tspkr\tdur\tf\tpool_speaker\tlist_item\tdef\n'
