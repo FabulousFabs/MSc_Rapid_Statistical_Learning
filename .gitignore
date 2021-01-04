@@ -1,5 +1,6 @@
 # OSX
 *.DS_Store
+*__MACOSX
 
 # participant data
 /stimulus-creation/experiment/logs/*
@@ -7,6 +8,12 @@
 /stimulus-creation/preprocessing-assignment/speakers.txt
 /stimulus-creation/preprocessing-assignment/definitions.txt
 /stimulus-creation/preprocessing-assignment/fillers.txt
+/experiment/logs/*
+/experiment/stimuli/definitions.txt
+/experiment/stimuli/fillers.txt
+/experiment/stimuli/speakers.txt
+/experiment/stimuli/txt/*
+/experiment/stimuli/audio/*
 
 # stimulus files
 *.wav

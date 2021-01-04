@@ -1,0 +1,238 @@
+include "rsl_INFO.pcl";
+
+## INPUT
+sub string GetInput(string prompt) begin
+	# Get keyboard input from user
+	#
+	# INPUTS:
+	#		string prompt	-	A prompt
+	#
+	# OUTPUTS:
+	#		string input	-	User input
+	
+	t_Text.set_caption(prompt, true);
+	t_Text2.set_caption("", true);
+	p_Text.present();
+	system_keyboard.set_case_mode(3);
+	string in = system_keyboard.get_input(p_Text, t_Text2);
+	return in;
+end;
+
+sub ClearText begin
+	# Clears text on screen
+	
+	t_Text.set_caption("", true);
+	t_Text2.set_caption("", true);
+end;
+
+sub GetParticipantID begin
+	# Gets participant ID via user prompt
+	
+	s_PPN = GetInput(s_ParticipantID);
+	ClearText();
+end;
+
+sub WaitForKey begin
+	# Pause experiment until key is pressed
+	
+	loop i_ButtonPresses = response_manager.total_response_count() until response_manager.total_response_count() > i_ButtonPresses
+   begin
+	end;
+end;
+
+sub InstructParticipant(string message) begin
+	# Show participants a text description
+	#
+	# INPUTS:
+	#		string message	-	A description to present to participants
+
+	ClearText();
+	t_Text2.set_caption(message, true);
+	p_Text.present();
+	WaitForKey();
+	ClearText();
+end;
+
+## STIMULI
+sub LoadSpeakers begin
+	# Loads the hardcoded speaker text file
+	
+	input_file f = new input_file;
+	f.open(s_Dir_Info + s_List_Speakers);
+	f.set_delimiter('\n');
+	
+	string header = f.get_line();
+	
+	loop i = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		array<string> spkr[2];
+		l.split("\t", spkr);
+		as_Speakers[i] = spkr[2];
+		i = i + 1;
+	end;
+	
+	f.close();
+end;
+
+sub LoadDefinitions begin
+	# Loads the hardcoded definition text file
+	
+	input_file f = new input_file;
+	f.open(s_Dir_Info + s_List_Definitions);
+	f.set_delimiter('\n');
+	
+	string header = f.get_line();
+	
+	loop i = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		l.split("\t", as_Definitions[i]);
+		i = i + 1;
+	end;
+	
+	f.close();
+end;
+
+sub LoadFillers begin
+	# Loads the hardcoded fillers text file
+	
+	input_file f = new input_file;
+	f.open(s_Dir_Info + s_List_Fillers);
+	f.set_delimiter('\n');
+	
+	string header = f.get_line();
+	
+	loop i = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		l.split("\t", as_Fillers[i]);
+		i = i + 1;
+	end;
+	
+	f.close();
+end;
+
+sub LoadStimuli(string file, array<string, 2>& stimuli, int c) begin
+	# Loads a list of stimuli
+	#
+	# INPUTS:
+	#		array<string, 2>& stimuli	-	The preassigned stimulus array we want to target
+	#		int columns						-	Integer count of the columns we need
+	#
+	# OUTPUTS:
+	#		none,
+	#			but mind the reference. This updates input stimuli.
+	
+	input_file f = new input_file;
+	f.open(s_Dir_Txt + file);
+	
+	string header = f.get_line();
+	
+	loop i = 1 until f.end_of_file() || !f.last_succeeded() begin
+		string l = f.get_line();
+		
+		array<string> entry[c-1];
+		l.split("\t", entry);
+		int spkr = int(entry[3]);
+		
+		array<string> full[c]; # presentation is so inelegant... why is there no way to index properly (or to at least do a memory referencing trick here)? good grief. (or maybe i just don't know enough about it but the docs are also very...meh)
+		full[1] = entry[1];
+		full[2] = entry[2];
+		full[3] = entry[3];
+		full[4] = entry[4];
+		full[5] = entry[5];
+		full[6] = entry[6];
+		full[7] = entry[7];
+		full[8] = entry[8];
+		full[9] = as_Speakers[spkr];
+		
+		stimuli[i] = full;
+		i = i + 1;
+	end;
+	
+	f.close();
+end;
+
+sub ShuffleBlocked(array<string, 2>& stimuli, int v, int r, int c) begin
+	# Shuffles a list of stimuli that has consecutive variants
+	#
+	# INPUTS:
+	#		array<string, 2>& stimuli	-	The preassigned stimulus array we want to target
+	#		int variants					-	The number of variants we have per stimulus
+	#		int rows							-	The number of rows of our stimuli
+	#		int columns						-	The number of columns of our stimuli
+	#
+	# OUTPUTS:
+	#		none,
+	#			but mind the reference. This updates input stimuli.
+	
+	array<string> bin[v][int(r/v)][c];
+	array<int> counts[v];
+	counts.fill(1, v, 1, 0);
+	
+	int j = 1;
+	
+	loop i = 1 until i == r begin
+		if j > 4 then
+			j = 1;
+		end;
+		
+		int b_var = j;
+		int b_num = counts[b_var];
+		
+		bin[b_var][b_num] = stimuli[i];
+		
+		counts[b_var] = counts[b_var] + 1;
+		i = i + 1;
+		j = j + 1;
+	end;
+	
+	array<string> collection[r][c];
+	
+	loop i = 1 until i == v begin
+		bin[i].shuffle();
+		
+		loop j = 1 until j == int(r/v) begin
+			collection[(i - 1) * int(r/v) + j] = bin[i][j];
+			
+			j = j + 1;
+		end;
+		
+		i = i + 1;
+	end;
+	
+	stimuli = collection;
+end;
+
+## TRIALS
+sub RunExposureTrials begin
+	# Presentation of the exposure trials
+	
+	loop i = 1 until i == i_Expo_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_Expo_Stimuli[i][5]);
+		w_Sound.load();
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_Expo_Fixation);
+		
+		p_Blank.present();
+		s_Sound.present();
+		wait_interval(int(as_Expo_Stimuli[i][4]) + i_Expo_Delay);
+		
+		t_Text.set_caption(as_Definitions[int(as_Expo_Stimuli[i][8])][2], true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		wait_interval(i_Expo_Definition);
+		
+		p_Blank.present();
+		ClearText();
+		
+		int ITI = i_Expo_ITI;
+		if int(as_Expo_Stimuli[i][4]) > i_Expo_Audio then
+			ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
+		end;
+		wait_interval(ITI);
+	end;
+end;

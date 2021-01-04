@@ -1,0 +1,41 @@
+# Configuration
+string s_Dir_Info = "./stimuli/";					# directory where general information are stored
+string s_Dir_Txt = "./stimuli/txt/";				# directory where stimuli lists are stored
+string s_Dir_Audio = "./stimuli/audio/";			# directory where audio stimuli are stored
+string s_List_Speakers = "speakers.txt";			# file containing speaker information
+string s_List_Definitions = "definitions.txt";	# file containing definitions
+string s_List_Fillers = "fillers.txt";				# file containing filler definitions
+
+int i_Speakers = 12; 		# no. of speakers
+int i_Definition_R = 40; 	# no. of definitions
+int i_Definition_C = 5; 	# cols of definitions
+int i_Fillers_R = 140; 		# no. of fillers
+int i_Fillers_C = 2; 		# cols of fillers
+
+# Configuration Exposure Task
+string s_List_Exposure = "_learning.txt";
+string s_Exposure_Instructions_1 = "Welkom!";
+string s_Exposure_Instructions_2 = "In deze taak is het van bedoeling dat je iets doet.";
+string s_Exposure_Instructions_3 = "Je ben klaar met de eerste taak.\nLaat het de onderzoeker weten.";
+
+int i_Expo_Trials_N = 160;		# trial count
+int i_Expo_Trials_C = 9;		# trial columns
+int i_Expo_Repetitions = 4;	# trial variants
+int i_Expo_Fixation = 750;		# fixation t
+int i_Expo_Audio = 500;			# expected audio t
+int i_Expo_Delay = 250;			# delay after audio
+int i_Expo_Definition = 4000;	# definition t
+int i_Expo_ITI = 1500;			# ITI without jitter (added through sound length deviation)
+
+
+# Internals
+string s_ParticipantID = "PPN alsjeblieft."; # id prompt
+string s_PPN; 											# participant id
+
+int i; 					# free iterator; used in ::LoadSpeakers(), ::LoadStimuli()
+int i_ButtonPresses; # Iterator for ::WaitForKey()
+
+array<string> as_Speakers[i_Speakers]; 									# memory assignment speakers
+array<string> as_Definitions[i_Definition_R][i_Definition_C];		# memory assignment definitions
+array<string> as_Fillers[i_Fillers_R][i_Fillers_C];					# memory assignment fillers
+array<string> as_Expo_Stimuli[i_Expo_Trials_N][i_Expo_Trials_C];	# memory assignment exposure stimuli

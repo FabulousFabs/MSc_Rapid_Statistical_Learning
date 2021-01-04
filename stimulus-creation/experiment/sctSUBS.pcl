@@ -27,6 +27,7 @@ sub WaitForKey begin
 end;
 
 sub InstructParticipant(string message) begin
+	ClearText();
 	t_Text2.set_caption(message, true);
 	p_Text.present();
 	WaitForKey();
