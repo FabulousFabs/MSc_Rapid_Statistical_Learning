@@ -1,7 +1,7 @@
 # Configuration
 string s_Dir_Info = "./stimuli/";					# directory where general information are stored
 string s_Dir_Txt = "./stimuli/txt/";				# directory where stimuli lists are stored
-string s_Dir_Audio = "./stimuli/audio/";			# directory where audio stimuli are stored
+string s_Dir_Audio = "./audio/";			# directory where audio stimuli are stored
 string s_List_Speakers = "speakers.txt";			# file containing speaker information
 string s_List_Definitions = "definitions.txt";	# file containing definitions
 string s_List_Fillers = "fillers.txt";				# file containing filler definitions

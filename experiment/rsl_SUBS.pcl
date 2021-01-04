@@ -234,5 +234,7 @@ sub RunExposureTrials begin
 			ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
 		end;
 		wait_interval(ITI);
+		
+		i = i + 1;
 	end;
 end;
