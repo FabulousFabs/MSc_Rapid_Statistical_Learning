@@ -32,3 +32,12 @@ This is a very simple task where participants are given the full list of items t
 
 ### Cued recall (cue = definition)
 ***TODO:*** Write task + description.
+
+## Testing phase
+For testing phases, we use bigger subsets of the conditions. For more information, check the relevant subheadings.
+
+### MEG semantic judgment
+***TODO:*** Write task + description.
+
+### 4AFC (cue = word)
+***TODO:*** Write task + description.
