@@ -52,7 +52,7 @@ This, too, is a variant of the classical two-alternative forced choice. In this 
 5. Feedback&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
 6. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~500ms, jittered)*
 
-This task, too, should take no longer than 16 minutes. Again, for a deeper understanding of how this task works, please consult `rsl4AFCD.sce` and `rsl4AFCD_main.pcl` as well as sub-routines and configurations in `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
+This task, too, should take no longer than 16 minutes. Again, for a deeper understanding of how this task works, please consult `rsl2AFCD.sce` and `rsl2AFCD_main.pcl` as well as sub-routines and configurations in `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
 
 ### Cued recall (cue = definition)
 ***TODO:*** Write task + description.
