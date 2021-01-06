@@ -24,6 +24,8 @@ This is a very simple task where participants are given the full list of items t
 4. Definition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *(4000ms)*
 5. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(jittered, ~1500ms)*
 
+Consequently, a full run of this task should take no longer than 16 minutes. For a full view of what happens, please refer to `rslEXPO.sce`, `rslEXPO_MAIN.pcl` and the relevant shared sub-routines in `rsl_SUBS.pcl` as well as configuration in `rsl_INFO.pcl`.
+
 ### 2AFC (cue = definition)
 This is a variant of the classical two-alternative forced choice task wherein a definition of a word is presented visually and then followed by presentation of two auditory stimuli. Participants then have to make a decision about which auditory stimulus corresponds to the initially presented definition and, upon having done so, get visual feedback on their decision. As such, the procedure is:
 
@@ -38,6 +40,7 @@ This is a variant of the classical two-alternative forced choice task wherein a 
 8. Feedback&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
 9. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~625ms, jittered)*
 
+A full run of the 2AFC should take no longer than 16 minutes. For a more comprehensive understanding of how this task works, please refer to `rsl2AFCW.sce`, `rsl2AFCW_main.pcl` and the shared sub-routines in `rsl_SUBS.pcl` as well as configuration in `rsl_INFO.pcl`.
 
 ### 2AFC (cue = word)
 This, too, is a variant of the classical two-alternative forced choice. In this case, however, we present an auditory stimulus as the cue, followed by two potential definitions only one of which can correctly be matched with the stimulus. Thereafter, participants receive visual feedback. The full procedure is:
@@ -49,6 +52,7 @@ This, too, is a variant of the classical two-alternative forced choice. In this 
 5. Feedback&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
 6. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~500ms, jittered)*
 
+This task, too, should take no longer than 16 minutes. Again, for a deeper understanding of how this task works, please consult `rsl4AFCD.sce` and `rsl4AFCD_main.pcl` as well as sub-routines and configurations in `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
 
 ### Cued recall (cue = definition)
 ***TODO:*** Write task + description.
