@@ -1,7 +1,7 @@
-scenario = "rslEXPO";
-pcl_file = "rslEXPO_MAIN.pcl";
+scenario = "rsl2AFCW";
+pcl_file = "rsl2AFCW_MAIN.pcl";
 
-active_buttons = 1;
+active_buttons = 3;
 
 default_background_color = 0, 0, 0;
 default_font = "Arial";

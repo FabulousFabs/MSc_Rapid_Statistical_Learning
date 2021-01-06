@@ -1,7 +1,8 @@
 # Configuration
 string s_Dir_Info = "./stimuli/";					# directory where general information are stored
 string s_Dir_Txt = "./stimuli/txt/";				# directory where stimuli lists are stored
-string s_Dir_Audio = "./audio/";			# directory where audio stimuli are stored
+string s_Dir_Audio = "./audio/";						# directory where audio stimuli are stored
+string s_Dir_Data = "./data/";						# directory where data are stored
 string s_List_Speakers = "speakers.txt";			# file containing speaker information
 string s_List_Definitions = "definitions.txt";	# file containing definitions
 string s_List_Fillers = "fillers.txt";				# file containing filler definitions
@@ -11,9 +12,12 @@ int i_Definition_R = 40; 	# no. of definitions
 int i_Definition_C = 5; 	# cols of definitions
 int i_Fillers_R = 140; 		# no. of fillers
 int i_Fillers_C = 2; 		# cols of fillers
+int i_Filler_None = 41;		# id of 'none of these' filler
+
+
 
 # Configuration Exposure Task
-string s_List_Exposure = "_learning.txt";
+string s_List_Exposure = "_learning.txt";			# load data template
 string s_Exposure_Instructions_1 = "Welkom!";
 string s_Exposure_Instructions_2 = "In deze taak is het van bedoeling dat je iets doet.";
 string s_Exposure_Instructions_3 = "Je ben klaar met de eerste taak.\nLaat het de onderzoeker weten.";
@@ -28,14 +32,63 @@ int i_Expo_Definition = 4000;	# definition t
 int i_Expo_ITI = 1500;			# ITI without jitter (added through sound length deviation)
 
 
+
+# Configuration 2AFC cue=definiton task
+string s_List_2AFCD = "_learning.txt";		# load data template
+string s_Outs_2AFCD = "_2AFCD.txt";			# save data template
+string s_2AFCD_Instructions_1 = "2afcd instructions 1";
+string s_2AFCD_Instructions_2 = "2afcd instructions 2";
+string s_2AFCD_Instructions_3 = "Je ben klaar met de tweede taak.\nLaat het de onderzoeker weten.";
+
+int i_2AFCD_Trials_N = 160;						# trial count
+int i_2AFCD_Trials_C = 9;							# trial columns
+int i_2AFCD_Repetitions = 4;						# trial variants
+int i_2AFCD_Alternatives = 5;						# alternative column count
+int i_2AFCD_Fixation = 500;						# fixation t
+int i_2AFCD_Delay = 125;							# delay t
+int i_2AFCD_Visual = 1500;							# definition t
+int i_2AFCD_Offset = 125;							# offset t (@DEPRECATED)
+int i_2AFCD_Middle = 250;							# lag between audio stimuli t
+int i_2AFCD_Audio = 2*500 + i_2AFCD_Middle;	# expected audio duration
+int i_2AFCD_Choice = 1500;							# decision t
+int i_2AFCD_Feedback = 500;						# feedback t
+int i_2AFCD_ITI = 625;								# ITI t; jittered
+
+
+
+# Configuration 2AFC cue=word task
+string s_List_2AFCW = "_learning.txt";		# load data template
+string s_Outs_2AFCW = "_2AFCW.txt";			# save data template
+string s_2AFCW_Instructions_1 = "2afcw instructions 1";
+string s_2AFCW_Instructions_2 = "2afcw instructions 2";
+string s_2AFCW_Instructions_3 = "Je ben klaar met de derde taak.\nLaat het de onderzoeker weten.";
+
+int i_2AFCW_Trials_N = 160;		# trial count
+int i_2AFCW_Trials_C = 9;			# trial columns
+int i_2AFCW_Repetitions = 4;		# trial variants
+int i_2AFCW_Alternatives = 1;		# alternatives to load per trial
+int i_2AFCW_Fixation = 500;		# fixation t
+int i_2AFCW_Delay = 125;			# delay t
+int i_2AFCW_Audio = 500;			# expected audio t
+int i_2AFCW_Visual = 3875;			# definitions t
+int i_2AFCW_Feedback = 500;		# feedback t
+int i_2AFCW_ITI = 500;				# ITI t; jittered
+
+
+
 # Internals
 string s_ParticipantID = "PPN alsjeblieft."; # id prompt
 string s_PPN; 											# participant id
 
-int i; 					# free iterator; used in ::LoadSpeakers(), ::LoadStimuli()
+int i; 					# free iterator
+int k;					# free iterator
 int i_ButtonPresses; # Iterator for ::WaitForKey()
 
-array<string> as_Speakers[i_Speakers]; 									# memory assignment speakers
-array<string> as_Definitions[i_Definition_R][i_Definition_C];		# memory assignment definitions
-array<string> as_Fillers[i_Fillers_R][i_Fillers_C];					# memory assignment fillers
-array<string> as_Expo_Stimuli[i_Expo_Trials_N][i_Expo_Trials_C];	# memory assignment exposure stimuli
+array<string> as_Speakers[i_Speakers]; 													# memory assignment speakers
+array<string> as_Definitions[i_Definition_R][i_Definition_C];						# memory assignment definitions
+array<string> as_Fillers[i_Fillers_R][i_Fillers_C];									# memory assignment fillers
+array<string> as_Expo_Stimuli[i_Expo_Trials_N][i_Expo_Trials_C];					# memory assignment exposure stimuli
+array<string> as_2AFCD_Stimuli[i_2AFCD_Trials_N][i_2AFCD_Trials_C];				# memory assignment 2AFCd stimuli
+array<string> as_2AFCD_Alternatives[i_2AFCD_Trials_N][i_2AFCD_Alternatives];	# memory assignment 2AFCd alternatives
+array<string> as_2AFCW_Stimuli[i_2AFCW_Trials_N][i_2AFCW_Trials_C];				# memory assignment 2AFCw stimuli
+array<int> ai_2AFCW_Alternatives[i_2AFCW_Trials_N][i_2AFCW_Alternatives];		# memory assignment 2AFCw alternatives

@@ -9,6 +9,7 @@
 /stimulus-creation/preprocessing-assignment/definitions.txt
 /stimulus-creation/preprocessing-assignment/fillers.txt
 /experiment/logs/*
+/experiment/logs/data/*
 /experiment/stimuli/definitions.txt
 /experiment/stimuli/fillers.txt
 /experiment/stimuli/speakers.txt

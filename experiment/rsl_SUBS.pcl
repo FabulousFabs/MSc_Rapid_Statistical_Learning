@@ -23,6 +23,8 @@ sub ClearText begin
 	
 	t_Text.set_caption("", true);
 	t_Text2.set_caption("", true);
+	t_2AFC_left.set_caption("", true);
+	t_2AFC_right.set_caption("", true);
 end;
 
 sub GetParticipantID begin
@@ -38,6 +40,29 @@ sub WaitForKey begin
 	loop i_ButtonPresses = response_manager.total_response_count() until response_manager.total_response_count() > i_ButtonPresses
    begin
 	end;
+end;
+
+sub int WaitForKeyTimed(int max) begin
+	# Wait for participant to choose a key or until max time runs out
+	#
+	# INPUTS:
+	#		int max		-	Maximum reaction time
+	#
+	# OUTPUTS:
+	#		int delta	-	Reaction time (or -1 if timeout)
+	
+	int tn = clock.time();
+	int delta = 0;
+	
+	loop i_ButtonPresses = response_manager.total_response_count() until response_manager.total_response_count() > i_ButtonPresses begin
+		delta = clock.time() - tn;
+		if delta > max then
+			return -1;
+			break;
+		end;
+	end;
+	
+	return delta;
 end;
 
 sub InstructParticipant(string message) begin
@@ -123,6 +148,7 @@ sub LoadStimuli(string file, array<string, 2>& stimuli, int c) begin
 	
 	input_file f = new input_file;
 	f.open(s_Dir_Txt + file);
+	f.set_delimiter('\n');
 	
 	string header = f.get_line();
 	
@@ -170,7 +196,7 @@ sub ShuffleBlocked(array<string, 2>& stimuli, int v, int r, int c) begin
 	
 	int j = 1;
 	
-	loop i = 1 until i == r begin
+	loop i = 1 until i > r begin
 		if j > 4 then
 			j = 1;
 		end;
@@ -187,10 +213,10 @@ sub ShuffleBlocked(array<string, 2>& stimuli, int v, int r, int c) begin
 	
 	array<string> collection[r][c];
 	
-	loop i = 1 until i == v begin
+	loop i = 1 until i > v begin
 		bin[i].shuffle();
 		
-		loop j = 1 until j == int(r/v) begin
+		loop j = 1 until j > int(r/v) begin
 			collection[(i - 1) * int(r/v) + j] = bin[i][j];
 			
 			j = j + 1;
@@ -202,11 +228,167 @@ sub ShuffleBlocked(array<string, 2>& stimuli, int v, int r, int c) begin
 	stimuli = collection;
 end;
 
+sub bool OptionsInclude(array<int, 1>& options, int target) begin
+	# Helper function that looks if an alternative is present in an option array already.
+	#
+	# INPUTS:
+	#		array<int, 1>& options	-	The options to scan
+	#		int target					-	The target to scan for
+	#
+	# OUTPUTS:
+	#		bool in_array				-	True if target exists in array
+	
+	int j = 1;
+	
+	loop j = 1 until j > options.count() begin
+		if options[j] == target then
+			return true;
+		end;
+		j = j + 1;
+	end;
+	
+	return false;
+end;
+
+sub SampleAlternatives(array<string, 2>& stimuli, array<int, 2>& alternatives, int n, int s, bool include_none) begin
+	# Curate a list of s alternatives for n stimuli
+	#
+	# INPUTS:
+	#		array<string, 2>& stimuli			-	The assigned and shuffled stimulus array
+	#		array<string, 2>& alternatives	-	The preassigned alternative array we want to target
+	#		int n										-	The number of stimuli we want alternatives for
+	#		int s										-	The number of alternatives we want per stimulus
+	#		bool include_none						-	If true, we include the 'None of these' answer as a potential alternative
+	#
+	# OUTPUTS:
+	#		none,
+	#			but mind the reference. This updates input alternatives array
+	
+	int i_Total = i_Definition_R + i_Fillers_R;
+	
+	loop i = 1 until i > n begin
+		array<int> collection[s];
+		
+		loop k = 1 until k > s begin
+			int choice;
+			
+			if include_none == true then
+				loop choice = random(1, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) begin
+					choice = random(1, i_Total);
+				end;
+			else
+				loop choice = random(1, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) && choice != i_Filler_None begin
+					choice = random(1, i_Total);
+				end;
+			end;
+			
+			collection[k] = choice;
+			
+			k = k + 1;
+		end;
+		
+		alternatives[i] = collection;
+		
+		i = i + 1;
+	end;
+end;
+
+sub SampleAlternativesAudio(array<string, 2>& stimuli, array<string, 2>& alternatives, int n, int s) begin
+	# Curate a list of n alternative audio stimuli
+	#
+	# INPUTS:
+	#		array<string, 2>& stimuli			-	The assigned and shuffled stimulus array
+	#		array<string, 2>& alternatives	-	The preassigned alternative array we want to target
+	#		int n										-	The number of trials we need an alternative for
+	#		int s										-	Maximum sample range
+	#
+	# OUTPUTS:
+	#		none,
+	#			but mind the reference. This updates input alternatives array
+	
+	loop i = 1 until i > n begin
+		int choice;
+		
+		loop choice = random(1, s) until stimuli[i][2] != stimuli[choice][2] begin
+			choice = random(1, s);
+		end;
+		
+		alternatives[i][1] = stimuli[choice][2];
+		alternatives[i][2] = stimuli[choice][3];
+		alternatives[i][3] = stimuli[choice][1];
+		alternatives[i][4] = stimuli[choice][4];
+		alternatives[i][5] = stimuli[choice][5];
+		
+		i = i + 1;
+	end;
+end;
+
+sub string GetDefinitionShort(int target) begin
+	# Returns the short definition for target definition id
+	#
+	# INPUTS:
+	#		int target	-	Target definition
+	#
+	# OUTPUTS:
+	#		string def	-	The corresponding short definition string
+	
+	string d;
+	
+	if target > i_Definition_R then
+		d = as_Fillers[target - i_Definition_R][2];
+	else
+		d = as_Definitions[target][3];
+	end;
+	
+	return d;
+end;
+
+## DATA
+sub BeginDataStream(string file, string header) begin
+	# Creates a save file for current session
+	#
+	# INPUTS:
+	#		string file		-	Name of file that should be created for this session
+	#		string header	-	Header that we need for this file
+	
+	output_file f = new output_file;
+	f.open(file, false);
+	f.print(header);
+	f.close();
+end;
+
+sub SaveData(string file, array<string, 1> data) begin
+	# Saves data to precreated session file
+	#
+	# INPUTS:
+	#		string file					-	Name of file where data are stored
+	#		array<string, 1> data	-	Data struct to be saved as one line in that file
+	
+	output_file f = new output_file;
+	f.open_append(file);
+	
+	string outs = "";
+	
+	int j;
+	loop j = 1 until j > data.count() begin
+		outs = outs + data[j];
+		if j == data.count() then
+			outs = outs + "\n";
+		else
+			outs = outs + "\t";
+		end;
+		j = j + 1;
+	end;
+	
+	f.print(outs);
+	f.close();
+end;
+
 ## TRIALS
 sub RunExposureTrials begin
 	# Presentation of the exposure trials
 	
-	loop i = 1 until i == i_Expo_Trials_N begin
+	loop i = 1 until i > i_Expo_Trials_N begin
 		w_Sound.unload();
 		w_Sound.set_filename(s_Dir_Audio + as_Expo_Stimuli[i][5]);
 		w_Sound.load();
@@ -237,4 +419,271 @@ sub RunExposureTrials begin
 		
 		i = i + 1;
 	end;
+end;
+
+sub Run2AFCDTrials begin
+	# Presentation of the 2AFC trials, cued by definition
+	
+	string f_save = s_Dir_Data + s_PPN + s_Outs_2AFCD;
+	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tf_spkr\tf_id\tf_var\tf_dur\tcor\trt\ti\n");
+	
+	response_manager.set_button_active(1, false);
+	
+	loop i = 1 until i > i_2AFCD_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_2AFCD_Stimuli[i][5]);
+		w_Sound.load();
+		w_Sound2.unload();
+		w_Sound2.set_filename(s_Dir_Audio + as_2AFCD_Alternatives[i][5]);
+		w_Sound2.load();
+		
+		array<int> options[2] = {1, 2};
+		options.shuffle();
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_2AFCD_Fixation);
+		
+		p_Blank.present();
+		wait_interval(i_2AFCD_Delay);
+		
+		t_Text.set_caption(GetDefinitionShort(int(as_2AFCD_Stimuli[i][8])), true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		wait_interval(i_2AFCD_Visual);
+		
+		p_Blank.present();
+		#wait_interval(i_2AFCD_Offset);
+		
+		ClearText();
+		t_Text.set_caption("1", true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		
+
+		if options[1] == 1 then
+			s_Sound.present();
+			wait_interval(int(as_2AFCD_Stimuli[i][4]));
+		else
+			s_Sound2.present();
+			wait_interval(int(as_2AFCD_Alternatives[i][4]));
+		end;
+		
+		ClearText();
+		p_Blank.present();
+		wait_interval(i_2AFCD_Middle);
+		
+		t_Text.set_caption("2", true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		
+		if options[1] == 1 then
+			s_Sound2.present();
+			wait_interval(int(as_2AFCD_Alternatives[i][4]));
+		else
+			s_Sound.present();
+			wait_interval(int(as_2AFCD_Stimuli[i][4]));
+		end;
+		
+		ClearText();
+		p_Blank.present();
+		#wait_interval(i_2AFCD_Offset);
+		
+		t_2AFC_left.set_caption("1", true);
+		t_2AFC_right.set_caption("2", true);
+		p_2AFC.present();
+		
+		int delta = WaitForKeyTimed(i_2AFCD_Choice);
+		int resp = -1;
+		int correct = 0;
+		
+		if delta > 0 then
+			resp = response_manager.last_response();
+		else
+			delta = i_2AFCD_Choice;
+		end;
+		
+		if resp == 2 && options[1] == 1 then				# left key pressed, left correct ==> success
+			correct = 1;
+			b_2AFC.set_color(0, 255, 0);
+			t_2AFC_left.set_font_color(0, 255, 0);
+		elseif resp == 2 && options[1] == 2 then			# left key pressed, left incorrect ==> failure
+			b_2AFC.set_color(255, 0, 0);
+			t_2AFC_left.set_font_color(255, 0, 0);
+		elseif resp == 3 && options[1] == 1 then			# right key pressed, right incorrect ==> failure
+			b_2AFC.set_color(255, 0, 0);
+			t_2AFC_right.set_font_color(255, 0, 0);
+		elseif resp == 3 && options[1] == 2 then			# right key pressed, right correct ==> success
+			correct = 1;
+			b_2AFC.set_color(0, 255, 0);
+			t_2AFC_right.set_font_color(0, 255, 0);
+		else
+			b_2AFC.set_color(255, 0, 0);
+			
+			if options[1] == 1 then								# no key pressed, left option correct
+				t_2AFC_left.set_font_color(0, 255, 0);
+			else														# no key pressed, right option correct
+				t_2AFC_right.set_font_color(0, 255, 0);
+			end;
+		end;
+		
+		t_2AFC_left.redraw();
+		t_2AFC_right.redraw();
+		p_2AFC.present();
+		wait_interval(i_2AFCD_Feedback);
+		
+		ClearText();
+		
+		t_2AFC_left.set_font_color(255, 255, 255);
+		t_2AFC_right.set_font_color(255, 255, 255);
+		t_2AFC_left.redraw();
+		t_2AFC_right.redraw();
+		b_2AFC.set_color(255, 255, 255);
+		p_Blank.present();
+		
+		array<string> data[16];
+		data[1] = as_2AFCD_Stimuli[i][2];
+		data[2] = as_2AFCD_Stimuli[i][3];
+		data[3] = as_2AFCD_Stimuli[i][1];
+		data[4] = as_2AFCD_Stimuli[i][4];
+		data[5] = as_2AFCD_Stimuli[i][5];
+		data[6] = as_2AFCD_Stimuli[i][6];
+		data[7] = as_2AFCD_Stimuli[i][7];
+		data[8] = as_2AFCD_Stimuli[i][8];
+		data[9] = as_2AFCD_Stimuli[i][9];
+		data[10] = as_2AFCD_Alternatives[i][1];
+		data[11] = as_2AFCD_Alternatives[i][2];
+		data[12] = as_2AFCD_Alternatives[i][3];
+		data[13] = as_2AFCD_Alternatives[i][4];
+		data[14] = string(correct);
+		data[15] = string(delta);
+		data[16] = string(i);
+		SaveData(f_save, data);
+		
+		int ITI = i_2AFCD_ITI;
+		if int(as_2AFCD_Stimuli[i][4]) + int(as_2AFCD_Alternatives[i][4]) + i_2AFCD_Middle > i_2AFCD_Audio then
+			ITI = ITI - (int(as_2AFCD_Stimuli[i][4]) + int(as_2AFCD_Alternatives[i][4]) + i_2AFCD_Middle - i_2AFCD_Audio);
+			if ITI < 250 then
+				ITI = 250;
+			end;
+		end;
+		wait_interval(ITI);
+		
+		i = i + 1;
+	end;
+	
+	response_manager.set_button_active(1, true);
+end;
+
+sub Run2AFCWTrials begin
+	# Presentation of the 2AFC trials, cued by word
+	
+	string f_save = s_Dir_Data + s_PPN + s_Outs_2AFCW;
+	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tfil\tcor\trt\ti\n");
+	
+	response_manager.set_button_active(1, false);
+	
+	loop i = 1 until i > i_2AFCD_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_2AFCW_Stimuli[i][5]);
+		w_Sound.load();
+		
+		int answer_expected = int(as_2AFCW_Stimuli[i][8]);
+		array<int> options[2];
+		options[1] = answer_expected;
+		options[2] = ai_2AFCW_Alternatives[i][1];
+		options.shuffle();
+		int answer_left = options[1];
+		int answer_right = options[2];
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_2AFCW_Fixation);
+		
+		p_Blank.present();
+		s_Sound.present();
+		wait_interval(int(as_2AFCW_Stimuli[i][4]) + i_2AFCW_Delay);
+		
+		t_2AFC_left.set_caption(GetDefinitionShort(answer_left), true);
+		t_2AFC_right.set_caption(GetDefinitionShort(answer_right), true);
+		p_2AFC.present();
+		
+		int delta = WaitForKeyTimed(i_2AFCW_Visual);
+		int resp = -1;
+		int correct = 0;
+		
+		if delta > 0 then
+			resp = response_manager.last_response();
+		else
+			delta = i_2AFCW_Visual;
+		end;
+		
+		if resp == 2 && answer_left == answer_expected then
+			correct = 1;
+			b_2AFC.set_color(0, 255, 0);
+			t_2AFC_left.set_font_color(0, 255, 0);
+		elseif resp == 2 && answer_right == answer_expected then
+			b_2AFC.set_color(255, 0, 0);
+			t_2AFC_left.set_font_color(255, 0, 0);
+		elseif resp == 3 && answer_right == answer_expected then
+			correct = 1;
+			b_2AFC.set_color(0, 255, 0);
+			t_2AFC_right.set_font_color(0, 255, 0);
+		elseif resp == 3 && answer_left == answer_expected then
+			b_2AFC.set_color(255, 0, 0);
+			t_2AFC_right.set_font_color(255, 0, 0);
+		else
+			b_2AFC.set_color(255, 0, 0);
+			
+			if answer_left == answer_expected then
+				t_2AFC_left.set_font_color(0, 255, 0);
+			else
+				t_2AFC_right.set_font_color(0, 255, 0);
+			end;
+		end;
+		
+		t_2AFC_left.redraw();
+		t_2AFC_right.redraw();
+		p_2AFC.present();
+		wait_interval(i_2AFCW_Feedback);
+		
+		ClearText();
+		
+		t_2AFC_left.set_font_color(255, 255, 255);
+		t_2AFC_right.set_font_color(255, 255, 255);
+		t_2AFC_left.redraw();
+		t_2AFC_right.redraw();
+		b_2AFC.set_color(255, 255, 255);
+		p_Blank.present();
+		
+		array<string> data[13];
+		data[1] = as_2AFCW_Stimuli[i][2];
+		data[2] = as_2AFCW_Stimuli[i][3];
+		data[3] = as_2AFCW_Stimuli[i][1];
+		data[4] = as_2AFCW_Stimuli[i][4];
+		data[5] = as_2AFCW_Stimuli[i][5];
+		data[6] = as_2AFCW_Stimuli[i][6];
+		data[7] = as_2AFCW_Stimuli[i][7];
+		data[8] = as_2AFCW_Stimuli[i][8];
+		data[9] = as_2AFCW_Stimuli[i][9];
+		data[10] = string(ai_2AFCW_Alternatives[i][1]);
+		data[11] = string(correct);
+		data[12] = string(delta);
+		data[13] = string(i);
+		SaveData(f_save, data);
+		
+		int ITI = i_2AFCW_ITI;
+		if int(as_2AFCW_Stimuli[i][4]) > i_2AFCW_Audio then
+			ITI = ITI - (int(as_2AFCW_Stimuli[i][4]) - i_2AFCW_Audio)
+		end;
+		wait_interval(ITI);
+		
+		i = i + 1;
+	end;
+	
+	response_manager.set_button_active(1, true);
 end;
