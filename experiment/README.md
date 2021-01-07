@@ -40,7 +40,7 @@ This is a variant of the classical two-alternative forced choice task wherein a 
 8. Feedback&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
 9. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~625ms, jittered)*
 
-A full run of the 2AFC should take no longer than 16 minutes. For a more comprehensive understanding of how this task works, please refer to `rsl2AFCW.sce`, `rsl2AFCW_main.pcl` and the shared sub-routines in `rsl_SUBS.pcl` as well as configuration in `rsl_INFO.pcl`.
+A full run of the 2AFC should take no longer than 16 minutes. For a more comprehensive understanding of how this task works, please refer to `rsl2AFCW.sce`, `rsl2AFCW_MAIN.pcl` and the shared sub-routines in `rsl_SUBS.pcl` as well as configuration in `rsl_INFO.pcl`.
 
 ### 2AFC (cue = word)
 This, too, is a variant of the classical two-alternative forced choice. In this case, however, we present an auditory stimulus as the cue, followed by two potential definitions only one of which can correctly be matched with the stimulus. Thereafter, participants receive visual feedback. The full procedure is:
@@ -55,7 +55,15 @@ This, too, is a variant of the classical two-alternative forced choice. In this 
 This task, too, should take no longer than 16 minutes. Again, for a deeper understanding of how this task works, please consult `rsl2AFCD.sce` and `rsl2AFCD_main.pcl` as well as sub-routines and configurations in `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
 
 ### Cued recall (cue = definition)
-***TODO:*** Write task + description.
+In this task, we cue participants with a definition whereupon they have to overtly produce the corresponding target word. After a maximum time, auditory feedback is given before the ITI. The full procedure is:
+
+1. Fixation cross&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
+2. Definition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *(3500ms)*
+3. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(250ms)*
+4. Feedback&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
+5. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~1250ms, jittered)*
+
+Again, task duration should come out as roughly 16 minutes. For specifics, please refer to `rslCR.sce`, `rslCR_MAIN.pcl`, `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
 
 ## Testing phase
 For testing phases, we use bigger subsets of the conditions. For more information, check the relevant subheadings.
@@ -64,4 +72,11 @@ For testing phases, we use bigger subsets of the conditions. For more informatio
 ***TODO:*** Write task + description.
 
 ### 4AFC (cue = word)
-***TODO:*** Write task + description.
+For the four-alternative forced choice task we use one variant from all nine conditions, yielding `9x1x20=180` stimuli in total. The task itself is essentially the same task as the 2AFC (cue = word) task employed during the learning phase, except that four alternatives are used and no feedback is given at the end of each trial. The full procedure is:
+
+1. Fixation cross&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(500ms)*
+2. Audio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~500ms)*
+3. Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *(up to 6000ms)*
+4. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~1000ms, jittered)*
+
+Given its extended stimuli and trial length, this task should be completed in roughly `9x1x20x8s=18m`. For specifis of the procedure, please see `rsl4AFC.sce`, `rsl4AFC_main.pcl`, `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
