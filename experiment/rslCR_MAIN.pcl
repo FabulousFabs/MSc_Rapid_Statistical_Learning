@@ -1,0 +1,16 @@
+# PCL file for exposure task during learning phase
+
+include "rsl_SUBS.pcl";
+
+# Setup
+GetParticipantID();
+LoadSpeakers();
+LoadDefinitions();
+LoadStimuli(s_PPN + s_List_CR, as_CR_Stimuli, i_CR_Trials_C);
+ShuffleBlocked(as_CR_Stimuli, i_CR_Repetitions, i_CR_Trials_N, i_CR_Trials_C);
+
+# Run task
+InstructParticipant(s_CR_Instructions_1);
+InstructParticipant(s_CR_Instructions_2);
+RunCRTrials();
+InstructParticipant(s_CR_Instructions_3);

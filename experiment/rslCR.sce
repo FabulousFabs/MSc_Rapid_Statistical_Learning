@@ -1,7 +1,7 @@
-scenario = "rsl2AFCD";
-pcl_file = "rsl2AFCD_MAIN.pcl";
+scenario = "rslCR";
+pcl_file = "rslCR_MAIN.pcl";
 
-active_buttons = 3;
+active_buttons = 1;
 
 default_background_color = 0, 0, 0;
 default_font = "Arial";

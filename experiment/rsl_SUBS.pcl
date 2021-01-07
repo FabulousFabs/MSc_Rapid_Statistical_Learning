@@ -687,3 +687,138 @@ sub Run2AFCWTrials begin
 	
 	response_manager.set_button_active(1, true);
 end;
+
+sub RunCRTrials begin
+	# Presentation of the cued recall trials
+	
+	loop i = 1 until i > i_CR_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_CR_Stimuli[i][5]);
+		w_Sound.load();
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_CR_Fixation);
+		
+		p_Blank.present();
+		
+		t_Text.set_caption(GetDefinitionShort(int(as_CR_Stimuli[i][8])), true);
+		t_Text2.set_caption("", true);
+		p_Text.present();
+		wait_interval(i_CR_Prompt);
+		
+		ClearText();
+		p_Blank.present();
+		wait_interval(i_CR_Padding);
+		
+		t_Text.set_caption(GetDefinitionShort(int(as_CR_Stimuli[i][8])), true);
+		t_Text2.set_caption("", true);
+		t_Text.set_font_color(0, 255, 0);
+		t_Text.redraw();
+		p_Text.present();
+		s_Sound.present();
+		wait_interval(int(as_CR_Stimuli[i][4]));
+		
+		ClearText();
+		t_Text.set_font_color(255, 255, 255);
+		t_Text.redraw();
+		p_Blank.present();
+		
+		int ITI = i_CR_ITI;
+		if int(as_CR_Stimuli[i][4]) > i_CR_Audio then
+			ITI = ITI - (int(as_CR_Stimuli[i][4]) - i_CR_Audio);
+			
+			if ITI < 500 then
+				ITI = 500;
+			end;
+		end;
+		wait_interval(ITI);
+		
+		i = i + 1;
+	end;
+end;
+
+sub Run4AFCTrials begin
+	# Presentation of the 4AFC task
+	
+	string f_save = s_Dir_Data + s_PPN + s_Outs_4AFC;
+	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\to1\to2\to3\to4\tcor\tr\trt\ti\n");
+	
+	response_manager.set_button_active(1, false);
+	
+	loop i = 1 until i > i_4AFC_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_4AFC_Stimuli[i][5]);
+		w_Sound.load();
+		
+		int answer_expected = int(as_4AFC_Stimuli[i][8]);
+		array<int> options[4];
+		options[1] = answer_expected;
+		options[2] = ai_4AFC_Alternatives[i][1];
+		options[3] = ai_4AFC_Alternatives[i][2];
+		options[4] = ai_4AFC_Alternatives[i][3];
+		options.shuffle();
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_4AFC_Fixation);
+		
+		p_Blank.present();
+		s_Sound.present();
+		wait_interval(int(as_4AFC_Stimuli[i][4]));
+		
+		t_4AFC_1_top_left.set_caption(GetDefinitionShort(options[1]), true);
+		t_4AFC_2_bottom_left.set_caption(GetDefinitionShort(options[2]), true);
+		t_4AFC_3_top_right.set_caption(GetDefinitionShort(options[3]), true);
+		t_4AFC_4_bottom_right.set_caption(GetDefinitionShort(options[4]), true);
+		p_4AFC.present();
+		
+		int delta = WaitForKeyTimed(i_4AFC_Visual);
+		int resp = -1;
+		int correct = 0;
+		
+		ClearText();
+		p_Blank.present();
+		
+		if delta > 0 then
+			resp = response_manager.last_response();
+			
+			if options[resp - 1] == answer_expected then		# note to self: for this to work, it is _critical_ that buttons 1 & 2 are top and bottom left and 3 & 4 are top and bottom right, respectively!
+				correct = 1;
+			end;
+		else
+			delta = i_4AFC_Visual;
+		end;
+		
+		array<string> data[17];
+		data[1] = as_4AFC_Stimuli[i][2];
+		data[2] = as_4AFC_Stimuli[i][3];
+		data[3] = as_4AFC_Stimuli[i][1];
+		data[4] = as_4AFC_Stimuli[i][4];
+		data[5] = as_4AFC_Stimuli[i][5];
+		data[6] = as_4AFC_Stimuli[i][6];
+		data[7] = as_4AFC_Stimuli[i][7];
+		data[8] = as_4AFC_Stimuli[i][8];
+		data[9] = as_4AFC_Stimuli[i][9];
+		data[10] = string(options[1]); # we are saving options presented + response as a sort of safety measure _should_ there ever be a problem with button assignments and we need to fix a systematic error in these data
+		data[11] = string(options[2]);
+		data[12] = string(options[3]);
+		data[13] = string(options[4]);
+		data[14] = string(correct);
+		data[15] = string(resp);
+		data[16] = string(delta);
+		data[17] = string(i);
+		SaveData(f_save, data);
+		
+		
+		wait_interval(i_4AFC_ITI + random(1, 250));
+		
+		i = i + 1;
+	end;
+	
+	response_manager.set_button_active(1, true);
+end;

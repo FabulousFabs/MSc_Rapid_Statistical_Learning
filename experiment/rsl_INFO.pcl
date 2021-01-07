@@ -76,6 +76,41 @@ int i_2AFCW_ITI = 500;				# ITI t; jittered
 
 
 
+# Configuration Cued Recall task
+string s_List_CR = "_learning.txt"; 		# load data template
+string s_CR_Instructions_1 = "CR instructions 1";
+string s_CR_Instructions_2 = "CR instructions 2";
+string s_CR_Instructions_3 = "Je ben klaar met de vierde taak.\nLaat het de onderzoeker weten.";
+
+int i_CR_Trials_N = 160;			# trial count
+int i_CR_Trials_C = 9;				# trial columns
+int i_CR_Repetitions = 4;			# trial variants
+int i_CR_Fixation = 500;			# fixation t
+int i_CR_Prompt = 3500;				# response t
+int i_CR_Padding = 250;				# padding t
+int i_CR_Audio = 500;				# expected audio t
+int i_CR_ITI = 1250;					# ITI t; jittered
+
+
+
+# Configuration 4AFC task
+string s_List_4AFC = "_4afc.txt";			# load data template
+string s_Outs_4AFC = "_4AFC.txt";			# save data template
+string s_4AFC_Instructions_1 = "4AFC instructions 1";
+string s_4AFC_Instructions_2 = "4AFC instructions 2";
+string s_4AFC_Instructions_3 = "Je ben klaar met de laatste taak.\nDankjewel!";
+
+int i_4AFC_Trials_N = 180;			# trial count
+int i_4AFC_Trials_C = 9;			# trial columns
+int i_4AFC_Repetitions = 1;		# trial variants
+int i_4AFC_Alternatives = 3;		# alternative to sample per trial
+int i_4AFC_Fixation = 500;			# fixation t
+int i_4AFC_Audio = 500;				# expected audio t
+int i_4AFC_Visual = 6000;			# response t
+int i_4AFC_ITI = 1000;				# ITI t; jittered
+
+
+
 # Internals
 string s_ParticipantID = "PPN alsjeblieft."; # id prompt
 string s_PPN; 											# participant id
@@ -92,3 +127,6 @@ array<string> as_2AFCD_Stimuli[i_2AFCD_Trials_N][i_2AFCD_Trials_C];				# memory 
 array<string> as_2AFCD_Alternatives[i_2AFCD_Trials_N][i_2AFCD_Alternatives];	# memory assignment 2AFCd alternatives
 array<string> as_2AFCW_Stimuli[i_2AFCW_Trials_N][i_2AFCW_Trials_C];				# memory assignment 2AFCw stimuli
 array<int> ai_2AFCW_Alternatives[i_2AFCW_Trials_N][i_2AFCW_Alternatives];		# memory assignment 2AFCw alternatives
+array<string> as_CR_Stimuli[i_CR_Trials_N][i_CR_Trials_C];							# memory assignment CR stimuli
+array<string> as_4AFC_Stimuli[i_4AFC_Trials_N][i_4AFC_Trials_C];					# memory assignment 4AFC stimuli
+array<int> ai_4AFC_Alternatives[i_4AFC_Trials_N][i_4AFC_Alternatives];			# memory assignment 4AFC alternatives
