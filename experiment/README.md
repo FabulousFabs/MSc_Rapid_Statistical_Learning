@@ -79,4 +79,4 @@ For the four-alternative forced choice task we use one variant from all nine con
 3. Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *(up to 6000ms)*
 4. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~1000ms, jittered)*
 
-Given its extended stimuli and trial length, this task should be completed in roughly `9x1x20x8s=18m`. For specifis of the procedure, please see `rsl4AFC.sce`, `rsl4AFC_main.pcl`, `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
+Given its extended stimuli and trial length, this task should be completed in roughly `9x1x20x8s=24m`. For specifis of the procedure, please see `rsl4AFC.sce`, `rsl4AFC_main.pcl`, `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
