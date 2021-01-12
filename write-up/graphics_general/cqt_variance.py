@@ -49,14 +49,14 @@ def get_spectrograms(all):
     '''
     compute, plot, save
     '''
-    
+
     for arr in all:
         fig, ax = plt.subplots()
         C = np.abs(librosa.cqt(arr[0], sr=arr[1]))
-        img = librosa.display.specshow(librosa.amplitude_to_db(C, ref=np.max), sr=arr[1], x_axis='time', y_axis='cqt_hz', ax=ax, cmap='jet')
+        img = librosa.display.specshow(librosa.amplitude_to_db(C, ref=np.max), sr=arr[1], x_axis='time', y_axis='cqt_hz', ax=ax, cmap='viridis')
         ax.set_title('Constant-Q power spectrum speaker_' + str(speakers[arr[2]]) + '')
         fig.colorbar(img, ax=ax, format="%+2.0f dB")
-        plt.savefig(os.path.join(figures_folder, '_'.join([str(speakers[arr[2]]), str(item), str(num)]) + '.png'))
+        plt.savefig(os.path.join(figures_folder, '_'.join([str(item), str(num), str(speakers[arr[2]])]) + '.png'))
 
 if __name__ == '__main__':
     if len(sys.argv) >= 1:
