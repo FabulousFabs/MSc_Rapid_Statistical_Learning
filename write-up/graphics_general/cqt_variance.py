@@ -20,7 +20,7 @@ figures_folder = '/users/fabianschneider/desktop/university/master/dissertation/
 
 def compute_cqts():
     '''
-    compute the CQTs for our targets
+    compute the CQTs for our targets and save spectrograms
     '''
 
     audio1, fs1 = load_audio(0)
@@ -31,13 +31,25 @@ def compute_cqts():
     get_spectrograms([[audio1, fs1, 0], [audio2, fs2, 1], [audio3, fs3, 2]])
 
 def load_audio(s):
+    '''
+    load file for specified speaker
+    '''
+
     return librosa.load(os.path.join(audio_folder, '_'.join([str(speakers[s]), str(item), str(num)]) + '.wav'))
 
 def pad_audio(a1, a2, a3):
+    '''
+    zero-padding at right margin of all audio files
+    '''
+
     L = np.array([len(a1), len(a2), len(a3)])
     return (np.pad(a1, (0, np.max(L)-L[0]), 'constant', constant_values=(0,)), np.pad(a2, (0, np.max(L)-L[1]), 'constant', constant_values=(0,)), np.pad(a3, (0, np.max(L)-L[2]), 'constant', constant_values=(0,)))
 
 def get_spectrograms(all):
+    '''
+    compute, plot, save
+    '''
+    
     for arr in all:
         fig, ax = plt.subplots()
         C = np.abs(librosa.cqt(arr[0], sr=arr[1]))
