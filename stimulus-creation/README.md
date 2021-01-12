@@ -1,5 +1,5 @@
 # Stimulus Creation
-Everything in this directory is concerned with creation of the auditory stimuli from our text lists. All text stimuli can be found in ```./experiment/stimuli.txt``` with practice stimuli being stored in ```./experiment/practice.txt```.
+Everything in this directory is concerned with creation of the auditory stimuli from our text lists. All text stimuli can be found in ```collection_stimuli.xlsx``` with practice stimuli being stored in ```collection_practice.xlsx```.
 
 ## Experiment
 The experiment is written for NeuroBS Presentation 22.1 but has been tested to work at least from 20.0 onwards. It is a very simple setup where each trial follows:
