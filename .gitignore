@@ -1,6 +1,7 @@
 # OSX
 *.DS_Store
 *__MACOSX
+*.icloud
 
 # participant data
 /stimulus-creation/experiment/logs/*
