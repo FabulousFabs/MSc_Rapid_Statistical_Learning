@@ -30,7 +30,26 @@ done
 
 # help function
 if [ -n "$help" ]; then
-        echo "Usage notes:\n";
+        echo "";
+        echo "Usage notes";
+        echo "---------------------------";
+        echo "Required parameters:";
+        echo "\tsubject=int or string";
+        echo "---------------------------";
+        echo "Optional parameters:";
+        echo "\tpath=string";
+        echo "\tcut_m=string {timed or cyclical}";
+        echo "\tvod_fs=int";
+        echo "\tvod_agg=int";
+        echo "\tvod_cmd=string";
+        echo "\tspl=boolean";
+        echo "\tspl_db=int";
+        echo "\tpcm=boolean";
+        echo "\tpcm_m=string";
+        echo "---------------------------";
+        echo "Example usage:";
+        echo "\t./preprocessing.sh path=\"/users/me/stim/\" subject=1";
+        echo "";
         exit 0;
 fi
 
