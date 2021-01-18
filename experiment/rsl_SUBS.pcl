@@ -25,6 +25,13 @@ sub ClearText begin
 	t_Text2.set_caption("", true);
 	t_2AFC_left.set_caption("", true);
 	t_2AFC_right.set_caption("", true);
+	t_MEG_top.set_caption("", true);
+	t_MEG_left.set_caption("", true);
+	t_MEG_right.set_caption("", true);
+	t_4AFC_1_top_left.set_caption("", true);
+	t_4AFC_2_bottom_left.set_caption("", true);
+	t_4AFC_3_top_right.set_caption("", true);
+	t_4AFC_4_bottom_right.set_caption("", true);
 end;
 
 sub GetParticipantID begin
@@ -735,6 +742,76 @@ sub RunCRTrials begin
 			end;
 		end;
 		wait_interval(ITI);
+		
+		i = i + 1;
+	end;
+end;
+
+sub RunMEGTrials begin
+	# Presentation of the MEG task
+	# @TODO: Trigger data
+	
+	string f_save = s_Dir_Data + s_PPN + s_Outs_MEG;
+	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tt\trt\tr\tc\ti\n");
+	
+	loop i = 1 until i > i_MEG_Trials_N begin
+		w_Sound.unload();
+		w_Sound.set_filename(s_Dir_Audio + as_MEG_Stimuli[i][5]);
+		w_Sound.load();
+		
+		int type = random(1, as_MEG_Prompts.count());
+		
+		ClearText();
+		
+		p_Blank.present();
+		p_Fixation.present();
+		wait_interval(i_MEG_Fixation);
+		
+		p_Blank.present();
+		s_Sound.present();
+		wait_interval(int(as_MEG_Stimuli[i][4]) + i_MEG_Delay);
+		
+		t_MEG_top.set_caption(as_MEG_Prompts[type], true);
+		t_MEG_left.set_caption(s_MEG_Prompt_N, true);
+		t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
+		p_MEG.present();
+		
+		int delta = WaitForKeyTimed(i_MEG_Response);
+		int resp = -1;
+		int correct = 0;
+		
+		ClearText();
+		p_Blank.present();
+		
+		if delta > 0 then
+			resp = response_manager.last_response();
+			int a = 3 + type;
+			
+			if (resp - 1) == int(as_Definitions[int(as_MEG_Stimuli[i][8])][a]) then
+				correct = 1;
+			end;
+		else
+			delta = i_MEG_Response;
+		end;
+		
+		array<string> data[14];
+		data[1] = as_MEG_Stimuli[i][2];
+		data[2] = as_MEG_Stimuli[i][3];
+		data[3] = as_MEG_Stimuli[i][1];
+		data[4] = as_MEG_Stimuli[i][4];
+		data[5] = as_MEG_Stimuli[i][5];
+		data[6] = as_MEG_Stimuli[i][6];
+		data[7] = as_MEG_Stimuli[i][7];
+		data[8] = as_MEG_Stimuli[i][8];
+		data[9] = as_MEG_Stimuli[i][9];
+		data[10] = string(type);
+		data[11] = string(delta);
+		data[12] = string(resp);
+		data[13] = string(correct);
+		data[14] = string(i);
+		SaveData(f_save, data);
+		
+		wait_interval(i_MEG_ITI);
 		
 		i = i + 1;
 	end;

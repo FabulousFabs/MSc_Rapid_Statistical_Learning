@@ -1,7 +1,7 @@
-scenario = "rslCR";
-pcl_file = "rslCR_MAIN.pcl";
+scenario = "rslMEG";
+pcl_file = "rslMEG_MAIN.pcl";
 
-active_buttons = 1;
+active_buttons = 2;
 
 default_background_color = 0, 0, 0;
 default_font = "Arial";
