@@ -5,7 +5,7 @@
 # 2 are one variant of each of the four speakers in that pool). essentially,
 # this is how we manipulate variability along our two dimensions.
 
-import os, sys
+import os, sys, string, random
 from pydub import AudioSegment
 import numpy as np
 
@@ -15,6 +15,7 @@ speakers_file = '/users/fabianschneider/desktop/university/master/dissertation/p
 definitions_file = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/definitions.txt'
 audio_targets = '.wav'
 
+ppn_length = 5
 n_lists = 1 # how many lists do we want to create (NOTE: we use one such list of assignments per participant)
 n_speakers = 12
 n_targets = 60
@@ -37,6 +38,8 @@ def preprocess_assignment():
         stimuli[int(props[0])-1,int(props[1])-1,int(props[2])-1] = len(audio)
         print('--- Read %d-%d-%d. ---\t\t' % (int(props[0]),int(props[1]),int(props[2])), end='\r')
     print('Completed reading all stimuli data.\t\t')
+
+    ppns = []
 
     for i in range(n_lists):
         """
@@ -93,24 +96,36 @@ def preprocess_assignment():
             if n == 1: outs_meg += lnp1 + lnp3
             if n == 2: outs_meg += lnp2 + lnp3
 
+        # get ppn
+        ppn = draw_ppn(ppn_length)
+        while ppn in ppns:
+            ppn = draw_ppn(ppn_length)
+        ppns.append(ppn)
+
         # write master
-        with open(os.path.join(list_folder, str(i) + '.txt'), 'w') as f:
+        with open(os.path.join(list_folder, ppn + '.txt'), 'w') as f:
             f.write(outs)
 
         # write learning
-        with open(os.path.join(list_folder, str(i) + '_learning.txt'), 'w') as f:
+        with open(os.path.join(list_folder, ppn + '_learning.txt'), 'w') as f:
             f.write(outs_learning)
 
         # write 4afc
-        with open(os.path.join(list_folder, str(i) + '_4afc.txt'), 'w') as f:
+        with open(os.path.join(list_folder, ppn + '_4afc.txt'), 'w') as f:
             f.write(outs_4afc)
 
         # write meg
-        with open(os.path.join(list_folder, str(i) + '_meg.txt'), 'w') as f:
+        with open(os.path.join(list_folder, ppn + '_meg.txt'), 'w') as f:
             f.write(outs_meg)
 
         print('--- List %d/%d done. ---\t\t' % (i+1, n_lists), end='\r')
+
+    print('Output PPNs:')
+    [print(ppn) for ppn in ppns]
     print('Completed creating all lists.\t\t')
+
+def draw_ppn(N):
+    return ''.join(random.choices(string.ascii_uppercase, k=N))
 
 def find_recordings(f, t):
     """Grab all recordings with extension t from f"""
