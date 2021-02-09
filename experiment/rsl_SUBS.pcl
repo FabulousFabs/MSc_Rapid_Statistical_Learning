@@ -396,6 +396,8 @@ sub RunExposureTrials begin
 	# Presentation of the exposure trials
 	
 	loop i = 1 until i > i_Expo_Trials_N begin
+		int off = random(1, i_Expo_Delay);
+		
 		w_Sound.unload();
 		w_Sound.set_filename(s_Dir_Audio + as_Expo_Stimuli[i][5]);
 		w_Sound.load();
@@ -408,7 +410,8 @@ sub RunExposureTrials begin
 		
 		p_Blank.present();
 		s_Sound.present();
-		wait_interval(int(as_Expo_Stimuli[i][4]) + i_Expo_Delay);
+		#wait_interval(int(as_Expo_Stimuli[i][4]) + i_Expo_Delay);
+		wait_interval(i_Expo_Audio + i_Expo_Delay - off);
 		
 		t_Text.set_caption(as_Definitions[int(as_Expo_Stimuli[i][8])][2], true);
 		t_Text2.set_caption("", true);
@@ -418,11 +421,13 @@ sub RunExposureTrials begin
 		p_Blank.present();
 		ClearText();
 		
-		int ITI = i_Expo_ITI;
-		if int(as_Expo_Stimuli[i][4]) > i_Expo_Audio then
-			ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
-		end;
-		wait_interval(ITI);
+		#int ITI = i_Expo_ITI;
+		#if int(as_Expo_Stimuli[i][4]) > i_Expo_Audio then
+		#	ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
+		#end;
+		#wait_interval(ITI);
+		wait_interval(i_Expo_ITI + off);
+		
 		
 		i = i + 1;
 	end;
