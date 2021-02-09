@@ -72,21 +72,37 @@ picture {
 	x = 0;
 	y = 0;
 	
+	#text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_1_top_left; 
+	#x = -400;
+	#y = -40;
+	#
+	#text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_2_bottom_left;
+	#x = -400;
+	#y = 40;
+	#
+	#text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_3_top_right;
+	#x = 400;
+	#y = -40;
+	#
+	#text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_4_bottom_right;
+	#x = 400;
+	#y = 40;
+	
 	text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_1_top_left; 
 	x = -400;
-	y = -40;
+	y = 40;
 	
 	text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_2_bottom_left;
 	x = -400;
-	y = 40;
+	y = -40;
 	
 	text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_3_top_right;
 	x = 400;
-	y = -40;
+	y = 40;
 	
 	text { caption = ""; font_size = 42; width=400; text_align=align_center; } t_4AFC_4_bottom_right;
 	x = 400;
-	y = 40;
+	y = -40;
 } p_4AFC;
 
 picture {
