@@ -50,6 +50,7 @@
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl2AFCW.sce</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslCR.sce</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl4AFC.sce</filename>
+<filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslMEG.sce</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslEXPO_MAIN.pcl</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl_SUBS.pcl</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl_INFO.pcl</filename>
@@ -57,7 +58,6 @@
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl2AFCW_MAIN.pcl</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslCR_MAIN.pcl</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rsl4AFC_MAIN.pcl</filename>
-<filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslMEG.sce</filename>
 <filename>C:\Users\Fabs\Documents\GitHub\MSc_Rapid_Statistical_Learning\experiment\rslMEG_MAIN.pcl</filename>
 </efs>
 <exclusive_mouse>1</exclusive_mouse>
@@ -605,6 +605,15 @@
 <rng>1</rng>
 <rts>1</rts>
 <sce>
+<idv>
+<device_type>3</device_type>
+<dx_device_type>19</dx_device_type>
+<ibn>LEER</ibn>
+<idn>Keyboard</idn>
+<index>0</index>
+<label></label>
+<offset>57</offset>
+</idv>
 <overrides></overrides>
 <sfn>all_scenarios</sfn>
 </sce>
