@@ -18,6 +18,8 @@
 /experiment/stimuli/speakers.txt
 /experiment/stimuli/txt/*
 /experiment/stimuli/audio/*
+/analyses/behavioural/data/*
+/analyses/behavioural/aggregate.txt
 
 # stimulus files
 *.wav
