@@ -396,6 +396,8 @@ sub RunExposureTrials begin
 	# Presentation of the exposure trials
 	
 	loop i = 1 until i > i_Expo_Trials_N begin
+		int off = random(1, i_Expo_Delay);
+		
 		w_Sound.unload();
 		w_Sound.set_filename(s_Dir_Audio + as_Expo_Stimuli[i][5]);
 		w_Sound.load();
@@ -408,7 +410,8 @@ sub RunExposureTrials begin
 		
 		p_Blank.present();
 		s_Sound.present();
-		wait_interval(int(as_Expo_Stimuli[i][4]) + i_Expo_Delay);
+		#wait_interval(int(as_Expo_Stimuli[i][4]) + i_Expo_Delay);
+		wait_interval(i_Expo_Audio + i_Expo_Delay - off);
 		
 		t_Text.set_caption(as_Definitions[int(as_Expo_Stimuli[i][8])][2], true);
 		t_Text2.set_caption("", true);
@@ -418,11 +421,13 @@ sub RunExposureTrials begin
 		p_Blank.present();
 		ClearText();
 		
-		int ITI = i_Expo_ITI;
-		if int(as_Expo_Stimuli[i][4]) > i_Expo_Audio then
-			ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
-		end;
-		wait_interval(ITI);
+		#int ITI = i_Expo_ITI;
+		#if int(as_Expo_Stimuli[i][4]) > i_Expo_Audio then
+		#	ITI = ITI - (int(as_Expo_Stimuli[i][4]) - i_Expo_Audio);
+		#end;
+		#wait_interval(ITI);
+		wait_interval(i_Expo_ITI + off);
+		
 		
 		i = i + 1;
 	end;
@@ -848,10 +853,10 @@ sub Run4AFCTrials begin
 		s_Sound.present();
 		wait_interval(int(as_4AFC_Stimuli[i][4]));
 		
-		t_4AFC_1_top_left.set_caption(GetDefinitionShort(options[1]), true);
-		t_4AFC_2_bottom_left.set_caption(GetDefinitionShort(options[2]), true);
-		t_4AFC_3_top_right.set_caption(GetDefinitionShort(options[3]), true);
-		t_4AFC_4_bottom_right.set_caption(GetDefinitionShort(options[4]), true);
+		t_4AFC_1_top_left.set_caption(GetDefinitionShort(options[1]), true);			# s
+		t_4AFC_2_bottom_left.set_caption(GetDefinitionShort(options[2]), true);		# x
+		t_4AFC_3_top_right.set_caption(GetDefinitionShort(options[3]), true);		# j
+		t_4AFC_4_bottom_right.set_caption(GetDefinitionShort(options[4]), true);	# n
 		p_4AFC.present();
 		
 		int delta = WaitForKeyTimed(i_4AFC_Visual);
@@ -862,9 +867,9 @@ sub Run4AFCTrials begin
 		p_Blank.present();
 		
 		if delta > 0 then
-			resp = response_manager.last_response();
+			resp = int(response_manager.last_response() - 1);
 			
-			if options[resp - 1] == answer_expected then		# note to self: for this to work, it is _critical_ that buttons 1 & 2 are top and bottom left and 3 & 4 are top and bottom right, respectively!
+			if options[resp] == answer_expected then		# note to self: for this to work, it is _critical_ that buttons 1 & 2 are top and bottom left and 3 & 4 are top and bottom right, respectively!
 				correct = 1;
 			end;
 		else
