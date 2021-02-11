@@ -1,6 +1,8 @@
 # script to run our behavioural analyses
 
 library(tidyverse);
+library(ggpubr);
+library(nortest);
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt";
 afc_chance <- 1 / 4;
@@ -47,4 +49,84 @@ ggplot(data = hr_speakers) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
-## 3: RT analysis
+## 3: RT prep
+hist(data$rt, xlab="RT (ms)")
+
+ggplot(data, aes(x=rt)) + 
+  geom_dotplot(stackdir = 'center', binwidth = 15)
+
+data$rtl <- log10(data$rt);
+
+hist(data$rtl, xlab="RT (log10(ms))")
+
+ggplot(data, aes(x=rtl)) + 
+  geom_dotplot(stackdir = 'center', binwidth = 1)
+
+ggqqplot(data$rt)
+ggqqplot(data$rtl)
+
+normality_rt <- ad.test(data$rt) # anderson-darling on raw RT data
+normality_rtl <- ad.test(data$rtl) # anderson-darling on log10(RT) data
+# ^ this is a problem because, almost certainly, these will seem normal
+# because AD is biased towards normality for bigger Ns, although the same
+# problem would apply to shapiro-wilk (which we won't be able to use here
+# anyways due to N>5000). Visual inspection + tests will have to do to
+# make decisions here. since we are working within-participants, however,
+# i think an affordance here would be to simply use a 2SD approach for
+# within-participant outliers, as seen below. since this will almost 
+# certainly be an exgaussian, we should do this on RTL data, not raw RTs.
+
+mu_participant_rt <- setNames(aggregate(data$rt, list(data$ppn), mean), c("ppn", "rt_mu"));
+mu_participant_rtl <- setNames(aggregate(data$rtl, list(data$ppn), mean), c("ppn", "rtl_mu"));
+sd_participant_rt <- setNames(aggregate(data$rt, list(data$ppn), sd), c("ppn", "rt_sd"));
+sd_participant_rtl <- setNames(aggregate(data$rtl, list(data$ppn), sd), c("ppn", "rtl_sd"));
+
+data <- merge(data, mu_participant_rt, by="ppn");
+data <- merge(data, mu_participant_rtl, by="ppn");
+data <- merge(data, sd_participant_rt, by="ppn");
+data <- merge(data, sd_participant_rtl, by="ppn");
+
+data_clean_rt <- subset(data, rt < (rt_mu + (2 * rt_sd)) & 
+                              rt > (rt_mu - (2 * rt_sd)));
+data_clean_rtl <- subset(data, rtl < (rtl_mu + (2 * rtl_sd)) &
+                               rtl > (rtl_mu - (2 * rtl_sd)));
+
+data_removed_rt <- (1 - (NROW(data_clean_rt) / NROW(data))) * 100; # data removed in per cent
+data_removed_rtl <- (1 - (NROW(data_clean_rtl) / NROW(data))) * 100; # data removed in per cent
+
+hist(data_clean_rt$rt, xlab="Cleaned RT (ms)")
+
+ggplot(data_clean_rt, aes(x=rt)) + 
+  geom_dotplot(stackdir = 'center', binwidth = 15)
+
+hist(data_clean_rtl$rtl, xlab="Cleaned RT (log10(ms))")
+
+ggplot(data_clean_rtl, aes(x=rtl)) + 
+  geom_dotplot(stackdir = 'center', binwidth = 1)
+
+# to make an informed decision, let's neatly plot
+# all qqplots again with titles such that we can evalute
+# properly at this point. v
+ggqqplot(data_clean_rt$rt, title="qqplot RTs of RT-cleaned data") + 
+  theme(plot.title = element_text(hjust = 0.5))
+ggqqplot(data_clean_rtl$rtl, title="qqplot RTLs of RTL-cleaned data") + 
+  theme(plot.title = element_text(hjust = 0.5))
+ggqqplot(data_clean_rt$rtl, title="qqplot RTLs of RT-cleaned data") + 
+  theme(plot.title = element_text(hjust = 0.5))
+ggqqplot(data_clean_rtl$rt, title="qqplot RT of RTL-cleaned data") + 
+  theme(plot.title = element_text(hjust = 0.5))
+# ^ note that QQplots aren't everything here because of course
+# this is going to give us a log-ish plot for the RTLs - also mind
+# normality (but with a grain of salt, again) and hist plots
+# as a general rule of thumb, it's probably best to go with RT-
+# cleaned RTL data for further analyses
+
+normality_clean_rt <- ad.test(data_clean_rt$rt) # anderson-darling on raw RT data
+normality_clean_rtl <- ad.test(data_clean_rtl$rtl) # anderson-darling on log10(RT) data
+# ^ note that, upon making a decision, the data used in the next section
+# should be changed accordingly (i.e., we reassign to a new variable to
+# make it easier to change decisions at this stage)
+
+
+## 4: RT analyses
+cleaned_data <- data_clean_rt; # selection of which data to run analyses with
