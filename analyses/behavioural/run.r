@@ -2,7 +2,9 @@
 
 library(tidyverse);
 library(ggpubr);
+library(ggplot2);
 library(nortest);
+library(car);
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt";
 afc_chance <- 1 / 4;
@@ -121,8 +123,10 @@ ggqqplot(data_clean_rtl$rt, title="qqplot RT of RTL-cleaned data") +
 # as a general rule of thumb, it's probably best to go with RT-
 # cleaned RTL data for further analyses
 
-normality_clean_rt <- ad.test(data_clean_rt$rt) # anderson-darling on raw RT data
-normality_clean_rtl <- ad.test(data_clean_rtl$rtl) # anderson-darling on log10(RT) data
+normality_clean_rt <- ad.test(data_clean_rt$rt) # anderson-darling on cleaned RT data (ms)
+normality_clean_rt_rtl <- ad.test(data.clean_rt$rtl) # anderson-darling on cleaned RT data (log10)
+normality_clean_rtl <- ad.test(data_clean_rtl$rtl) # anderson-darling on cleaned RTL data (log10)
+normality_clean_rt <- ad.test(data_clean_rtl$rt) # anderson-darling on cleaned RTL data (ms)
 # ^ note that, upon making a decision, the data used in the next section
 # should be changed accordingly (i.e., we reassign to a new variable to
 # make it easier to change decisions at this stage)
@@ -130,3 +134,27 @@ normality_clean_rtl <- ad.test(data_clean_rtl$rtl) # anderson-darling on log10(R
 
 ## 4: RT analyses
 cleaned_data <- data_clean_rt; # selection of which data to run analyses with
+cleaned_data$outcome <- cleaned_data$rt; # selection of which outcome to work with
+cleaned_data$list <- factor(cleaned_data$list);
+cleaned_data$pool <- factor(cleaned_data$pool);
+
+res.hete <- leveneTest(outcome ~ pool * list, data = cleaned_data);
+res.aov2 <- aov(outcome ~ pool * list, data = cleaned_data);
+summary(res.aov2)
+res.spkr <- TukeyHSD(res.aov2, which = "pool");
+res.item <- TukeyHSD(res.aov2, which = "list");
+
+res.mu <- setNames(aggregate(cleaned_data$outcome, by=list(cleaned_data$list, cleaned_data$pool), mean), c("list", "pool", "outcome"));
+res.sd <- setNames(aggregate(cleaned_data$outcome, by=list(cleaned_data$list, cleaned_data$pool), sd), c("list", "pool", "sd"));
+res.sum <- res.mu;
+res.sum$sd <- res.sd$sd;
+
+ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 
+  geom_line(position = position_dodge(.25), linetype = "dashed") + 
+  geom_point(position = position_dodge(.25), size = 4) + 
+  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.25))
+
+#ggplot(res.sum, aes(x = list, y = outcome, fill = pool)) + 
+#  geom_bar(stat = "identity", color = "black", position = position_dodge()) + 
+#  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.9)) + 
+#  labs(title  ="Two-way interaction plots of model", x = "List", y = "RT (ms)")
