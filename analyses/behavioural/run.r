@@ -52,23 +52,25 @@ ggplot(data = hr_speakers) +
 
 
 ## 3: RT prep
-hist(data$rt, xlab="RT (ms)")
+cordata <- subset(data, cor == 1); # remove incorrect responses
 
-ggplot(data, aes(x=rt)) + 
+hist(cordata$rt, xlab="RT (ms)")
+
+ggplot(cordata, aes(x=rt)) + 
   geom_dotplot(stackdir = 'center', binwidth = 15)
 
-data$rtl <- log10(data$rt);
+cordata$rtl <- log10(cordata$rt);
 
-hist(data$rtl, xlab="RT (log10(ms))")
+hist(cordata$rtl, xlab="RT (log10(ms))")
 
-ggplot(data, aes(x=rtl)) + 
+ggplot(cordata, aes(x=rtl)) + 
   geom_dotplot(stackdir = 'center', binwidth = 1)
 
-ggqqplot(data$rt)
-ggqqplot(data$rtl)
+ggqqplot(cordata$rt)
+ggqqplot(cordata$rtl)
 
-normality_rt <- ad.test(data$rt) # anderson-darling on raw RT data
-normality_rtl <- ad.test(data$rtl) # anderson-darling on log10(RT) data
+normality_rt <- ad.test(cordata$rt) # anderson-darling on raw RT data
+normality_rtl <- ad.test(cordata$rtl) # anderson-darling on log10(RT) data
 # ^ this is a problem because, almost certainly, these will seem normal
 # because AD is biased towards normality for bigger Ns, although the same
 # problem would apply to shapiro-wilk (which we won't be able to use here
@@ -78,23 +80,40 @@ normality_rtl <- ad.test(data$rtl) # anderson-darling on log10(RT) data
 # within-participant outliers, as seen below. since this will almost 
 # certainly be an exgaussian, we should do this on RTL data, not raw RTs.
 
-mu_participant_rt <- setNames(aggregate(data$rt, list(data$ppn), mean), c("ppn", "rt_mu"));
-mu_participant_rtl <- setNames(aggregate(data$rtl, list(data$ppn), mean), c("ppn", "rtl_mu"));
-sd_participant_rt <- setNames(aggregate(data$rt, list(data$ppn), sd), c("ppn", "rt_sd"));
-sd_participant_rtl <- setNames(aggregate(data$rtl, list(data$ppn), sd), c("ppn", "rtl_sd"));
+mu_rt <- mean(cordata$rt);
+mu_rtl <- mean(cordata$rtl);
+sd_rt <- sd(cordata$rt);
+sd_rtl <- sd(cordata$rtl);
+# ^ mean and standard deviations across data set
 
-data <- merge(data, mu_participant_rt, by="ppn");
-data <- merge(data, mu_participant_rtl, by="ppn");
-data <- merge(data, sd_participant_rt, by="ppn");
-data <- merge(data, sd_participant_rtl, by="ppn");
+mu_participant_rt <- setNames(aggregate(cordata$rt, list(cordata$ppn), mean), c("ppn", "rt_mu"));
+mu_participant_rtl <- setNames(aggregate(cordata$rtl, list(cordata$ppn), mean), c("ppn", "rtl_mu"));
+sd_participant_rt <- setNames(aggregate(cordata$rt, list(cordata$ppn), sd), c("ppn", "rt_sd"));
+sd_participant_rtl <- setNames(aggregate(cordata$rtl, list(cordata$ppn), sd), c("ppn", "rtl_sd"));
 
-data_clean_rt <- subset(data, rt < (rt_mu + (2 * rt_sd)) & 
-                              rt > (rt_mu - (2 * rt_sd)));
-data_clean_rtl <- subset(data, rtl < (rtl_mu + (2 * rtl_sd)) &
-                               rtl > (rtl_mu - (2 * rtl_sd)));
+cordata <- merge(cordata, mu_participant_rt, by="ppn");
+cordata <- merge(cordata, mu_participant_rtl, by="ppn");
+cordata <- merge(cordata, sd_participant_rt, by="ppn");
+cordata <- merge(cordata, sd_participant_rtl, by="ppn");
+# ^ mean and standard deviations within participants in data set
 
-data_removed_rt <- (1 - (NROW(data_clean_rt) / NROW(data))) * 100; # data removed in per cent
-data_removed_rtl <- (1 - (NROW(data_clean_rtl) / NROW(data))) * 100; # data removed in per cent
+data_clean_rt_total <- subset(cordata, rt < (mu_rt + (2 * sd_rt)) & 
+                                       rt > (mu_rt - (2 * sd_rt)));
+data_clean_rtl_total <- subset(cordata, rtl < (mu_rtl + (2 * sd_rtl)) & 
+                                        rtl > (mu_rtl - (2 * sd_rtl)));
+# ^ outliers removed by overall data
+
+data_clean_rt_participant <- subset(cordata, rt < (rt_mu + (2 * rt_sd)) & 
+                                             rt > (rt_mu - (2 * rt_sd)));
+data_clean_rtl_participant <- subset(cordata, rtl < (rtl_mu + (2 * rtl_sd)) &
+                                              rtl > (rtl_mu - (2 * rtl_sd)));
+# ^ outliers removed by participant data
+
+data_clean_rt <- data_clean_rt_total; # choice of which cleaning method to use
+data_clean_rtl <- data_clean_rtl_total; # choice of which cleaning method to use
+
+data_removed_rt <- (1 - (NROW(data_clean_rt) / NROW(data))) * 100; # data removed in per cent (corr & outliers)
+data_removed_rtl <- (1 - (NROW(data_clean_rtl) / NROW(data))) * 100; # data removed in per cent (corr & outliers)
 
 hist(data_clean_rt$rt, xlab="Cleaned RT (ms)")
 
@@ -124,7 +143,7 @@ ggqqplot(data_clean_rtl$rt, title="qqplot RT of RTL-cleaned data") +
 # cleaned RTL data for further analyses
 
 normality_clean_rt <- ad.test(data_clean_rt$rt) # anderson-darling on cleaned RT data (ms)
-normality_clean_rt_rtl <- ad.test(data.clean_rt$rtl) # anderson-darling on cleaned RT data (log10)
+normality_clean_rt_rtl <- ad.test(data_clean_rt$rtl) # anderson-darling on cleaned RT data (log10)
 normality_clean_rtl <- ad.test(data_clean_rtl$rtl) # anderson-darling on cleaned RTL data (log10)
 normality_clean_rt <- ad.test(data_clean_rtl$rt) # anderson-darling on cleaned RTL data (ms)
 # ^ note that, upon making a decision, the data used in the next section
@@ -134,7 +153,8 @@ normality_clean_rt <- ad.test(data_clean_rtl$rt) # anderson-darling on cleaned R
 
 ## 4: RT analyses
 cleaned_data <- data_clean_rt; # selection of which data to run analyses with
-cleaned_data$outcome <- cleaned_data$rt; # selection of which outcome to work with
+cleaned_data$outcome <- cleaned_data$rtl; # selection of which outcome to work with
+outcome_label <- "RT (log10)";
 cleaned_data$list <- factor(cleaned_data$list);
 cleaned_data$pool <- factor(cleaned_data$pool);
 
@@ -149,11 +169,19 @@ res.sd <- setNames(aggregate(cleaned_data$outcome, by=list(cleaned_data$list, cl
 res.sum <- res.mu;
 res.sum$sd <- res.sd$sd;
 
-ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 
-  geom_line(position = position_dodge(.25), linetype = "dashed") + 
-  geom_point(position = position_dodge(.25), size = 4) + 
-  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.25))
+compare_means(outcome ~ list * pool, data = cleaned_data, method="anova");
+ggboxplot(cleaned_data, x = "list", y = "outcome", color = "pool", palette = "jco", add = "jitter", short.panel.labs = FALSE) + 
+  stat_compare_means(aes(group = pool), label = "p.signif", paired = FALSE, hide.ns = FALSE)
 
+
+#ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 
+#  geom_line(position = position_dodge(.25), linetype = "dashed") + 
+#  geom_point(position = position_dodge(.25), size = 3) + 
+#  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.25)) + 
+#  labs(title = "Two-way interaction plots of model", x = "List", y = outcome_label, color = "Pool") + 
+#  theme(plot.title = element_text(hjust = 0.5))
+
+# this is a bar plot but it's comparably less informative imho
 #ggplot(res.sum, aes(x = list, y = outcome, fill = pool)) + 
 #  geom_bar(stat = "identity", color = "black", position = position_dodge()) + 
 #  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.9)) + 
