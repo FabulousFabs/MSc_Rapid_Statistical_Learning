@@ -153,8 +153,8 @@ normality_clean_rt <- ad.test(data_clean_rtl$rt) # anderson-darling on cleaned R
 
 ## 4: RT analyses
 cleaned_data <- data_clean_rt; # selection of which data to run analyses with
-cleaned_data$outcome <- cleaned_data$rtl; # selection of which outcome to work with
-outcome_label <- "RT (log10)";
+cleaned_data$outcome <- cleaned_data$rt; # selection of which outcome to work with
+outcome_label <- "RT (ms)";
 cleaned_data$list <- factor(cleaned_data$list);
 cleaned_data$pool <- factor(cleaned_data$pool);
 
@@ -169,19 +169,29 @@ res.sd <- setNames(aggregate(cleaned_data$outcome, by=list(cleaned_data$list, cl
 res.sum <- res.mu;
 res.sum$sd <- res.sd$sd;
 
-compare_means(outcome ~ list * pool, data = cleaned_data, method="anova");
-ggboxplot(cleaned_data, x = "list", y = "outcome", color = "pool", palette = "jco", add = "jitter", short.panel.labs = FALSE) + 
-  stat_compare_means(aes(group = pool), label = "p.signif", paired = FALSE, hide.ns = FALSE)
 
+# violin plots
+#ggplot(cleaned_data, aes(x = list, y = outcome, fill = pool)) + 
+#  geom_violin(position = position_dodge(1)) + 
+#  geom_point(position = position_dodge(1), size = 1) + 
+#  facet_grid(list ~ pool)
+#  geom_dotplot(binaxis = 'y', bins=1, stackdir = 'center', position = position_dodge(1))
+#  geom_boxplot(width = 0.1, fill = "white")
 
-#ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 
-#  geom_line(position = position_dodge(.25), linetype = "dashed") + 
-#  geom_point(position = position_dodge(.25), size = 3) + 
-#  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.25)) + 
-#  labs(title = "Two-way interaction plots of model", x = "List", y = outcome_label, color = "Pool") + 
-#  theme(plot.title = element_text(hjust = 0.5))
+# box plots
+#compare_means(outcome ~ list * pool, data = cleaned_data, method="anova");
+#ggboxplot(cleaned_data, x = "list", y = "outcome", color = "pool", palette = "jco", add = "jitter", short.panel.labs = FALSE) + 
+#  stat_compare_means(aes(group = pool), label = "p.signif", paired = FALSE, hide.ns = FALSE)
 
-# this is a bar plot but it's comparably less informative imho
+# summary interaction plots
+ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 
+  geom_line(position = position_dodge(.25), linetype = "dashed") + 
+  geom_point(position = position_dodge(.25), size = 2) + 
+  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.25)) + 
+  labs(title = "Two-way interaction plots of model", x = "List", y = outcome_label, color = "Pool") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+# bar plots
 #ggplot(res.sum, aes(x = list, y = outcome, fill = pool)) + 
 #  geom_bar(stat = "identity", color = "black", position = position_dodge()) + 
 #  geom_errorbar(aes(ymin = outcome - sd, ymax = outcome + sd), width = .2, position = position_dodge(.9)) + 
