@@ -15,8 +15,9 @@ speakers = np.array([1,2,3], dtype='int')
 item = 1
 num = 2
 
-audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-assignment/full-done/'
+audio_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/stimulus-creation/preprocessing-finalise/pcm/'
 figures_folder = '/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/cqts/'
+targets = '.wav'
 
 def compute_cqts():
     '''
@@ -58,6 +59,69 @@ def get_spectrograms(all):
         fig.colorbar(img, ax=ax, format="%+2.0f dB")
         plt.savefig(os.path.join(figures_folder, '_'.join([str(item), str(num), str(speakers[arr[2]])]) + '.png'))
 
+def find_recordings(f, t):
+    '''
+    Grab all files of type t from f
+    '''
+
+    af = os.listdir(f)
+    at = []
+    for f in af:
+        if f.endswith(t):
+            at.append(f)
+    return at
+
+def pad_audio_single(a, L):
+    '''
+    pads signal to length L
+    '''
+
+    return np.pad(a, (0, L - len(a)), 'constant', constant_values=(0,))
+
+def get_spectrogram_single(a, fs, f):
+    '''
+    compute, plot, save
+    '''
+
+    info = f.split('.')[0].split('_')
+
+    fig, ax = plt.subplots()
+    C = np.abs(librosa.cqt(a, sr=fs))
+    img = librosa.display.specshow(librosa.amplitude_to_db(C, ref=np.max), sr=fs, x_axis='time', y_axis='cqt_hz', ax=ax, cmap='viridis')
+    ax.set_title('Constant-Q power spectrum speaker_' + info[0] + '')
+    fig.colorbar(img, ax=ax, format="%+2.0f dB")
+    plt.savefig(os.path.join(figures_folder, '_'.join(info) + '.png'))
+
+def compute_cqts_all():
+    '''
+    compute the CQTs for all files
+    '''
+
+    files = find_recordings(audio_folder, targets)
+    audio = []
+    fs = []
+    L = 0
+
+    for f in files:
+        print('--- Loading ' + f + '. ---', end='\r')
+        a, s = librosa.load(os.path.join(audio_folder, f))
+        L = len(a) if len(a) > L else L
+        audio.append(a)
+        fs.append(s)
+    print('--- All files loaded. ---')
+
+    for n in range(len(audio)):
+        print('--- Paddding ' + str(n) + '. ---', end='\r')
+        audio[n] = pad_audio_single(audio[n], L)
+    print('--- All files padded. ---')
+
+    for a, s, f in zip(audio, fs, files):
+        print('--- Plotting ' + f + '. ---')
+        get_spectrogram_single(a, s, f)
+    print('--- All signals plotted. ---')
+
+    return 0
+
 if __name__ == '__main__':
     if len(sys.argv) >= 1:
         for arg in sys.argv[1:]:
@@ -73,3 +137,5 @@ if __name__ == '__main__':
                 speakers[2] = int(arg[5:])
             elif len(arg) == 4 and arg[0:4] == '-cqt':
                 compute_cqts()
+            elif len(arg) == 8 and arg[0:8] == '-cqt-all':
+                compute_cqts_all()
