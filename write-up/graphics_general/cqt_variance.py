@@ -9,7 +9,7 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
-from librosa import display, amplitude_to_db
+from librosa import display, amplitude_to_db, pyin
 
 speakers = np.array([1,2,3], dtype='int')
 item = 1
@@ -52,6 +52,11 @@ def get_spectrograms(all):
     '''
 
     for arr in all:
+        f0, vf, vp = librosa.pyin(arr[0], sr=arr[1], fmin=15, fmax=500)
+        print("")
+        print("%s mu: %d" % (str(speakers[arr[2]]), np.mean(np.ma.masked_equal(np.nan_to_num(f0), 0))))
+        print("")
+
         fig, ax = plt.subplots()
         C = np.abs(librosa.cqt(arr[0], sr=arr[1]))
         img = librosa.display.specshow(librosa.amplitude_to_db(C, ref=np.max), sr=arr[1], x_axis='time', y_axis='cqt_hz', ax=ax, cmap='viridis')
