@@ -171,17 +171,17 @@ res.sum$sd <- res.sd$sd;
 
 
 # violin plots
-#ggplot(cleaned_data, aes(x = list, y = outcome, fill = pool)) + 
-#  geom_violin(position = position_dodge(1)) + 
-#  geom_point(position = position_dodge(1), size = 1) + 
-#  facet_grid(list ~ pool)
-#  geom_dotplot(binaxis = 'y', bins=1, stackdir = 'center', position = position_dodge(1))
-#  geom_boxplot(width = 0.1, fill = "white")
+ggplot(cleaned_data, aes(x = list, y = outcome, fill = pool)) + 
+  geom_violin(position = position_dodge(1)) + 
+  geom_point(position = position_dodge(1), size = 1) + 
+  #facet_grid(~) + 
+  #geom_dotplot(binaxis = 'y', bins=1, stackdir = 'center', position = position_dodge(1)) + 
+  #geom_boxplot(width = 0.1, fill = "white")
 
 # box plots
-#compare_means(outcome ~ list * pool, data = cleaned_data, method="anova");
-#ggboxplot(cleaned_data, x = "list", y = "outcome", color = "pool", palette = "jco", add = "jitter", short.panel.labs = FALSE) + 
-#  stat_compare_means(aes(group = pool), label = "p.signif", paired = FALSE, hide.ns = FALSE)
+compare_means(outcome ~ list * pool, data = cleaned_data, method="anova");
+ggboxplot(cleaned_data, x = "list", y = "outcome", color = "pool", palette = "jco", add = "jitter", short.panel.labs = FALSE) + 
+  stat_compare_means(aes(group = pool), label = "p.signif", paired = FALSE, hide.ns = FALSE)
 
 # summary interaction plots
 ggplot(res.sum, aes(x = list, y = outcome, group = pool, color = pool)) + 

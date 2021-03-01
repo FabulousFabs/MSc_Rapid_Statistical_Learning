@@ -9,7 +9,7 @@ library(car);
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt"; # collection to load
 afc_chance <- 1 / 4; # chance level of performance in 4AFC
-cutoff_sd <- 4; # standard deviations beyond which we classify outliers
+cutoff_sd <- 2; # standard deviations beyond which we classify outliers
 
 ### 1: load and prepare data
 data <- read.delim(file, header = TRUE, sep = "\t", dec=".");
@@ -88,12 +88,18 @@ data.controlled <- subset(data, !(ppn %in% drop.participants | spkr %in% drop.it
 data.controlled.hits <- subset(data.controlled, cor == 1);
 
 rt.mu.total <- mean(data.controlled.hits$rt); # RT mean
+rtl.mu.total <- mean(data.controlled.hits$rtl); # RTL mean
 rt.sd.total <- sd(data.controlled.hits$rt); # RT sd
+rtl.sd.total <- sd(data.controlled.hits$rtl); # RTL sd
 
 rt.mu.by_participant <- setNames(aggregate(data.controlled.hits$rt, list(data.controlled.hits$ppn), mean), c("ppn", "rt_mu_ppn")); # RT mean by participant
+rtl.mu.by_participant <- setNames(aggregate(data.controlled.hits$rtl, list(data.controlled.hits$ppn), mean), c("ppn", "rtl_mu_ppn")); # RTL mean by participant
 rt.sd.by_participant <- setNames(aggregate(data.controlled.hits$rt, list(data.controlled.hits$ppn), sd), c("ppn", "rt_sd_ppn")); # RT sd by participant
-data.controlled.hits <- merge(data.controlled.hits, rt.mu.by_participant, by="ppn"); # merge mean for easy access
-data.controlled.hits <- merge(data.controlled.hits, rt.sd.by_participant, by="ppn"); # merge standard deviation for easy access
+rtl.sd.by_participant <- setNames(aggregate(data.controlled.hits$rtl, list(data.controlled.hits$ppn), sd), c("ppn", "rtl_sd_ppn")); # RTL sd by participant
+data.controlled.hits <- merge(data.controlled.hits, rt.mu.by_participant, by="ppn"); # merge mean for easy access (RT)
+data.controlled.hits <- merge(data.controlled.hits, rtl.mu.by_participant, by="ppn"); # merge mean for easy access (RTL)
+data.controlled.hits <- merge(data.controlled.hits, rt.sd.by_participant, by="ppn"); # merge standard deviation for easy access (RT)
+data.controlled.hits <- merge(data.controlled.hits, rtl.sd.by_participant, by="ppn"); # merge standard deviation for easy access (RTL)
 
 # filter data
 data.controlled.hits.between <- subset(data.controlled.hits, rt <= (rt.mu.total + (cutoff_sd * rt.sd.total)) & 
@@ -102,6 +108,12 @@ data.controlled.hits.within <- subset(data.controlled.hits, rt <= (rt_mu_ppn + (
                                                             rt >= (rt_mu_ppn - (cutoff_sd * rt_sd_ppn)));
 data.controlled.hits.both <- subset(data.controlled.hits.within, rt <= (rt.mu.total + (cutoff_sd * rt.sd.total)) & 
                                       rt >= (rt.mu.total - (cutoff_sd * rt.sd.total)));
+data.controlled.hits.between.by_rtl <- subset(data.controlled.hits, rtl <= (rtl.mu.total + (cutoff_sd * rtl.sd.total)) &
+                                                                    rtl >= (rtl.mu.total - (cutoff_sd * rtl.sd.total)));
+data.controlled.hits.within.by_rtl <- subset(data.controlled.hits, rtl <= (rtl_mu_ppn + (cutoff_sd * rtl_sd_ppn)) & 
+                                                                   rtl >= (rtl_mu_ppn - (cutoff_sd * rtl_sd_ppn)));
+data.controlled.hits.both.by_rtl <- subset(data.controlled.hits.within.by_rtl, rtl <= (rtl.mu.total + (cutoff_sd * rtl.sd.total)) &
+                                                                               rtl >= (rtl.mu.total - (cutoff_sd * rtl.sd.total)));
 
 # create plots to check for outliers pre-filtering
 hist(data.controlled.hits$rt, xlab = "RT (ms)")
@@ -127,16 +139,48 @@ ggplot(data.controlled.hits.both, aes(x = rt)) +
   geom_dotplot(stackdir = 'center', binwidth = 15)
 ggqqplot(data.controlled.hits.both$rt)
 
+# create plots to check for outliers pre-filtering (RTL)
+hist(data.controlled.hits$rtl, xlab = "RT (log10)")
+ggplot(data.controlled.hits, aes(x = rtl)) + 
+  geom_dotplot(stackdir = 'center', binwidth = .003)
+ggqqplot(data.controlled.hits$rtl);
+
+# create plots to check for outliers post-filtering (between, RTL)
+hist(data.controlled.hits.between.by_rtl$rtl, xlab="RT (log10)")
+ggplot(data.controlled.hits.between.by_rtl, aes(x = rtl)) + 
+  geom_dotplot(stackdir = 'center', binwidth = .003)
+ggqqplot(data.controlled.hits.between.by_rtl$rtl)
+
+# create plots to check for outliers post-filtering (within, RTL)
+hist(data.controlled.hits.within.by_rtl$rtl, xlab = "RT (log10)")
+ggplot(data.controlled.hits.within, aes(x = rtl)) + 
+  geom_dotplot(stackdir = 'center', binwiddth = .003)
+ggqqplot(data.controlled.hits.within.by_rtl$rtl)
+
+# create plots to check for outliers post-filtering (both, RTL)
+hist(data.controlled.hits.both.by_rtl$rtl, xlab = "RT (log10)")
+ggplot(data.controlled.hits.both.by_rtl, aes(x = rtl)) + 
+  geom_dotplot(stackdir = 'center', binwidth = .003)
+ggqqplot(data.controlled.hits.both$rtl)
+
 # check normality for RT (ms)
 data.controlled.hits.ad <- ad.test(data.controlled.hits$rt) # anderson-darling pre-filter
 data.controlled.hits.between.ad <- ad.test(data.controlled.hits.between$rt) # anderson-darling post-filter (between)
 data.controlled.hits.within.ad <- ad.test(data.controlled.hits.within$rt) # anderson-darling post-filter (within)
 data.controlled.hits.both.ad <- ad.test(data.controlled.hits.both$rt) # anderson-darling post-filter (both)
+data.controlled.hits.by_rtl.ad <- ad.test(data.controlled.hits$rtl) # anderson-darling pre-filter (RTL)
+data.controlled.hits.between.by_rtl.ad <- ad.test(data.controlled.hits.between.by_rtl$rtl); # anderson-darling post-filter (between, RTL)
+data.controlled.hits.within.by_rtl.ad <- ad.test(data.controlled.hits.within.by_rtl$rtl); # anderson-darling post-filter (within, RTL)
+data.controlled.hits.both.by_rtl.ad <- ad.test(data.controlled.hits.both.by_rtl$rtl); # anderson-darling post-filter (both, RTL)
 
 data.controlled.hits.ad
 data.controlled.hits.between.ad
 data.controlled.hits.within.ad
 data.controlled.hits.both.ad
+data.controlled.hits.by_rtl.ad
+data.controlled.hits.between.by_rtl.ad
+data.controlled.hits.within.by_rtl.ad
+data.controlled.hits.both.by_rtl.ad
 
 # create plots to check for outliers pre-filtering (log)
 hist(data.controlled.hits$rtl, xlab = "RT (log10)")
@@ -185,6 +229,11 @@ data.controlled.hits.both.ad2
 # anyways, make a choice here about what
 # data to use, based on the plots and info
 # obtained so far
+# this is kind of problematic because i
+# would also expect that, even in the
+# best case scenario, these will not be
+# perfectly normal...so where does that
+# leave us exactly?
 
 data.chosen <- data.controlled.hits; # select a data set to work with
 data.chosen$outcome <- data.chosen$rtl; # select an outcome variable to work with
