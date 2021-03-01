@@ -9,7 +9,7 @@ LoadDefinitions();
 LoadFillers();
 LoadStimuli(s_PPN + s_List_4AFC, as_4AFC_Stimuli, i_4AFC_Trials_C);
 as_4AFC_Stimuli.shuffle();
-SampleAlternatives(as_4AFC_Stimuli, ai_4AFC_Alternatives, i_4AFC_Trials_N, i_4AFC_Alternatives, true);
+SampleAlternatives(as_4AFC_Stimuli, ai_4AFC_Alternatives, i_4AFC_Trials_N, i_4AFC_Alternatives, true, false);
 
 # Run task
 InstructParticipant(s_4AFC_Instructions_1);

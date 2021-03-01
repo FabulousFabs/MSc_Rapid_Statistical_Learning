@@ -9,7 +9,7 @@ LoadDefinitions();
 LoadFillers();
 LoadStimuli(s_PPN + s_List_2AFCW, as_2AFCW_Stimuli, i_2AFCW_Trials_C);
 ShuffleBlocked(as_2AFCW_Stimuli, i_2AFCW_Repetitions, i_2AFCW_Trials_N, i_2AFCW_Trials_C);
-SampleAlternatives(as_2AFCW_Stimuli, ai_2AFCW_Alternatives, i_2AFCW_Trials_N, i_2AFCW_Alternatives, false);
+SampleAlternatives(as_2AFCW_Stimuli, ai_2AFCW_Alternatives, i_2AFCW_Trials_N, i_2AFCW_Alternatives, false, true);
 
 # Run task
 InstructParticipant(s_2AFCW_Instructions_1);
