@@ -257,7 +257,7 @@ sub bool OptionsInclude(array<int, 1>& options, int target) begin
 	return false;
 end;
 
-sub SampleAlternatives(array<string, 2>& stimuli, array<int, 2>& alternatives, int n, int s, bool include_none) begin
+sub SampleAlternatives(array<string, 2>& stimuli, array<int, 2>& alternatives, int n, int s, bool include_none, bool include_real) begin
 	# Curate a list of s alternatives for n stimuli
 	#
 	# INPUTS:
@@ -266,6 +266,7 @@ sub SampleAlternatives(array<string, 2>& stimuli, array<int, 2>& alternatives, i
 	#		int n										-	The number of stimuli we want alternatives for
 	#		int s										-	The number of alternatives we want per stimulus
 	#		bool include_none						-	If true, we include the 'None of these' answer as a potential alternative
+	#		bool include_real						-  If true, we include real defintiions in the pool we draw from.
 	#
 	# OUTPUTS:
 	#		none,
@@ -279,13 +280,21 @@ sub SampleAlternatives(array<string, 2>& stimuli, array<int, 2>& alternatives, i
 		loop k = 1 until k > s begin
 			int choice;
 			
-			if include_none == true then
+			if include_none == true && include_real == true then
 				loop choice = random(1, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) begin
 					choice = random(1, i_Total);
 				end;
-			else
+			elseif include_none == true && include_real == false then
+				loop choice = random(1 + i_Definition_R, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) begin
+					choice = random(1 + i_Definition_R, i_Total);
+				end;
+			elseif include_none == false && include_real == true then
 				loop choice = random(1, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) && choice != i_Filler_None begin
 					choice = random(1, i_Total);
+				end;
+			else
+				loop choice = random(1 + i_Definition_R, i_Total) until !OptionsInclude(collection, choice) && choice != int(stimuli[i][8]) && choice != i_Filler_None begin
+					choice = random(1 + i_Definition_R, i_Total);
 				end;
 			end;
 			
