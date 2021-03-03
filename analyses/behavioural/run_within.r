@@ -6,6 +6,9 @@ library(rstatix);
 library(ggplot2);
 library(nortest);
 library(car);
+library(lme4);
+library(lmerTest);
+library(effects);
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt"; # collection to load
 afc_chance <- 1 / 4; # chance level of performance in 4AFC
@@ -85,7 +88,21 @@ drop.items <- c(); # specify items (if any) to drop from analyses because of poo
 data.controlled <- subset(data, !(ppn %in% drop.participants | spkr %in% drop.items)); # apply filter
 
 ### 3: prepare data
-data.controlled.hits <- subset(data.controlled, cor == 1);
+data.controlled.hits <- subset(data.controlled, cor == 1); # correct response filter
+
+# quick comment here:
+# a lot of the following visualisations
+# and analyses are kind of pointless
+# given that we have a pretty strong
+# idea of what we want and how we want
+# to get there (I mean, for example,
+# it just doesn't make sense for us
+# to SD control RTL data). generally,
+# we do a pretty comprehensive look
+# into all the possible combinations
+# here nevertheless just for the sake
+# of completeness.
+# skip reading this for sanity
 
 rt.mu.total <- mean(data.controlled.hits$rt); # RT mean
 rtl.mu.total <- mean(data.controlled.hits$rtl); # RTL mean
@@ -234,8 +251,54 @@ data.controlled.hits.both.ad2
 # best case scenario, these will not be
 # perfectly normal...so where does that
 # leave us exactly?
+# i guess this is kind of the curse of
+# working with RT data
 
 data.chosen <- data.controlled.hits; # select a data set to work with
-data.chosen$outcome <- data.chosen$rtl; # select an outcome variable to work with
+data.chosen$outcome <- data.chosen$rt; # select an outcome variable to work with
+
+data.loss <- (1 - (NROW(data.chosen) / NROW(data))) * 100; # how much data was removed from this data set? in per cent
+data.loss
 
 ### 4: analyses
+
+# quick comment here:
+# so i have given this some thought
+# and it would seem to me like to be
+# perfectly honest it doesn't really
+# make much sense for us to use an
+# aov approach here. ideally, we want
+# to get at within-subjects differences
+# here and a) that means we'd already
+# lose the advantages of aov because
+# the comparisons we want don't come
+# that naturally and b) we'd have to
+# go for rmaov which is just...not
+# ideal (and _almost_ lme anyway except
+# worse). so we'll just build a lme
+# model here. what _is_ nice is that
+# our model is incredibly simple.
+
+res.m1 <- lmer(outcome ~ list * pool + (1|ppn), data = data.chosen);
+res.m2.by_id <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr), data = data.chosen);
+res.m2.by_spkr <- lmer(outcome ~ list * pool + (1|ppn) + (1|id), data = data.chosen);
+res.m2.by_both <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr) + (1|id), data=data.chosen);
+
+summary(res.m1);
+summary(res.m2.by_id);
+summary(res.m2.by_spkr);
+summary(res.m2.by_both);
+
+# quick comment here:
+# we could also go for something
+# like a 0+spkr|ppn term here but
+# that's almost certainly either
+# not going to converge or give us
+# singular fit so no point really.
+
+AIC(res.m1, res.m2.by_id, res.m2.by_spkr, res.m2.by_both); # find lowest Akaike information criterion
+
+res.chosen <- res.m2.by_both; # make a choice of best model
+res.chosen.e <- allEffects(res.chosen);
+
+plot(res.chosen.e, confint=TRUE,ci.style="bars", multiline=TRUE);
