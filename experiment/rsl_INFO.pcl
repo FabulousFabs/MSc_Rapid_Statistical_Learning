@@ -18,8 +18,17 @@ int i_Filler_None = 41;		# id of 'none of these' filler
 
 # Configuration Exposure Task
 string s_List_Exposure = "_learning.txt";			# load data template
-string s_Exposure_Instructions_1 = "Welkom!";
-string s_Exposure_Instructions_2 = "In deze taak is het van bedoeling dat je iets doet.";
+string s_Exposure_Instructions_1 = "In dit experiment ga je 40 nieuwe Nederlandse\n" +
+												"woorden leren.\n\n" + 
+												"In deze taak zie je bij elke trial eerst een\n" +
+												"fixatiekruis, meteen daarna hoor je het woord\n" + 
+												"door de koptelefoon en zie je een omschrijving\n" + 
+												"van de betekenis van het woord op het scherm.";
+string s_Exposure_Instructions_2 = "Je hoeft in deze taak dus niets anders\n" +
+												"te doen dan de woorden en hun bijbehorende\n" +
+												"betekenis te onthouden. Elk woord wordt\n" +
+												"vier keer aan je laten horen. Ben je er\n" +
+												"klaar voor? Druk dan op de spatiebalk om te beginnen.";
 string s_Exposure_Instructions_3 = "Je ben klaar met de eerste taak.\nLaat het de onderzoeker weten.";
 
 int i_Expo_Trials_N = 160;		# trial count
@@ -36,8 +45,22 @@ int i_Expo_ITI = 1500;			# ITI without jitter (added through sound length deviat
 # Configuration 2AFC cue=definiton task
 string s_List_2AFCD = "_learning.txt";		# load data template
 string s_Outs_2AFCD = "_2AFCD.txt";			# save data template
-string s_2AFCD_Instructions_1 = "2afcd instructions 1";
-string s_2AFCD_Instructions_2 = "2afcd instructions 2";
+string s_2AFCD_Instructions_1 = "In deze taak is het de bedoeling dat je\n" +
+											"definities die je net geleerd hebt met het\n" +
+											"juiste woord matcht.\n\n" + 
+											"Je krijgt een fixatiekruis te zien gevolgd\n" +
+											"door een korte definitie en daarna hoor je\n" +
+											"twee woorden, de een na de ander.\n" + 
+											"Je moet dan zo snel mogelijk aangeven welk\n" +
+											"woord bij de definitie hoort. Je krijgt na\n" + 
+											"elke trial meteen feedback of je het goed\n" +
+											"had of niet.\n\n" +
+											"Ook hier komt elk woord vier keer voor.";
+string s_2AFCD_Instructions_2 = "Om het eerste woord te selecteren druk\n" +
+											"op X. Om het het tweede woord te\n" +
+											"selecteren druk op N.\n\n" + 
+											"Ben je er klaar voor? Druk dan op\n" +
+											"de spatiebalk om te beginnen.";
 string s_2AFCD_Instructions_3 = "Je ben klaar met de tweede taak.\nLaat het de onderzoeker weten.";
 
 int i_2AFCD_Trials_N = 160;						# trial count
@@ -59,8 +82,20 @@ int i_2AFCD_ITI = 625;								# ITI t; jittered
 # Configuration 2AFC cue=word task
 string s_List_2AFCW = "_learning.txt";		# load data template
 string s_Outs_2AFCW = "_2AFCW.txt";			# save data template
-string s_2AFCW_Instructions_1 = "2afcw instructions 1";
-string s_2AFCW_Instructions_2 = "2afcw instructions 2";
+string s_2AFCW_Instructions_1 = "In deze taak is het de bedoeling dat je\n" +
+											"woorden met de juiste definitie matcht.\n\n" + 
+											"Je krijgt een fixatiekruis te zien en\n" +
+											"hoort daarna een woord. Je krijgt\n" +
+											"daarna twee definities te zien en moet\n" +
+											"je zo snel mogelijk de juiste kiezen.\n" +
+											"Je krijgt na elke trial meteen feedback\n" +
+											"of je het goed had of niet.";
+string s_2AFCW_Instructions_2 = "Om de definitie aan de linkerkant te\n" +
+											"selecteren druk op X. Om de definitie\n" +
+											"aan de rechterkant te selecteren druk\n" +
+											"op N.\n\n" +
+											"Ben je er klaar voor? Druk dan op\n" + 
+											"de spatiebalk om te beginnen."
 string s_2AFCW_Instructions_3 = "Je ben klaar met de derde taak.\nLaat het de onderzoeker weten.";
 
 int i_2AFCW_Trials_N = 160;		# trial count
@@ -78,8 +113,15 @@ int i_2AFCW_ITI = 500;				# ITI t; jittered
 
 # Configuration Cued Recall task
 string s_List_CR = "_learning.txt"; 		# load data template
-string s_CR_Instructions_1 = "CR instructions 1";
-string s_CR_Instructions_2 = "CR instructions 2";
+string s_CR_Instructions_1 = "In deze taak is het de bedoeling dat je\n" +
+										"woorden hardop uitspreekt.\n\n" + 
+										"Je krijgt een fixatiekruis te zien\n" +
+										"gevolgd door een definitie. Je moet\n" +
+										"dan het bijbehorende woord hardop\n" +
+										"uitspreken. Na elke trial hoor je\n" +
+										"wat het juiste woord was.";
+string s_CR_Instructions_2 = "Ben je er klaar voor? Druk dan op\n" +
+										"de spatiebalk om te beginnen.";
 string s_CR_Instructions_3 = "Je ben klaar met de vierde taak.\nLaat het de onderzoeker weten.";
 
 int i_CR_Trials_N = 160;			# trial count
@@ -116,8 +158,22 @@ int i_MEG_ITI = 1200;			# ITI t
 # Configuration 4AFC task
 string s_List_4AFC = "_4afc.txt";			# load data template
 string s_Outs_4AFC = "_4AFC.txt";			# save data template
-string s_4AFC_Instructions_1 = "4AFC instructions 1";
-string s_4AFC_Instructions_2 = "4AFC instructions 2";
+string s_4AFC_Instructions_1 = "In deze taak is het opnieuw de  bedoeling\n" +
+											"dat je een woord met de juiste definitie\n" +
+											"matcht.\n\n" +
+											"Je krijgt een fixatiekruis te zien en\n" +
+											"hoort een woord. Daarna zie je vier\n" +
+											"mogelijke definities en moet je zo snel\n" +
+											"mogelijk de juiste kiezen. Je krijgt nu\n" +
+											"geen feedback meer.";
+string s_4AFC_Instructions_2 = "Om de definitie linksboven te selecteren\n" +
+											"druk op S; Om de definitie linksonder te\n" +
+											"selecteren druk op X; Om de definitie\n" +
+											"rechtsboven te selecteren druk op J;\n" +
+											"Om de definitie rechtsonder te\n" +
+											"selecteren druk op N.\n\n" +
+											"Ben je er klaar voor? Druk dan op\n" + 
+											"de spatiebalk om te beginnen."
 string s_4AFC_Instructions_3 = "Je ben klaar met de laatste taak.\nDankjewel!";
 
 int i_4AFC_Trials_N = 180;			# trial count
