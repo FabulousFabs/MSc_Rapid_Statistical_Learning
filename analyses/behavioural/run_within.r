@@ -1,8 +1,11 @@
-# script to run our behavioural analyses
+# script to run our behavioural analyses (that, unfortunately,
+# i wrote before i saw that there's a julia package of lme4 - 
+# that would've been the dream to work with, praise be julia)
 
 library(tidyverse);
 library(ggpubr);
 library(rstatix);
+library(latex2exp);
 library(ggplot2);
 library(nortest);
 library(car);
@@ -11,6 +14,12 @@ library(lmerTest);
 library(effects);
 library(multcomp);
 library(emmeans);
+library(cowplot);
+library(raincloudplots);
+library(dplyr);
+
+setwd("/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/")
+source("./R_rainclouds.r")
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt"; # collection to load
 afc_chance <- 1 / 4; # chance level of performance in 4AFC
@@ -280,82 +289,134 @@ data.chosen.loss
 # worse). so we'll just build a lme
 # model here. what _is_ nice is that
 # our model is incredibly simple.
-
-res.m1 <- lmer(outcome ~ list * pool + (1|ppn), data = data.chosen);
-res.m2.by_id <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr), data = data.chosen);
-res.m2.by_spkr <- lmer(outcome ~ list * pool + (1|ppn) + (1|id), data = data.chosen);
-res.m2.by_both <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
-res.m3 <- lmer(outcome ~ list * pool + i + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
-res.m3.wo_ppn <- lmer(outcome ~ list * pool + i + (1|spkr) + (1|id), data = data.chosen);
-res.m4 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
-res.m4.wo_i <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
-res.m5 <- lmer(outcome ~ -1 + list:pool + (1|ppn), data = data.chosen);
-res.m6 <- lmer(outcome ~ (-1 + list + pool - 1)^2  + (1|ppn), data = data.chosen);
-
-# quick comment here:
-# we could also go for something
-# like a 0+spkr|ppn term here but
-# that's almost certainly either
-# not going to converge or give us
-# singular fit so no point really.
-
+#
 # quick comment here:
 # can we think of a good reason
 # not to use lme to build a cell
 # means model? that really seems
 # like the best approach here
 
-anova(res.m1, 
-      res.m2.by_id, 
-      res.m2.by_spkr, 
-      res.m2.by_both, 
-      res.m3,
-      res.m3.wo_ppn,
-      res.m4,
-      res.m4.wo_i,
-      res.m5,
-      res.m6); # find lowest Akaike information criterion
-res.chosen <- res.m5; # make a choice of best model
+# models without fixed time regressor, varying random effects
+res.model.untimed.r1 <- lmer(outcome ~ -1 + list:pool + (1|ppn), data = data.chosen);
+res.model.untimed.r2a <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id), data = data.chosen);
+res.model.untimed.r2b <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|spkr), data = data.chosen);
+res.model.untimed.r3 <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
 
-summary(res.chosen);
+# models with fixed time regressor, varying random effects
+res.model.timed.r1 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn), data = data.chosen);
+res.model.timed.r2a <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id), data = data.chosen);
+res.model.timed.r2b <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|spkr), data = data.chosen);
+res.model.timed.r3 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
 
-K <- rbind(# contrast matrix
-           # P1L1 < P1L2 < P1L3
-           c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
-           c(0, 0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
-           c(0, 1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
-           # P2L2 < P2L1 < P2L3
-           c(0, 0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
-           c(0, 0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
-           c(0, 0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
-           # P3L2 < P3L1
-           c(0, 0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
-           # P1L3 < P3L3
-           c(0, 0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
-           # P2L3 < P3L3
-           c(0, 0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
-           # P1L3 < P2L3 v P1L3 ~= P2L3
-           c(0, 0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
-           );
-K2 <- rbind(# contrast matrix
+# quick comment here:
+# we could also go for something
+# like a 0+spkr|ppn term here but
+# that's just going to give us a
+# singular fit so definitely not
+# ideal (but worth a try with 
+# the real data).
+
+K.timed <- rbind(
+  # contrast matrix (timed models)
   # P1L1 < P1L2 < P1L3
-  c(1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
-  c(0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
-  c(1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
+  P1L1_P1L2 = c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
+  P1L2_P1L3 = c(0, 0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
+  P1L1_P1L3 = c(0, 1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
   # P2L2 < P2L1 < P2L3
-  c(0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
-  c(0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
-  c(0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
+  P2L2_P2L1 = c(0, 0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
+  P2L1_P2L3 = c(0, 0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
+  P2L2_P2L3 = c(0, 0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
   # P3L2 < P3L1
-  c(0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
+  P3L2_P3L1 = c(0, 0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
   # P1L3 < P3L3
-  c(0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
+  P1L3_P3L3 = c(0, 0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
   # P2L3 < P3L3
-  c(0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
+  P2L3_P3L3 = c(0, 0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
   # P1L3 < P2L3 v P1L3 ~= P2L3
-  c(0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+  P1L3_P2L3 = c(0, 0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
 );
-summary(glht(res.chosen, K2), test = adjusted("single-step"));
 
-res.chosen.e <- allEffects(res.chosen);
-plot(res.chosen.e, confint=TRUE, ci.style="bars", multiline=TRUE);
+K.untimed <- rbind(
+  # contrast matrix (untimed models)
+  # P1L1 < P1L2 < P1L3
+  P1L1_P1L2 = c(1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
+  P1L2_P1L3 = c(0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
+  P1L1_P1L3 = c(1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
+  # P2L2 < P2L1 < P2L3
+  P2L2_P2L1 = c(0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
+  P2L1_P2L3 = c(0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
+  P2L2_P2L3 = c(0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
+  # P3L2 < P3L1
+  P3L2_P3L1 = c(0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
+  # P1L3 < P3L3
+  P1L3_P3L3 = c(0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
+  # P2L3 < P3L3
+  P2L3_P3L3 = c(0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
+  # P1L3 < P2L3 v P1L3 ~= P2L3
+  P1L3_P2L3 = c(0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+);
+
+# find lowest Akaike information criterion (note: refits to ML but no bother)
+# alternative, could AIC() everything to avoid refit (if that were an issue)
+anova(
+  res.model.untimed.r1,
+  res.model.untimed.r2a,
+  res.model.untimed.r2b,
+  res.model.untimed.r3,
+  res.model.timed.r1,
+  res.model.timed.r2a,
+  res.model.timed.r2b,
+  res.model.timed.r3
+);
+
+res.chosen <- res.model.timed.r3; # make a choice of best model
+summary(res.chosen);
+K.chosen <- K.timed; # make a choice of corresponding contrast matrix
+
+# some sanity checks
+qqnorm(residuals(res.chosen)) # overall residuals
+plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | ppn, abline = 0) # residuals by participant
+plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | id, abline = 0) # residuals by speaker (mislabeled)
+plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | spkr, abline = 0) # residuals by item (mislabeled)
+plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | list, abline = 0) # residuals by list
+plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | pool, abline = 0) # residuals by pool
+
+# run general linear hypotheses
+#
+# quick note here:
+# bonferroni correction is pretty
+# conservative here so we should
+# maybe consider using a better
+# alternative here (although, it
+# is, admittedly, a little bit of
+# a minefield).
+# consider BY or single-step?
+res.chosen.glht <- summary(glht(res.chosen, K.chosen), test = adjusted("bonferroni"));
+
+# visualisation
+#vis.list <- predictorEffect("list", res.chosen);
+#ggplot(data.chosen, aes(y = outcome, x = list, color = pool)) + 
+#  geom_jitter(height = 0.05) 
+
+# data summaries
+vis.se.mu <- setNames(aggregate(outcome~list+pool, data.chosen, mean), c("list", "pool", "se_mu"));
+vis.se.sd <- setNames(aggregate(outcome~list+pool, data.chosen, sd), c("l", "p", "se_sd"));
+vis.se <- setNames(cbind(vis.se.mu, vis.se.sd$se_sd), c("list", "pool", "se_mu", "se_sd"));
+
+# terrible full visualisation using rainclouds
+vis.full <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) + 
+  geom_flat_violin(aes(fill = pool), position = position_nudge(x = .3, y = 0), adjust = 1.5, trim = FALSE, alpha = .5, colour = NA) + 
+  geom_point(aes(x = list, y = outcome, colour = pool), position = position_jitter(width = .1), size = .1, shape = 20, alpha = .5) + 
+  geom_boxplot(aes(x = list, y = outcome, fill = pool), outlier.shape = NA, alpha = .5, position = position_nudge(x = c(-0.05, 0, 0.05), y = 0), width = .03) +
+  geom_line(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), linetype = 3, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
+  geom_point(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), shape = 18, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
+  geom_errorbar(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool, ymin = se_mu - se_sd, ymax = se_mu + se_sd), width = .05, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
+  scale_colour_brewer(palette = "Dark2", name = "Pool") +
+  scale_fill_brewer(palette = "Dark2", name = "Pool") + 
+  xlab("List") + 
+  ylab(TeX("Reaction time in $log_{10}(ms)$")) + 
+  guides(color = FALSE) + 
+  ggtitle("Overview of behavioural data") +
+  theme(plot.title = element_text(hjust = .5))
+ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/vis.full.png')
+
