@@ -9,6 +9,8 @@ library(car);
 library(lme4);
 library(lmerTest);
 library(effects);
+library(multcomp);
+library(emmeans);
 
 file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/aggregate.txt"; # collection to load
 afc_chance <- 1 / 4; # chance level of performance in 4AFC
@@ -254,11 +256,11 @@ data.controlled.hits.both.ad2
 # i guess this is kind of the curse of
 # working with RT data
 
-data.chosen <- data.controlled.hits; # select a data set to work with
-data.chosen$outcome <- data.chosen$rt; # select an outcome variable to work with
+data.chosen <- data.controlled.hits.within; # select a data set to work with
+data.chosen$outcome <- data.chosen$rtl; # select an outcome variable to work with
 
-data.loss <- (1 - (NROW(data.chosen) / NROW(data))) * 100; # how much data was removed from this data set? in per cent
-data.loss
+data.chosen.loss <- (1 - (NROW(data.chosen) / NROW(data))) * 100; # how much data was removed from this data set? in per cent
+data.chosen.loss
 
 ### 4: analyses
 
@@ -282,12 +284,13 @@ data.loss
 res.m1 <- lmer(outcome ~ list * pool + (1|ppn), data = data.chosen);
 res.m2.by_id <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr), data = data.chosen);
 res.m2.by_spkr <- lmer(outcome ~ list * pool + (1|ppn) + (1|id), data = data.chosen);
-res.m2.by_both <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr) + (1|id), data=data.chosen);
-
-summary(res.m1);
-summary(res.m2.by_id);
-summary(res.m2.by_spkr);
-summary(res.m2.by_both);
+res.m2.by_both <- lmer(outcome ~ list * pool + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
+res.m3 <- lmer(outcome ~ list * pool + i + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
+res.m3.wo_ppn <- lmer(outcome ~ list * pool + i + (1|spkr) + (1|id), data = data.chosen);
+res.m4 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
+res.m4.wo_i <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|spkr) + (1|id), data = data.chosen);
+res.m5 <- lmer(outcome ~ -1 + list:pool + (1|ppn), data = data.chosen);
+res.m6 <- lmer(outcome ~ (-1 + list + pool - 1)^2  + (1|ppn), data = data.chosen);
 
 # quick comment here:
 # we could also go for something
@@ -296,9 +299,63 @@ summary(res.m2.by_both);
 # not going to converge or give us
 # singular fit so no point really.
 
-AIC(res.m1, res.m2.by_id, res.m2.by_spkr, res.m2.by_both); # find lowest Akaike information criterion
+# quick comment here:
+# can we think of a good reason
+# not to use lme to build a cell
+# means model? that really seems
+# like the best approach here
 
-res.chosen <- res.m2.by_both; # make a choice of best model
+anova(res.m1, 
+      res.m2.by_id, 
+      res.m2.by_spkr, 
+      res.m2.by_both, 
+      res.m3,
+      res.m3.wo_ppn,
+      res.m4,
+      res.m4.wo_i,
+      res.m5,
+      res.m6); # find lowest Akaike information criterion
+res.chosen <- res.m5; # make a choice of best model
+
+summary(res.chosen);
+
+K <- rbind(# contrast matrix
+           # P1L1 < P1L2 < P1L3
+           c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
+           c(0, 0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
+           c(0, 1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
+           # P2L2 < P2L1 < P2L3
+           c(0, 0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
+           c(0, 0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
+           c(0, 0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
+           # P3L2 < P3L1
+           c(0, 0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
+           # P1L3 < P3L3
+           c(0, 0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
+           # P2L3 < P3L3
+           c(0, 0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
+           # P1L3 < P2L3 v P1L3 ~= P2L3
+           c(0, 0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+           );
+K2 <- rbind(# contrast matrix
+  # P1L1 < P1L2 < P1L3
+  c(1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
+  c(0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
+  c(1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
+  # P2L2 < P2L1 < P2L3
+  c(0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
+  c(0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
+  c(0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
+  # P3L2 < P3L1
+  c(0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
+  # P1L3 < P3L3
+  c(0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
+  # P2L3 < P3L3
+  c(0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
+  # P1L3 < P2L3 v P1L3 ~= P2L3
+  c(0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+);
+summary(glht(res.chosen, K2), test = adjusted("single-step"));
+
 res.chosen.e <- allEffects(res.chosen);
-
-plot(res.chosen.e, confint=TRUE,ci.style="bars", multiline=TRUE);
+plot(res.chosen.e, confint=TRUE, ci.style="bars", multiline=TRUE);
