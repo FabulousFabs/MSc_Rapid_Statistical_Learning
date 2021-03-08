@@ -17,6 +17,9 @@ library(emmeans);
 library(cowplot);
 library(raincloudplots);
 library(dplyr);
+library(ggpubr);
+library(gtable);
+library(psycho);
 
 setwd("/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/")
 source("./R_rainclouds.r")
@@ -265,7 +268,7 @@ data.controlled.hits.both.ad2
 # i guess this is kind of the curse of
 # working with RT data
 
-data.chosen <- data.controlled.hits.within; # select a data set to work with
+data.chosen <- data.controlled.hits; # select a data set to work with
 data.chosen$outcome <- data.chosen$rtl; # select an outcome variable to work with
 
 data.chosen.loss <- (1 - (NROW(data.chosen) / NROW(data))) * 100; # how much data was removed from this data set? in per cent
@@ -392,12 +395,9 @@ plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | pool, abline = 0) # resid
 # a minefield).
 # consider BY or single-step?
 res.chosen.glht <- summary(glht(res.chosen, K.chosen), test = adjusted("bonferroni"));
+res.chosen.glht
 
-# visualisation
-#vis.list <- predictorEffect("list", res.chosen);
-#ggplot(data.chosen, aes(y = outcome, x = list, color = pool)) + 
-#  geom_jitter(height = 0.05) 
-
+### 5: visualisation
 # data summaries
 vis.se.mu <- setNames(aggregate(outcome~list+pool, data.chosen, mean), c("list", "pool", "se_mu"));
 vis.se.sd <- setNames(aggregate(outcome~list+pool, data.chosen, sd), c("l", "p", "se_sd"));
@@ -408,9 +408,9 @@ vis.full <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) +
   geom_flat_violin(aes(fill = pool), position = position_nudge(x = .3, y = 0), adjust = 1.5, trim = FALSE, alpha = .5, colour = NA) + 
   geom_point(aes(x = list, y = outcome, colour = pool), position = position_jitter(width = .1), size = .1, shape = 20, alpha = .5) + 
   geom_boxplot(aes(x = list, y = outcome, fill = pool), outlier.shape = NA, alpha = .5, position = position_nudge(x = c(-0.05, 0, 0.05), y = 0), width = .03) +
-  geom_line(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), linetype = 3, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
-  geom_point(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), shape = 18, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
-  geom_errorbar(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool, ymin = se_mu - se_sd, ymax = se_mu + se_sd), width = .05, position = position_nudge(x = c(.25, .25, .25, .2, .2, .2, .15, .15, .15), y = 0)) + 
+  geom_line(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), linetype = 3, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
+  geom_point(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool), shape = 18, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
+  geom_errorbar(data = vis.se, aes(x = list, y = se_mu, group = pool, colour = pool, ymin = se_mu - se_sd, ymax = se_mu + se_sd), width = .05, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
   scale_colour_brewer(palette = "Dark2", name = "Pool") +
   scale_fill_brewer(palette = "Dark2", name = "Pool") + 
   xlab("List") + 
@@ -418,5 +418,47 @@ vis.full <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) +
   guides(color = FALSE) + 
   ggtitle("Overview of behavioural data") +
   theme(plot.title = element_text(hjust = .5))
-ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/vis.full.png')
+ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/vis.full4.png')
 
+# glht plots
+vis.contrasts.data.mu <- t(t(res.chosen@beta[-1]));
+vis.contrasts.data.se <- t(t(sqrt(diag(vcov(res.chosen))[-1])));
+vis.contrasts.data <- setNames(data.frame(cbind(vis.contrasts.data.mu, vis.contrasts.data.se, as.factor(vis.se$pool), as.factor(vis.se$list))), c("co_mu", "co_se", "pool", "list"));
+
+vis.contrasts.glht1.data <- vis.contrasts.data[1:3,]; # P1L1 < P1L2 < P1L3
+vis.contrasts.glht1 <- ggplot(vis.contrasts.glht1.data, aes(x = list, y = co_mu, fill = pool)) + 
+  geom_errorbar(aes(ymin = co_mu - co_se, ymax = co_mu + co_se, colour = pool), width = .2) + 
+  geom_point(aes(x = list, y = co_mu), size = 3, shape = c(13, 4, 1)) + 
+  # sig.1
+  geom_line(data = data.frame(list = c(1,2), co_mu = c(3.35, 3.35), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.34, 3.3512), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.34, 3.3512), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 1.5, y = 3.36, label = stars.pval(res.chosen.glht$test$pvalues[[1]]), parse = FALSE) + 
+  # sig.2
+  geom_line(data = data.frame(list = c(2,3), co_mu = c(3.55, 3.55), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.54, 3.5512), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.54, 3.5512), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 2.5, y = 3.56, label = stars.pval(res.chosen.glht$test$pvalues[[2]]), parse = FALSE) + 
+  # sig.3
+  geom_line(data = data.frame(list = c(1,3), co_mu = c(3.6, 3.6), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.59, 3.6012), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.59, 3.6012), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 2, y = 3.61, label = stars.pval(res.chosen.glht$test$pvalues[[3]]), parse = FALSE) + 
+  # theme
+  xlab("List") + 
+  ylab(TeX("Reaction time in $log_{10}(ms)")) + 
+  labs(fill = "Pool") + 
+  guides(colour = FALSE) + 
+  theme_bw() +
+  scale_x_discrete(limits = c("1", "2", "3"))# + 
+  #theme(axis.text.x = element_text(angle = 45, hjust = .5))
+vis.contrasts.glht1
+
+vis.contrasts.glht2.data <- vis.contrasts.data[4:6,]; # P2L2 < P2L1 < P2L3
+vis.contrasts.glht2 <- ggplot(vis.contrasts.glht2.data, aes(x = list, y = co_mu, fill = pool)) + 
+  geom_errorbar(aes(ymin = co_mu - co_se, ymax = co_mu + co_se), width = .2)
+
+aes(x = list, y = outcome, colour = pool), position = position_jitter(width = .1), size = .1, shape = 20, alpha = .5
+
+ggarrange(vis.contrasts.glht1, vis.contrasts.glht2)
+### 6: extraction
