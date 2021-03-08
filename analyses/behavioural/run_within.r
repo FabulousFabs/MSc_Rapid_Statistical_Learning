@@ -298,6 +298,14 @@ data.chosen.loss
 # not to use lme to build a cell
 # means model? that really seems
 # like the best approach here
+#
+# quick comment here:
+# one thing I am not sure about is
+# should we also fit nuisance reg-
+# ressors for presented location?
+# this might be a significant
+# contributor of noise, since our
+# data come from a 4AFC
 
 # models without fixed time regressor, varying random effects
 res.model.untimed.r1 <- lmer(outcome ~ -1 + list:pool + (1|ppn), data = data.chosen);
