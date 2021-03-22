@@ -20,6 +20,8 @@ library(dplyr);
 library(ggpubr);
 library(gtable);
 library(psycho);
+library(gtools);
+library(caret);
 
 setwd("/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/")
 source("./R_rainclouds.r")
@@ -50,6 +52,13 @@ data$r <- factor(data$cor);                           # factor: chosen option
 data$rt <- as.numeric(as.character(data$rt));         # continuous: reaction time (ms)
 data$i <- as.numeric(as.character(data$i));           # continuous: time progression
 data$rtl <- log10(as.numeric(as.character(data$rt))); # continuous: reaction time (log10)
+fn.recode_od <- function(r) { 
+  if (r[[9]] == r[[11]]) { return('top_left'); } 
+  else if (r[[9]] == r[[12]]) { return('bottom_left'); } 
+  else if (r[[9]] == r[[13]]) { return('top_right'); } 
+  return('bottom_right'); 
+};
+data$od <- factor(apply(data, MARGIN=1, FUN=fn.recode_od)); # factor: correct option position in grid
 
 ### 2: control learning
 hr.total.t <- t.test(data$cor, mu = afc_chance, alternative = "greater"); # one-sided t-test for HR > chance
@@ -216,7 +225,7 @@ data.controlled.hits.both.by_rtl.ad
 # create plots to check for outliers pre-filtering (log)
 hist(data.controlled.hits$rtl, xlab = "RT (log10)")
 ggplot(data.controlled.hits, aes(x = rtl)) + 
-  geom_dotplot(stackdir = 'center', binwidth = 15)
+  geom_dotplot(stackdir = 'center', binwidth = .0065)
 ggqqplot(data.controlled.hits$rtl)
 
 # create plots to check for outliers post-filtering (between, log)
@@ -268,7 +277,7 @@ data.controlled.hits.both.ad2
 # i guess this is kind of the curse of
 # working with RT data
 
-data.chosen <- data.controlled.hits; # select a data set to work with
+data.chosen <- data.controlled.hits.within; # select a data set to work with
 data.chosen$outcome <- data.chosen$rtl; # select an outcome variable to work with
 
 data.chosen.loss <- (1 - (NROW(data.chosen) / NROW(data))) * 100; # how much data was removed from this data set? in per cent
@@ -307,17 +316,58 @@ data.chosen.loss
 # contributor of noise, since our
 # data come from a 4AFC
 
-# models without fixed time regressor, varying random effects
+# models without fixed time or display regressors, varying random effects
 res.model.untimed.r1 <- lmer(outcome ~ -1 + list:pool + (1|ppn), data = data.chosen);
 res.model.untimed.r2a <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id), data = data.chosen);
 res.model.untimed.r2b <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|spkr), data = data.chosen);
 res.model.untimed.r3 <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
+res.model.untimed.r4a <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id), data = data.chosen);
+res.model.untimed.r4b <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr), data = data.chosen);
+res.model.untimed.r4c <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.untimed.r4d <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr), data = data.chosen);
+res.model.untimed.r4e <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|ppn:spkr), data = data.chosen);
+res.model.untimed.r4f <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.untimed.r4g <- lmer(outcome ~ -1 + list:pool + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+
+# models without fixed time regressor, with display regressor and varying random effects
+res.model.display.r1 <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn), data = data.chosen);
+res.model.display.r2a <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id), data = data.chosen);
+res.model.display.r2b <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|spkr), data = data.chosen);
+res.model.display.r3 <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
+res.model.display.r4a <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id), data = data.chosen);
+res.model.display.r4b <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr), data = data.chosen);
+res.model.display.r4c <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.display.r4d <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr), data = data.chosen);
+res.model.display.r4e <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|ppn:spkr), data = data.chosen);
+res.model.display.r4f <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.display.r4g <- lmer(outcome ~ -1 + list:pool + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
 
 # models with fixed time regressor, varying random effects
 res.model.timed.r1 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn), data = data.chosen);
 res.model.timed.r2a <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id), data = data.chosen);
 res.model.timed.r2b <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|spkr), data = data.chosen);
 res.model.timed.r3 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
+res.model.timed.r4a <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id), data = data.chosen);
+res.model.timed.r4b <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr), data = data.chosen);
+res.model.timed.r4c <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.timed.r4d <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr), data = data.chosen);
+res.model.timed.r4e <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|ppn:spkr), data = data.chosen);
+res.model.timed.r4f <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.timed.r4g <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+
+# models with fixed time regressor, display regressor and varying random effects
+res.model.both.r1 <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn), data = data.chosen);
+res.model.both.r2a <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id), data = data.chosen);
+res.model.both.r2b <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|spkr), data = data.chosen);
+res.model.both.r3 <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr), data = data.chosen);
+res.model.both.r4a <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id), data = data.chosen);
+res.model.both.r4b <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr), data = data.chosen);
+res.model.both.r4c <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.both.r4d <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr), data = data.chosen);
+res.model.both.r4e <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|ppn:spkr), data = data.chosen);
+res.model.both.r4f <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.both.r4g <- lmer(outcome ~ -1 + list:pool + i + (1|od) + (1|ppn) + (1|id) + (1|spkr) + (1|ppn:id) + (1|id:spkr) + (1|ppn:spkr), data = data.chosen);
+res.model.both.t <- lmer(rt ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|spkr) + (1|od) + (1|ppn:id) + (1|id:spkr), data = data.controlled);
 
 # quick comment here:
 # we could also go for something
@@ -327,62 +377,230 @@ res.model.timed.r3 <- lmer(outcome ~ -1 + list:pool + i + (1|ppn) + (1|id) + (1|
 # ideal (but worth a try with 
 # the real data).
 
-K.timed <- rbind(
-  # contrast matrix (timed models)
-  # P1L1 < P1L2 < P1L3
-  P1L1_P1L2 = c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
-  P1L2_P1L3 = c(0, 0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
-  P1L1_P1L3 = c(0, 1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
-  # P2L2 < P2L1 < P2L3
-  P2L2_P2L1 = c(0, 0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
-  P2L1_P2L3 = c(0, 0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
-  P2L2_P2L3 = c(0, 0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
-  # P3L2 < P3L1
-  P3L2_P3L1 = c(0, 0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
-  # P1L3 < P3L3
-  P1L3_P3L3 = c(0, 0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
-  # P2L3 < P3L3
-  P2L3_P3L3 = c(0, 0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
-  # P1L3 < P2L3 v P1L3 ~= P2L3
-  P1L3_P2L3 = c(0, 0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+K.none <- rbind(
+  #     contrast matrix
+  # VERIDICAL < STATISTICAL (WORD)
+  VERIDICAL_STATWORDl = c(1, 0, 0,   # + L1P1
+                          0, 0, 0,
+                          -1, 0, 0), # - L1P3
+  VERIDICAL_STATWORDh = c(0, 0, 0,
+                          0, 1, 0,   # + L2P2
+                          0, -1, 0), # - L2P3
+  
+  # STATISTICAL (WORD) < CONTROL
+  STATWORDl_CONTROL = c(0, 0, 0,
+                        0, 0, 0,
+                        1, 0, -1), # L1P3 - L3P3
+  STATWORDh_CONTROL = c(0, 0, 0,
+                        0, 0, 0,
+                        0, 1, -1), # L2P3 - L3P3
+  
+  # STATISTICAL (WORD, high) < STATISTICAL (WORD, low)
+  STATWORDh_STATWORDl = c(0, 0, 0,
+                          0, 0, 0,
+                          -1, 1, 0), # - L1P3 + L2P3
+  
+  # STATISTICAL (SPKR) < CONTROL
+  STATSPKRl_CONTROL = c(0, 0, 0,
+                        0, 0, 1,  # + L3P2
+                        0, 0, -1), # - L3P3
+  STATSPKRh_CONTROL = c(0, 0, 1,  # + L3P1
+                        0, 0, 0,
+                        0, 0, -1), # - L3P3
+  
+  # STATISTICAL (SPKR, high) < STATISTICAL (SPKR, low)
+  STATSPKRh_STATSPKRl = c(0, 0, 1,  # + L3P1
+                          0, 0, -1, # - L3P2
+                          0, 0, 0),
+  
+  # STATISTICAL (double) < CONTROL
+  STATDOUBL2_CONTROL = c(0, 1, 0,   # + L2P1
+                         0, 0, 0,
+                         0, 0, -1), # - L3P3
+  STATDOUBL1_CONTROL = c(0, 0, 0,
+                         1, 0, 0,  # + L1P2
+                         0, 0, -1) # - L3P3
 );
 
-K.untimed <- rbind(
-  # contrast matrix (untimed models)
-  # P1L1 < P1L2 < P1L3
-  P1L1_P1L2 = c(1, -1, 0, 0, 0, 0, 0, 0, 0), # P1L1 - P1L2
-  P1L2_P1L3 = c(0, 1, -1, 0, 0, 0, 0, 0, 0), # P1L2 - P1L3
-  P1L1_P1L3 = c(1, 0, -1, 0, 0, 0, 0, 0, 0), # P1L1 - P1L3
-  # P2L2 < P2L1 < P2L3
-  P2L2_P2L1 = c(0, 0, 0, -1, 1, 0, 0, 0, 0), # P2L2 - P2L1
-  P2L1_P2L3 = c(0, 0, 0, 1, 0, -1, 0, 0, 0), # P2L1 - P2L3
-  P2L2_P2L3 = c(0, 0, 0, 0, 1, -1, 0, 0, 0), # P2L2 - P2L3
-  # P3L2 < P3L1
-  P3L2_P3L1 = c(0, 0, 0, 0, 0, 0, -1, 1, 0), # P3L2 - P3L1
-  # P1L3 < P3L3
-  P1L3_P3L3 = c(0, 0, 1, 0, 0, 0, 0, 0, -1), # P1L3 - P3L3
-  # P2L3 < P3L3
-  P2L3_P3L3 = c(0, 0, 0, 0, 0, 1, 0, 0, -1), # P2L3 - P3L3
-  # P1L3 < P2L3 v P1L3 ~= P2L3
-  P1L3_P2L3 = c(0, 0, 1, 0, 0, -1, 0, 0, 0)  # P1L3 - P2L3
+K.pooled <- rbind(
+  #     contrast matrix (poooled)
+  # VERIDICAL < STATISTICAL (WORD)
+  VERIDICAL_STATWORD = c(.5, 0, 0,    # + L1P1 / 2
+                         0, .5, 0,    # + L2P2 / 2
+                         -.5, -.5, 0), # - L1P3/2 - L2P3/2
+  
+  # STATISTICAL (WORD) < CONTROL
+  STATWORD_CONTROL = c(0, 0, 0,
+                       0, 0, 0,
+                       .5, .5, -1), # (L1P3 + L2P3) / 2 - L3P3
+  
+  # STATISTICAL (WORD, high) < STATISTICAL (WORD, low)
+  STATWORDh_STATWORDl = c(0, 0, 0,
+                          0, 0, 0,
+                          -1, 1, 0), # - L1P3 + L2P3
+  
+  # STATISTICAL (SPKR) < CONTROL
+  STATSPKR_CONTROL = c(0, 0, .5,  # + L3P1 / 2
+                       0, 0, .5,  # + L3P2 / 2
+                       0, 0, -1), # - L3P3
+  
+  # STATISTICAL (SPKR, high) < STATISTICAL (SPKR, low)
+  STATSPKRh_STATSPKRl = c(0, 0, 1,  # + L3P1
+                          0, 0, -1, # - L3P2
+                          0, 0, 0),
+  
+  # STATISTICAL (double) < CONTROL
+  STATDOUB_CONTROL = c(0, .5, 0, # + L2P1 / 2
+                       .5, 0, 0, # + L1P2 / 2
+                       0, 0, -1) # - L3P3
+);
+
+K.none.long <- rbind(
+  #     contrast matrix
+  # VERIDICAL < STATISTICAL (WORD)
+  VERIDICAL_STATWORDl = c(0,
+                          1, 0, 0,   # + L1P1
+                          0, 0, 0,
+                          -1, 0, 0), # - L1P3
+  VERIDICAL_STATWORDh = c(0,
+                          0, 0, 0,
+                          0, 1, 0,   # + L2P2
+                          0, -1, 0), # - L2P3
+  
+  # STATISTICAL (WORD) < CONTROL
+  STATWORDl_CONTROL = c(0,
+                        0, 0, 0,
+                        0, 0, 0,
+                        1, 0, -1), # L1P3 - L3P3
+  STATWORDh_CONTROL = c(0,
+                        0, 0, 0,
+                        0, 0, 0,
+                        0, 1, -1), # L2P3 - L3P3
+  
+  # STATISTICAL (WORD, high) < STATISTICAL (WORD, low)
+  STATWORDh_STATWORDl = c(0,
+                          0, 0, 0,
+                          0, 0, 0,
+                          -1, 1, 0), # - L1P3 + L2P3
+  
+  # STATISTICAL (SPKR) < CONTROL
+  STATSPKRl_CONTROL = c(0,
+                        0, 0, 0,
+                        0, 0, 1,  # + L3P2
+                        0, 0, -1), # - L3P3
+  STATSPKRh_CONTROL = c(0,
+                        0, 0, 1,  # + L3P1
+                        0, 0, 0,
+                        0, 0, -1), # - L3P3
+  
+  # STATISTICAL (SPKR, high) < STATISTICAL (SPKR, low)
+  STATSPKRh_STATSPKRl = c(0,
+                          0, 0, 1,  # + L3P1
+                          0, 0, -1, # - L3P2
+                          0, 0, 0),
+  
+  # STATISTICAL (double) < CONTROL
+  STATDOUBL2_CONTROL = c(0,
+                         0, 1, 0,   # + L2P1
+                         0, 0, 0,
+                         0, 0, -1), # - L3P3
+  STATDOUBL1_CONTROL = c(0,
+                         0, 0, 0,
+                         1, 0, 0,  # + L1P2
+                         0, 0, -1) # - L3P3
+);
+
+K.pooled.long <- rbind(
+  #     contrast matrix (poooled)
+  # VERIDICAL < STATISTICAL (WORD)
+  VERIDICAL_STATWORD = c(0,
+                         .5, 0, 0,    # + L1P1 / 2
+                         0, .5, 0,    # + L2P2 / 2
+                         -.5, -.5, 0), # - L1P3/2 - L2P3/2
+  
+  # STATISTICAL (WORD) < CONTROL
+  STATWORD_CONTROL = c(0,
+                       0, 0, 0,
+                       0, 0, 0,
+                       .5, .5, -1), # (L1P3 + L2P3) / 2 - L3P3
+  
+  # STATISTICAL (WORD, high) < STATISTICAL (WORD, low)
+  STATWORDh_STATWORDl = c(0,
+                          0, 0, 0,
+                          0, 0, 0,
+                          -1, 1, 0), # - L1P3 + L2P3
+  
+  # STATISTICAL (SPKR) < CONTROL
+  STATSPKR_CONTROL = c(0,
+                       0, 0, .5,  # + L3P1 / 2
+                       0, 0, .5,  # + L3P2 / 2
+                       0, 0, -1), # - L3P3
+  
+  # STATISTICAL (SPKR, high) < STATISTICAL (SPKR, low)
+  STATSPKRh_STATSPKRl = c(0,
+                          0, 0, 1,  # + L3P1
+                          0, 0, -1, # - L3P2
+                          0, 0, 0),
+  
+  # STATISTICAL (double) < CONTROL
+  STATDOUB_CONTROL = c(0,
+                       0, .5, 0, # + L2P1 / 2
+                       .5, 0, 0, # + L1P2 / 2
+                       0, 0, -1) # - L3P3
 );
 
 # find lowest Akaike information criterion (note: refits to ML but no bother)
 # alternative, could AIC() everything to avoid refit (if that were an issue)
-anova(
+AIC(
   res.model.untimed.r1,
   res.model.untimed.r2a,
   res.model.untimed.r2b,
   res.model.untimed.r3,
+  res.model.untimed.r4a,
+  res.model.untimed.r4b,
+  res.model.untimed.r4c,
+  res.model.untimed.r4d,
+  res.model.untimed.r4e,
+  res.model.untimed.r4f,
+  res.model.untimed.r4g,
+  res.model.display.r1,
+  res.model.display.r2a,
+  res.model.display.r2b,
+  res.model.display.r3,
+  res.model.display.r4a,
+  res.model.display.r4b,
+  res.model.display.r4c,
+  res.model.display.r4d,
+  res.model.display.r4e,
+  res.model.display.r4f,
+  res.model.display.r4g,
   res.model.timed.r1,
   res.model.timed.r2a,
   res.model.timed.r2b,
-  res.model.timed.r3
+  res.model.timed.r3,
+  res.model.timed.r4a,
+  res.model.timed.r4b,
+  res.model.timed.r4c,
+  res.model.timed.r4d,
+  res.model.timed.r4e,
+  res.model.timed.r4f,
+  res.model.timed.r4g,
+  res.model.both.r1,
+  res.model.both.r2a,
+  res.model.both.r2b,
+  res.model.both.r3,
+  res.model.both.r4a,
+  res.model.both.r4b,
+  res.model.both.r4c,
+  res.model.both.r4d,
+  res.model.both.r4e,
+  res.model.both.r4f,
+  res.model.both.r4g
 );
 
-res.chosen <- res.model.timed.r3; # make a choice of best model
+res.chosen <- res.model.display.r4f; # make a choice of best model
 summary(res.chosen);
-K.chosen <- K.timed; # make a choice of corresponding contrast matrix
+K.chosen <- K.none; # make a choice of corresponding contrast matrix
 
 # some sanity checks
 qqnorm(residuals(res.chosen)) # overall residuals
@@ -390,7 +608,10 @@ plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | ppn, abline = 0) # residu
 plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | id, abline = 0) # residuals by speaker (mislabeled)
 plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | spkr, abline = 0) # residuals by item (mislabeled)
 plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | list, abline = 0) # residuals by list
+leveneTest(residuals(res.chosen) ~ data.chosen$list);
 plot(res.chosen, resid(., scaled = TRUE) ~ fitted(.) | pool, abline = 0) # residuals by pool
+leveneTest(residuals(res.chosen) ~ data.chosen$pool);
+
 
 # run general linear hypotheses
 #
@@ -426,11 +647,38 @@ vis.full <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) +
   guides(color = FALSE) + 
   ggtitle("Overview of behavioural data") +
   theme(plot.title = element_text(hjust = .5))
-ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/vis.full4.png')
+ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel_withincontrol_rtl.png')
+vis.full
+
+# data summaries by ppn
+vis.ppn.se.mu <- setNames(aggregate(outcome~list+pool+ppn, data.chosen, mean), c("list", "pool", "ppn", "se_mu"));
+vis.ppn.se.sd <- setNames(aggregate(outcome~list+pool+ppn, data.chosen, sd), c("l", "p", "ppn", "se_sd"));
+vis.ppn.se <- setNames(cbind(vis.ppn.se.mu, vis.ppn.se.sd$se_sd), c("list", "pool", "ppn", "se_mu", "se_sd"));
+
+# full visualisation by participant
+vis.full.facet_ppn <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) + 
+  geom_boxplot(aes(x = list, y = outcome, fill = pool), outlier.shape = NA, alpha = .5, position = position_nudge(x = c(-0.08, 0, 0.08), y = 0), width = .04) +
+  geom_line(data = vis.ppn.se, aes(x = list, y = se_mu, group = pool, colour = pool), linetype = 3, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
+  geom_point(data = vis.ppn.se, aes(x = list, y = se_mu, group = ppn, colour = pool), shape = 18, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
+  geom_errorbar(data = vis.ppn.se, aes(x = list, y = se_mu, group = ppn, colour = pool, ymin = se_mu - se_sd, ymax = se_mu + se_sd), width = .05, position = position_nudge(x = c(.15, .15, .15, .2, .2, .2, .25, .25, .25), y = 0)) + 
+  facet_wrap(vars(ppn)) + 
+  scale_colour_brewer(palette = "Dark2", name = "Pool") +
+  scale_fill_brewer(palette = "Dark2", name = "Pool") + 
+  xlab("List") + 
+  ylab(TeX("Reaction time in $log_{10}(ms)$")) + 
+  guides(color = FALSE) + 
+  ggtitle("Overview of behavioural data per participant") +
+  theme(plot.title = element_text(hjust = .5))
+ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel-byppn_withincontrol_rtl.png')
+vis.full.facet_ppn
 
 # glht plots
-vis.contrasts.data.mu <- t(t(res.chosen@beta[-1]));
-vis.contrasts.data.se <- t(t(sqrt(diag(vcov(res.chosen))[-1])));
+#vis.contrasts.data.mu <- t(t(res.chosen@beta[-1:-2])); # two nuisance factors
+#vis.contrasts.data.mu <- t(t(sqrt(diag(vcov(res.chosen)[-1:-2])))); # two nuisance factors
+#vis.contrasts.data.mu <- t(t(res.chosen@beta[-1])); # one nuisance factor
+#vis.contrasts.data.se <- t(t(sqrt(diag(vcov(res.chosen))[-1]))); # one nuisance factor
+vis.contrasts.data.mu <- t(t(res.chosen@beta)); # no nuisance factors
+vis.contrasts.data.se <- t(t(sqrt(diag(vcov(res.chosen))))); # no nuisance factors
 vis.contrasts.data <- setNames(data.frame(cbind(vis.contrasts.data.mu, vis.contrasts.data.se, as.factor(vis.se$pool), as.factor(vis.se$list))), c("co_mu", "co_se", "pool", "list"));
 
 vis.contrasts.glht1.data <- vis.contrasts.data[1:3,]; # P1L1 < P1L2 < P1L3
@@ -438,23 +686,23 @@ vis.contrasts.glht1 <- ggplot(vis.contrasts.glht1.data, aes(x = list, y = co_mu,
   geom_errorbar(aes(ymin = co_mu - co_se, ymax = co_mu + co_se, colour = pool), width = .2) + 
   geom_point(aes(x = list, y = co_mu), size = 3, shape = c(13, 4, 1)) + 
   # sig.1
-  geom_line(data = data.frame(list = c(1,2), co_mu = c(3.35, 3.35), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.34, 3.3512), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.34, 3.3512), pool = c(1, 1)), size = 1) + 
-  annotate("text", x = 1.5, y = 3.36, label = stars.pval(res.chosen.glht$test$pvalues[[1]]), parse = FALSE) + 
+  geom_line(data = data.frame(list = c(1,2), co_mu = c(3.27, 3.27), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.26, 3.2712), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.26, 3.2712), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 1.5, y = 3.276, label = stars.pval(res.chosen.glht$test$pvalues[[1]]), parse = FALSE) + 
   # sig.2
-  geom_line(data = data.frame(list = c(2,3), co_mu = c(3.55, 3.55), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.54, 3.5512), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.54, 3.5512), pool = c(1, 1)), size = 1) + 
-  annotate("text", x = 2.5, y = 3.56, label = stars.pval(res.chosen.glht$test$pvalues[[2]]), parse = FALSE) + 
+  geom_line(data = data.frame(list = c(2,3), co_mu = c(3.29, 3.29), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(2,2), co_mu = c(3.28, 3.2912), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.28, 3.2912), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 2.5, y = 3.35, label = stars.pval(res.chosen.glht$test$pvalues[[2]]), parse = FALSE) + 
   # sig.3
-  geom_line(data = data.frame(list = c(1,3), co_mu = c(3.6, 3.6), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.59, 3.6012), pool = c(1, 1)), size = 1) + 
-  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.59, 3.6012), pool = c(1, 1)), size = 1) + 
-  annotate("text", x = 2, y = 3.61, label = stars.pval(res.chosen.glht$test$pvalues[[3]]), parse = FALSE) + 
+  geom_line(data = data.frame(list = c(1,3), co_mu = c(3.31, 3.31), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(1,1), co_mu = c(3.30, 3.3112), pool = c(1, 1)), size = 1) + 
+  geom_line(data = data.frame(list = c(3,3), co_mu = c(3.30, 3.3112), pool = c(1, 1)), size = 1) + 
+  annotate("text", x = 2, y = 3.32, label = stars.pval(res.chosen.glht$test$pvalues[[3]]), parse = FALSE) + 
   # theme
   xlab("List") + 
-  ylab(TeX("Reaction time in $log_{10}(ms)")) + 
+  ylab(TeX("Reaction time in $log_{10}(ms)$")) + 
   labs(fill = "Pool") + 
   guides(colour = FALSE) + 
   theme_bw() +
@@ -469,4 +717,6 @@ vis.contrasts.glht2 <- ggplot(vis.contrasts.glht2.data, aes(x = list, y = co_mu,
 aes(x = list, y = outcome, colour = pool), position = position_jitter(width = .1), size = .1, shape = 20, alpha = .5
 
 ggarrange(vis.contrasts.glht1, vis.contrasts.glht2)
+
+
 ### 6: extraction
