@@ -61,7 +61,7 @@ string s_2AFCD_Instructions_2 = "Om het eerste woord te selecteren druk\n" +
 											"selecteren druk op N.\n\n" + 
 											"Ben je er klaar voor? Druk dan op\n" +
 											"de spatiebalk om te beginnen.";
-string s_2AFCD_Instructions_3 = "Je ben klaar met de tweede taak.\nLaat het de onderzoeker weten.";
+string s_2AFCD_Instructions_3 = "Je ben klaar met de tweede taak.\nHit rate: %d%.";
 
 int i_2AFCD_Trials_N = 160;						# trial count
 int i_2AFCD_Trials_C = 9;							# trial columns
@@ -95,8 +95,8 @@ string s_2AFCW_Instructions_2 = "Om de definitie aan de linkerkant te\n" +
 											"aan de rechterkant te selecteren druk\n" +
 											"op N.\n\n" +
 											"Ben je er klaar voor? Druk dan op\n" + 
-											"de spatiebalk om te beginnen."
-string s_2AFCW_Instructions_3 = "Je ben klaar met de derde taak.\nLaat het de onderzoeker weten.";
+											"de spatiebalk om te beginnen.";
+string s_2AFCW_Instructions_3 = "Je ben klaar met de derde taak.\nHit rate: %d%.";
 
 int i_2AFCW_Trials_N = 160;		# trial count
 int i_2AFCW_Trials_C = 9;			# trial columns
@@ -173,8 +173,8 @@ string s_4AFC_Instructions_2 = "Om de definitie linksboven te selecteren\n" +
 											"Om de definitie rechtsonder te\n" +
 											"selecteren druk op N.\n\n" +
 											"Ben je er klaar voor? Druk dan op\n" + 
-											"de spatiebalk om te beginnen."
-string s_4AFC_Instructions_3 = "Je ben klaar met de laatste taak.\nDankjewel!";
+											"de spatiebalk om te beginnen.";
+string s_4AFC_Instructions_3 = "Je ben klaar met de laatste taak.\nHit rate: %d%.\nDankjewel!";
 
 int i_4AFC_Trials_N = 180;			# trial count
 int i_4AFC_Trials_C = 9;			# trial columns
@@ -194,6 +194,7 @@ string s_PPN; 											# participant id
 int i; 					# free iterator
 int k;					# free iterator
 int i_ButtonPresses; # Iterator for ::WaitForKey()
+int i_Total_Correct; # Incrementor for ::Run2AFCDTrials, ::Run2AFCWTrials and ::Run4AFCTrials
 
 array<string> as_Speakers[i_Speakers]; 													# memory assignment speakers
 array<string> as_Definitions[i_Definition_R][i_Definition_C];						# memory assignment definitions

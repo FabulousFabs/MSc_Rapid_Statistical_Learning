@@ -448,6 +448,8 @@ sub Run2AFCDTrials begin
 	string f_save = s_Dir_Data + s_PPN + s_Outs_2AFCD;
 	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tf_spkr\tf_id\tf_var\tf_dur\tcor\trt\ti\n");
 	
+	i_Total_Correct = 0;
+	
 	response_manager.set_button_active(1, false);
 	
 	loop i = 1 until i > i_2AFCD_Trials_N begin
@@ -583,6 +585,8 @@ sub Run2AFCDTrials begin
 		data[16] = string(i);
 		SaveData(f_save, data);
 		
+		i_Total_Correct = i_Total_Correct + correct;
+		
 		int ITI = i_2AFCD_ITI;
 		if int(as_2AFCD_Stimuli[i][4]) + int(as_2AFCD_Alternatives[i][4]) + i_2AFCD_Middle > i_2AFCD_Audio then
 			ITI = ITI - (int(as_2AFCD_Stimuli[i][4]) + int(as_2AFCD_Alternatives[i][4]) + i_2AFCD_Middle - i_2AFCD_Audio);
@@ -603,6 +607,8 @@ sub Run2AFCWTrials begin
 	
 	string f_save = s_Dir_Data + s_PPN + s_Outs_2AFCW;
 	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tfil\tcor\trt\ti\n");
+	
+	i_Total_Correct = 0;
 	
 	response_manager.set_button_active(1, false);
 	
@@ -696,6 +702,8 @@ sub Run2AFCWTrials begin
 		data[12] = string(delta);
 		data[13] = string(i);
 		SaveData(f_save, data);
+		
+		i_Total_Correct = i_Total_Correct + correct;
 		
 		int ITI = i_2AFCW_ITI;
 		if int(as_2AFCW_Stimuli[i][4]) > i_2AFCW_Audio then
@@ -837,6 +845,8 @@ sub Run4AFCTrials begin
 	string f_save = s_Dir_Data + s_PPN + s_Outs_4AFC;
 	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\to1\to2\to3\to4\tcor\tr\trt\ti\n");
 	
+	i_Total_Correct = 0;
+	
 	response_manager.set_button_active(1, false);
 	
 	loop i = 1 until i > i_4AFC_Trials_N begin
@@ -904,6 +914,8 @@ sub Run4AFCTrials begin
 		data[16] = string(delta);
 		data[17] = string(i);
 		SaveData(f_save, data);
+		
+		i_Total_Correct = i_Total_Correct + correct;
 		
 		
 		wait_interval(i_4AFC_ITI + random(1, 250));

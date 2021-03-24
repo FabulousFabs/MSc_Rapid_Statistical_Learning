@@ -15,4 +15,6 @@ SampleAlternativesAudio(as_2AFCD_Stimuli, as_2AFCD_Alternatives, i_2AFCD_Trials_
 InstructParticipant(s_2AFCD_Instructions_1);
 InstructParticipant(s_2AFCD_Instructions_2);
 Run2AFCDTrials();
-InstructParticipant(s_2AFCD_Instructions_3);
+double HR = round(double(i_Total_Correct) / double(i_2AFCD_Trials_N) * double(100), 2);
+term.print(HR);
+InstructParticipant(s_2AFCD_Instructions_3.replace("%d", string(HR)));

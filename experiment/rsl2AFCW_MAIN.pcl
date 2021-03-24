@@ -15,4 +15,5 @@ SampleAlternatives(as_2AFCW_Stimuli, ai_2AFCW_Alternatives, i_2AFCW_Trials_N, i_
 InstructParticipant(s_2AFCW_Instructions_1);
 InstructParticipant(s_2AFCW_Instructions_2);
 Run2AFCWTrials();
-InstructParticipant(s_2AFCW_Instructions_3);
+double HR = round(double(i_Total_Correct) / double(i_2AFCW_Trials_N) * double(100), 2);
+InstructParticipant(s_2AFCW_Instructions_3.replace("%d", string(HR)));
