@@ -21,6 +21,7 @@
 /analyses/behavioural/data/*
 /analyses/behavioural/raw/*
 /analyses/behavioural/aggregate.txt
+/analyses/behavioural/aggregate_old.txt
 
 # stimulus files
 *.wav
