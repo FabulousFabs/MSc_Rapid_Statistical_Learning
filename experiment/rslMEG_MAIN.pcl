@@ -3,6 +3,8 @@
 include "rsl_SUBS.pcl";
 
 # Setup
+input_port Serial = input_port_manager.get_port(1);
+
 GetParticipantID();
 LoadSpeakers();
 LoadDefinitions();
@@ -10,7 +12,7 @@ LoadStimuli(s_PPN + s_List_MEG, as_MEG_Stimuli, i_MEG_Trials_C);
 ShuffleBlocked(as_MEG_Stimuli, i_MEG_Repetitions, i_MEG_Trials_N, i_MEG_Trials_C);
 
 # Run task
-InstructParticipant(s_MEG_Instructions_1);
-InstructParticipant(s_MEG_Instructions_2);
-RunMEGTrials();
-InstructParticipant(s_MEG_Instructions_3);
+InstructParticipantBITSI(s_MEG_Instructions_1, Serial);
+InstructParticipantBITSI(s_MEG_Instructions_2, Serial);
+#RunMEGTrials(Serial);
+#InstructParticipantBITSI(s_MEG_Instructions_3, Serial);

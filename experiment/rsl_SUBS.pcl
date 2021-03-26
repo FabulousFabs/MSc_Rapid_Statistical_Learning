@@ -72,6 +72,55 @@ sub int WaitForKeyTimed(int max) begin
 	return delta;
 end;
 
+
+sub WaitForBITSIButton(input_port& Serial) begin
+	# Pause experiment until 1 valid BITSI button press is received
+	#
+	# INPUTS:
+	#		input_port& Serial	-	Reference to the BITSI input port
+	
+	loop until Serial.new_code_count() > 0
+	begin
+	end;
+end;
+
+sub WaitForBITSIButton_Full(input_port& Serial) begin
+	# Pause experiment until a valid BITSI button press is received
+	#
+	# INPUTS:
+	#		input_port& Serial	-	Reference to the BITSI input port
+	
+	WaitForBITSIButton(Serial);
+	WaitForBITSIButton(Serial);
+end;
+
+sub int WaitForBITSIButtonTimed(input_port& Serial, int max) begin
+	# Pause experiment until a valid BITSI button press is received
+	#
+	# INPUTS:
+	#		input_port& Serial	-	Reference to the BITSI input port
+	#		int max					-	Maximum reaction time
+	#
+	# OUTPUTS:
+	#		int delta				-	Reaction time (or -1 if timeout)
+	
+	int tn = clock.time();
+	int delta = 0;
+	
+	loop until Serial.new_code_count() > 0
+	begin
+		delta = clock.time() - tn;
+		if delta > max then
+			return -1;
+			break;
+		end;
+	end;
+	
+	WaitForBITSIButton(Serial);
+	
+	return delta;
+end;
+
 sub InstructParticipant(string message) begin
 	# Show participants a text description
 	#
@@ -82,6 +131,20 @@ sub InstructParticipant(string message) begin
 	t_Text2.set_caption(message, true);
 	p_Text.present();
 	WaitForKey();
+	ClearText();
+end;
+
+sub InstructParticipantBITSI(string message, input_port& Serial) begin
+	# Show participants a text description that with BITSI buttons
+	#
+	# INPUTS:
+	#		string message			-	A description to present to participants
+	#		input_port& Serial	-	Reference to the BITSI input port
+	
+	ClearText();
+	t_Text2.set_caption(message, true);
+	p_Text.present();
+	WaitForBITSIButton_Full(Serial);
 	ClearText();
 end;
 
@@ -769,7 +832,7 @@ sub RunCRTrials begin
 	end;
 end;
 
-sub RunMEGTrials begin
+sub RunMEGTrials(input_port& Serial) begin
 	# Presentation of the MEG task
 	# @TODO: Trigger data
 	
@@ -798,7 +861,7 @@ sub RunMEGTrials begin
 		t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
 		p_MEG.present();
 		
-		int delta = WaitForKeyTimed(i_MEG_Response);
+		int delta = WaitForBITSIButtonTimed(Serial, i_MEG_Response);
 		int resp = -1;
 		int correct = 0;
 		
@@ -808,7 +871,7 @@ sub RunMEGTrials begin
 		if delta > 0 then
 			resp = response_manager.last_response();
 			int a = 3 + type;
-			
+			# recode the respnose to 0 or 1; left or right
 			if (resp - 1) == int(as_Definitions[int(as_MEG_Stimuli[i][8])][a]) then
 				correct = 1;
 			end;
