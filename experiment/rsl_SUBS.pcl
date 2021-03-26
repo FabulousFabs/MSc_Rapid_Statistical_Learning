@@ -72,29 +72,91 @@ sub int WaitForKeyTimed(int max) begin
 	return delta;
 end;
 
-
-sub WaitForBITSIButton(input_port& Serial) begin
-	# Pause experiment until 1 valid BITSI button press is received
+sub int WaitForBITSIInput(input_port& Serial) begin
+	# Poll BITSI states until button press
 	#
 	# INPUTS:
 	#		input_port& Serial	-	Reference to the BITSI input port
+	#
+	# OUTPUTS:
+	#		int Code					-	Integer ASCII code from BITSI
 	
 	loop until Serial.new_code_count() > 0
 	begin
 	end;
+	
+	return Serial.last_code();
 end;
 
-sub WaitForBITSIButton_Full(input_port& Serial) begin
-	# Pause experiment until a valid BITSI button press is received
+sub array<int, 1> WaitForBITSIInputTimed(input_port& Serial, int start, int max) begin
+	# Poll BITSI states until button press or time out
 	#
 	# INPUTS:
 	#		input_port& Serial	-	Reference to the BITSI input port
+	#		int start				-	Start of waiting time
+	#		int max					-	Maximum waiting time
+	#
+	# OUTPUTS:
+	#		int resp					-	[1] BITSI code, [2] delta
 	
-	WaitForBITSIButton(Serial);
-	WaitForBITSIButton(Serial);
+	array<int> resp[2];
+	resp[1] = -1;
+	resp[2] = max;
+	
+	loop until Serial.new_code_count() > 0
+	begin
+		delta = clock.time() - start;
+		if delta > max then
+			return resp;
+			break;
+		end;
+	end;
+	
+	resp[1] = Serial.last_code();
+	resp[2] = delta;
+	
+	return resp;
 end;
 
-sub int WaitForBITSIButtonTimed(input_port& Serial, int max) begin
+sub bool IsValidButton(int code) begin
+	# Check input code against allowed codes from BITSI
+	#
+	# INPUTS:
+	#		int code		-	Input code
+	#
+	# OUTPUTS:
+	#		bool valid	-	Is input allowed?
+	
+	loop int allowed_code = 1 until allowed_code > ai_MEG_Buttons.count() begin
+		if code == ai_MEG_Buttons[allowed_code] then
+			return true;
+		end;
+	end;
+	
+	return false;
+end;
+
+
+sub int WaitForBITSIButton(input_port& Serial) begin
+	# Pause experiment until 1 valid BITSI button press is received
+	#
+	# INPUTS:
+	#		input_port& Serial	-	Reference to the BITSI input port
+	#
+	# OUTPUTS:
+	#		int code					-	Integer ASCII code from BITSI
+	
+	loop int code = WaitForBITSIInput(Serial) until false
+	begin
+		if IsValidButton(code) == true then
+			return code;
+		end;
+	end;
+	
+	return -1;
+end;
+
+sub array<int, 1> WaitForBITSIButtonTimed(input_port& Serial, int max) begin
 	# Pause experiment until a valid BITSI button press is received
 	#
 	# INPUTS:
@@ -102,23 +164,27 @@ sub int WaitForBITSIButtonTimed(input_port& Serial, int max) begin
 	#		int max					-	Maximum reaction time
 	#
 	# OUTPUTS:
-	#		int delta				-	Reaction time (or -1 if timeout)
+	#		array<int, 1> resp	-	[1] BITSI code, [2] delta
 	
-	int tn = clock.time();
-	int delta = 0;
+	array<int> resp[2];
+	resp[1] = -1;
+	resp[2] = max;
+	int start = clock.time();
 	
-	loop until Serial.new_code_count() > 0
+	loop resp = WaitForBITSIInputTimed(Serial, start, max) until false
 	begin
-		delta = clock.time() - tn;
-		if delta > max then
-			return -1;
-			break;
+		if resp[1] > 0 then
+			if IsValidButton(resp[1]) == true then
+				return resp;
+			end;
+		else
+			resp[1] = -1;
+			resp[2] = max;
+			return resp;
 		end;
 	end;
 	
-	WaitForBITSIButton(Serial);
-	
-	return delta;
+	return resp;
 end;
 
 sub InstructParticipant(string message) begin
@@ -144,7 +210,7 @@ sub InstructParticipantBITSI(string message, input_port& Serial) begin
 	ClearText();
 	t_Text2.set_caption(message, true);
 	p_Text.present();
-	WaitForBITSIButton_Full(Serial);
+	WaitForBITSIButton(Serial);
 	ClearText();
 end;
 
@@ -832,6 +898,24 @@ sub RunCRTrials begin
 	end;
 end;
 
+sub int RecodeBITSIResponse(int code) begin
+	# INPUTS:
+	#		int code		-	Valid BITSI code
+	#
+	# OUTPUTS:
+	#		int option	-	1 v 2 for left v right
+	
+	if code < 0 then
+		return -1;
+	end;
+	
+	if OptionsInclude(ai_MEG_Buttons_No, code) then
+		return 1;
+	end;
+	
+	return 2;
+end;
+
 sub RunMEGTrials(input_port& Serial) begin
 	# Presentation of the MEG task
 	# @TODO: Trigger data
@@ -861,22 +945,19 @@ sub RunMEGTrials(input_port& Serial) begin
 		t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
 		p_MEG.present();
 		
-		int delta = WaitForBITSIButtonTimed(Serial, i_MEG_Response);
-		int resp = -1;
+		array<int> R[2] = WaitForBITSIButtonTimed(Serial, i_MEG_Response);
+		int delta = R[2];
+		int resp = RecodeBITSIResponse(R[1]); # recode the respnose to 1 or 2; left or right
 		int correct = 0;
 		
 		ClearText();
 		p_Blank.present();
 		
-		if delta > 0 then
-			resp = response_manager.last_response();
+		if resp > 0 then
 			int a = 3 + type;
-			# recode the respnose to 0 or 1; left or right
 			if (resp - 1) == int(as_Definitions[int(as_MEG_Stimuli[i][8])][a]) then
 				correct = 1;
 			end;
-		else
-			delta = i_MEG_Response;
 		end;
 		
 		array<string> data[14];

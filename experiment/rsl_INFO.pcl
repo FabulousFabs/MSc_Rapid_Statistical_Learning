@@ -144,6 +144,9 @@ string s_MEG_Instructions_3 = "Je ben klaar met de vijfde taak.\nLaat het de ond
 string s_MEG_Prompt_N = "Nee";				# option no
 string s_MEG_Prompt_Y = "Ja";					# option yes
 array<string> as_MEG_Prompts[2] = {"...is animate?", "...fits in a shoebox?"};	# prompts
+array<int> ai_MEG_Buttons[4] = {97, 98, 101, 102}; # blue right (down), yellow right (down), blue left (down), yellow left (down)
+array<int> ai_MEG_Buttons_No[2] = {97, 102}; # buttons for no (double coded to allow both left/right handedness)
+array<int> ai_MEG_Buttons_Yes[2] = {98, 101}; # buttons for yes (double coded to allow both left/right handedness)
 
 int i_MEG_Trials_N = 320;		# trial count
 int i_MEG_Trials_C = 9;			# trial columns
