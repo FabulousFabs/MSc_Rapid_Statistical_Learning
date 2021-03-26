@@ -899,11 +899,13 @@ sub RunCRTrials begin
 end;
 
 sub int RecodeBITSIResponse(int code) begin
+	# Recode ASCII codes from BITSI to 1 or 2
+	# 
 	# INPUTS:
 	#		int code		-	Valid BITSI code
 	#
 	# OUTPUTS:
-	#		int option	-	1 v 2 for left v right
+	#		int option	-	1 v 2 for left (no) v right (yes)
 	
 	if code < 0 then
 		return -1;
@@ -916,14 +918,49 @@ sub int RecodeBITSIResponse(int code) begin
 	return 2;
 end;
 
-sub RunMEGTrials(input_port& Serial) begin
+sub int CodeOnsetTrigger(int p, int l) begin
+	# Codes the trigger for our condition where:
+	#
+	#		pool
+	#	l	1	2	3
+	#	i	4	5	6
+	#	s	7	8	9
+	#	t
+	# 
+	# INPUTS:
+	#		int p		-	Pool
+	#		int l 	-	List
+	#
+	# OUTPUTS:
+	#		int c		-	Code
+	
+	return (l - 1) * 3 + p; # range 1-9 for c E M_ij
+end;
+
+sub RunMEGTrials(input_port& Serial, output_port& Port) begin
 	# Presentation of the MEG task
 	# @TODO: Trigger data
 	
 	string f_save = s_Dir_Data + s_PPN + s_Outs_MEG;
-	BeginDataStream(f_save, "spkr\tid\tvar\tdur\tf\tpool\tlist\tdef\ts\tt\trt\tr\tc\ti\n");
+	BeginDataStream(f_save, "id\tspkr\tvar\tdur\tf\tpool\tlist\tdef\ts\tt\trt\tr\tc\ti\n");
+	
+	Port.send_code(100); # CODE 100: MEG start
+	wait_interval(200);
 	
 	loop i = 1 until i > i_MEG_Trials_N begin
+		int l = int(as_MEG_Stimuli[i][7]);
+		int p = int(as_MEG_Stimuli[i][6]);
+		
+		# this is a bit frustrating because we cannot
+		# really code all the information we would
+		# in an ideal world send in 8 bits but
+		# it's really not that important; the main
+		# thing to send here is condition and that
+		# we're doing right now
+		Port.send_code(pow(2, 4)); # CODE 2^4: trial start
+		wait_interval(pow(2, 4));
+		Port.send_code(CodeOnsetTrigger(p, l));
+		
 		w_Sound.unload();
 		w_Sound.set_filename(s_Dir_Audio + as_MEG_Stimuli[i][5]);
 		w_Sound.load();
@@ -938,14 +975,17 @@ sub RunMEGTrials(input_port& Serial) begin
 		
 		p_Blank.present();
 		s_Sound.present();
+		Port.send_code(pow(2, 5)); # CODE 2^5: audio onset
 		wait_interval(int(as_MEG_Stimuli[i][4]) + i_MEG_Delay);
 		
 		t_MEG_top.set_caption(as_MEG_Prompts[type], true);
 		t_MEG_left.set_caption(s_MEG_Prompt_N, true);
 		t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
 		p_MEG.present();
+		Port.send_code(pow(2, 6)); # CODE 2^6: audio offset/response onset
 		
 		array<int> R[2] = WaitForBITSIButtonTimed(Serial, i_MEG_Response);
+		Port.send_code(pow(2, 7)); # CODE 2^7: response offset
 		int delta = R[2];
 		int resp = RecodeBITSIResponse(R[1]); # recode the respnose to 1 or 2; left or right
 		int correct = 0;
@@ -981,6 +1021,9 @@ sub RunMEGTrials(input_port& Serial) begin
 		
 		i = i + 1;
 	end;
+	
+	Port.send_code(200); # CODE 200: MEG end
+	wait_interval(300);
 end;
 
 sub Run4AFCTrials begin
