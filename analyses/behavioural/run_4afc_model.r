@@ -78,6 +78,7 @@ ggplot(data = hr.by_participant) +
   ggtitle(sprintf("Learning outcomes by participant, p=%.3f.", hr.total.t$p.value)) + 
   theme(plot.title = element_text(hjust = 0.5)) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_hitrate-byppn_withincontrol_rtl.png')
 
 # create plots by items to check for outliers
 ggplot(data = hr.by_item) + 
@@ -387,6 +388,14 @@ K.none <- rbind(
                           0, 1, 0,   # + L2P2
                           0, -1, 0), # - L2P3
   
+  # VERIDICAL < STATISTICAL (SPKR)
+  VERIDICAL_STATSPKRl = c(0, 0, 0,
+                          0, 1, -1, # + L2P2 - L3P2
+                          0, 0, 0),
+  VERIDICAL_STATSPKRh = c(1, 0, -1, # + L1P1 - L3P1
+                          0, 0, 0,
+                          0, 0, 0),
+  
   # STATISTICAL (WORD) < CONTROL
   STATWORDl_CONTROL = c(0, 0, 0,
                         0, 0, 0,
@@ -623,7 +632,7 @@ leveneTest(residuals(res.chosen) ~ data.chosen$pool);
 # is, admittedly, a little bit of
 # a minefield).
 # consider BY or single-step?
-res.chosen.glht <- summary(glht(res.chosen, K.chosen), test = adjusted("bonferroni"));
+res.chosen.glht <- summary(glht(res.chosen, K.none), test = adjusted("bonferroni"));
 res.chosen.glht
 
 ### 5: visualisation
@@ -647,7 +656,7 @@ vis.full <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool)) +
   guides(color = FALSE) + 
   ggtitle("Overview of behavioural data") +
   theme(plot.title = element_text(hjust = .5))
-ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel_withincontrol_rtl.png')
+#ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel_withincontrol_rtl.png')
 vis.full
 
 # data summaries by ppn
@@ -669,7 +678,7 @@ vis.full.facet_ppn <- ggplot(data.chosen, aes(x = list, y = outcome, fill = pool
   guides(color = FALSE) + 
   ggtitle("Overview of behavioural data per participant") +
   theme(plot.title = element_text(hjust = .5))
-ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel-byppn_withincontrol_rtl.png')
+#ggsave('/users/fabianschneider/desktop/university/master/dissertation/project/write-up/graphics_general/stash/beh/pilot_fullmodel-byppn_withincontrol_rtl.png')
 vis.full.facet_ppn
 
 # glht plots
