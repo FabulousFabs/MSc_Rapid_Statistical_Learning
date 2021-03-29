@@ -19,9 +19,11 @@
 /experiment/stimuli/txt/*
 /experiment/stimuli/audio/*
 /analyses/behavioural/data/*
+/analyses/behavioural/data_evolution/*
 /analyses/behavioural/raw/*
 /analyses/behavioural/aggregate.txt
 /analyses/behavioural/aggregate_old.txt
+/analyses/behavioural/aggregate_evolution.txt
 *.log
 
 # stimulus files
