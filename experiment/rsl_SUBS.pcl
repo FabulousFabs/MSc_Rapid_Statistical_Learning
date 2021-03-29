@@ -946,7 +946,10 @@ end;
 
 sub RunMEGTrials(input_port& Serial, output_port& Port) begin
 	# Presentation of the MEG task
-	# @TODO: Trigger data
+	#
+	# INPUTS:
+	# 		input_port& Serial	-	BITSI input port
+	#		outpot_port& Port		-	BITSI output port
 	
 	string f_save = s_Dir_Data + s_PPN + s_Outs_MEG;
 	BeginDataStream(f_save, "id\tspkr\tvar\tdur\tf\tpool\tlist\tdef\ts\tt\trt\tr\tc\ti\n");
@@ -955,6 +958,10 @@ sub RunMEGTrials(input_port& Serial, output_port& Port) begin
 	wait_interval(200);
 	
 	loop i = 1 until i > i_MEG_Trials_N begin
+		if OptionsInclude(ai_MEG_Breaks, i) then
+			InstructParticipantBITSI(s_MEG_Break, Serial);
+		end;
+		
 		int l = int(as_MEG_Stimuli[i][7]);
 		int p = int(as_MEG_Stimuli[i][6]);
 		
@@ -964,9 +971,11 @@ sub RunMEGTrials(input_port& Serial, output_port& Port) begin
 		# it's really not that important; the main
 		# thing to send here is condition and that
 		# we're doing right now
-		Port.send_code(int(pow(2, 4))); # CODE 2^4: trial start
-		wait_interval(int(pow(2, 4)));
-		Port.send_code(CodeOnsetTrigger(p, l));
+		#Port.send_code(int(pow(2, 4))); # CODE 2^4: trial start
+		#wait_interval(int(pow(2, 4)));
+		#Port.send_code(CodeOnsetTrigger(p, l));
+		Port.send_code(CodeOnsetTrigger(p, l)); # CODE 1-9: trial onset (condition)
+		wait_interval(CodeOnsetTrigger(p, l) + 1);
 		
 		w_Sound.unload();
 		w_Sound.set_filename(s_Dir_Audio + as_MEG_Stimuli[i][5]);
