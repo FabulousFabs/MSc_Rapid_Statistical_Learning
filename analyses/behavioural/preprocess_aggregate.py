@@ -53,11 +53,68 @@ def mk_line(ins):
     """Make writeable line from array"""
     return '\t'.join(ins) + '\n'
 
+def read_txt_by(f, type = None, ppn = None):
+    """Read txt table and fill NAs to fit template"""
+    if type is None or ppn is None: return
+
+    tbl = []
+    items = []
+
+    with open(f, 'r') as ftxt:
+        con = ftxt.readlines()
+
+        for i in range(len(con)):
+            if i == 0: continue # skip header
+            line = read_line_by(con[i], type = type, ppn = ppn)
+            items.append(line[3])
+            line[2] = str(items.count(line[3]) + (4 if type == '2AFCD' else 8 if type == '2AFCW' else 16))
+            tbl.append(line)
+
+    return tbl
+
+def read_line_by(line, type = None, ppn = None):
+    """Fill in line properly"""
+    if type is None or ppn is None: return
+
+    # id, speaker, variant, duration, file, pool, list, definition, sex, filler, correct, rt, index == 13 => 2AFCW
+    # foil id, foil speaker, foil variant, foil duration                                            == 4 => 2AFCD
+    # option 1, option 2, option 3, option 4                                                        == 4 => 4AFC
+    # task, learning iteration, ppn                                                                 == 3 => additional flags
+    full_line = ['N/A'] * 24
+    full_line[0] = type
+    full_line[1] = ppn
+    full_line[2] = str(-1)
+
+    # header:
+    # task, ppn, learning iteration, id, speaker, variant, duration, file, pool, list, definition, sex, filler, correct, rt, index
+    # foil id, foil speaker, foil variant, foil duration, option 1, option 2, option 3, option 4
+
+    data = line.replace('\n', '').split('\t')
+
+    if type == "2AFCW":
+        full_line[3:16] = data[0:13]
+    elif type == "2AFCD":
+        full_line[3:12] = data[0:9]
+        full_line[13:16] = data[13:16]
+        full_line[16:20] = data[9:13]
+    elif type == "4AFC":
+        full_line[3:12] = data[0:9]
+        full_line[13:16] = data[13:16]
+        full_line[20:24] = data[9:13]
+
+    return full_line
+
 def preprocess_evolution():
     """Main function for aggregation of evolution data"""
-    files = find_data(ins, ext)
+    files = find_data(ins_evo, ext)
 
-    with open()
+    with open(os.path.join(outs, target_evo), 'w+') as master:
+        master.write(mk_line(['task', 'ppn', 'iteration', 'id', 'spkr', 'var', 'dur', 'f', 'pool', 'list', 'def', 'sex', 'filler', 'cor', 'rt', 'i', 'f_id', 'f_spkr', 'f_var', 'f_dur', 'o1', 'o2', 'o3', 'o4']))
+        for i in range(len(files)):
+            ppn, task = files[i].replace('.txt', '').split('_')
+            content = read_txt_by(os.path.join(ins_evo, files[i]), type = task, ppn = ppn)
+            for line in content: master.write(mk_line(line))
+    print('--- All done. ---')
 
 if __name__ == '__main__':
     if len(sys.argv) >= 1:
