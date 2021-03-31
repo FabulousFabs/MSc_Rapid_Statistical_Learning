@@ -994,9 +994,19 @@ sub RunMEGTrials(input_port& Serial, output_port& Port) begin
 		Port.send_code(int(pow(2, 5))); # CODE 2^5: audio onset
 		wait_interval(int(as_MEG_Stimuli[i][4]) + i_MEG_Delay);
 		
-		t_MEG_top.set_caption(as_MEG_Prompts[type], true);
-		t_MEG_left.set_caption(s_MEG_Prompt_N, true);
-		t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
+		# we are changing this because this setup
+		# where we have 3 items on screen is a bit
+		# silly because it might well encourage
+		# participants to redirect eye gaze, but we
+		# really wanna avoid these kinds of artefacts
+		# as much as possible
+		#t_MEG_top.set_caption(as_MEG_Prompts[type], true);
+		#t_MEG_left.set_caption(s_MEG_Prompt_N, true);
+		#t_MEG_right.set_caption(s_MEG_Prompt_Y, true);
+		#p_MEG.present();
+		#Port.send_code(int(pow(2, 6))); # CODE 2^6: audio offset/response onset
+		
+		t_MEG_Q.set_caption(as_MEG_Prompts[type], true);
 		p_MEG.present();
 		Port.send_code(int(pow(2, 6))); # CODE 2^6: audio offset/response onset
 		
