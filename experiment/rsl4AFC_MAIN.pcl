@@ -14,6 +14,7 @@ SampleAlternatives(as_4AFC_Stimuli, ai_4AFC_Alternatives, i_4AFC_Trials_N, i_4AF
 # Run task
 InstructParticipant(s_4AFC_Instructions_1);
 InstructParticipant(s_4AFC_Instructions_2);
+InstructParticipant(s_4AFC_Instructions_22);
 Run4AFCTrials();
 double HR = round(double(i_Total_Correct) / double(i_4AFC_Trials_N) * double(100), 2);
 InstructParticipant(s_4AFC_Instructions_3.replace("%d", string(HR)));
