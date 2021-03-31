@@ -138,13 +138,32 @@ int i_CR_ITI = 1250;					# ITI t; jittered
 # Configuration MEG task
 string s_List_MEG = "_meg.txt";				# load data template
 string s_Outs_MEG = "_MEG.txt";				# save data template
-string s_MEG_Instructions_1 = "MEG instructions 1";
-string s_MEG_Instructions_2 = "MEG instructions 2";
+string s_MEG_Instructions_1 = "In deze taak krijg je een fixatiekruis te\n" +
+											"zien en hoor een word. Daarna zie je\n" +
+											"een prompt ('levendig?' of 'schoenendoos?')\n" +
+											"en moet je zo snel mogelijk 'Ja' of 'Nee'\n" +
+											"kiezen.\n\n" +
+											"Als de prompt 'levendig?' is besluit dan\n" +
+											"of het woord dat je net gehoord hebt iets\n" +
+											"levendig beschrijft.\n\n" +
+											"Als de prompt 'schoenendoos?' is besluit\n" +
+											"dan of het woord dat je net gehoord hebt\n" +
+											"iets beschrijft dat in een schoenendoos\n" +
+											"zou passen.";
+string s_MEG_Instructions_2 = "Je moet altijd met 'Ja' of 'Nee' antwoorden.\n" +
+										"Als je linkshandig bent druk op de rode knop\n" +
+										"om 'Nee' te selecteren en druk op de groene\n" +
+										"knop om 'Ja' te selecteren.\n" +
+										"Als je rechtshandig bent druk op de groene\n" +
+										"knop om 'Nee' te selecteren en druk op de rode\n" +
+										"knop om 'Ja' te selecteren.\n" +
+										"Ben je er klaar voor? Druk dan op een knop om\n" +
+										"te beginnen."
 string s_MEG_Instructions_3 = "Je ben klaar met de vijfde taak.\nLaat het de onderzoeker weten.";
 string s_MEG_Prompt_N = "Nee";				# option no
 string s_MEG_Prompt_Y = "Ja";					# option yes
 string s_MEG_Break = "Neem een korte pauze."; # displayed for breaks so we can help participant get back into position (if necessary)
-array<string> as_MEG_Prompts[2] = {"...is animate?", "...fits in a shoebox?"};	# prompts
+array<string> as_MEG_Prompts[2] = {"levendig?", "schoenendoos?"};	# prompts
 #array<int> ai_MEG_Buttons[4] = {97, 98, 101, 102}; # blue right (down), yellow right (down), blue left (down), yellow left (down)
 #array<int> ai_MEG_Buttons_No[2] = {97, 102}; # buttons for no (double coded to allow both left/right handedness)
 #array<int> ai_MEG_Buttons_Yes[2] = {98, 101}; # buttons for yes (double coded to allow both left/right handedness)
@@ -166,7 +185,7 @@ int i_MEG_ITI = 1200;			# ITI t
 # Configuration 4AFC task
 string s_List_4AFC = "_4afc.txt";			# load data template
 string s_Outs_4AFC = "_4AFC.txt";			# save data template
-string s_4AFC_Instructions_1 = "In deze taak is het opnieuw de  bedoeling\n" +
+string s_4AFC_Instructions_1 = "In deze taak is het opnieuw de bedoeling\n" +
 											"dat je een woord met de juiste definitie\n" +
 											"matcht.\n\n" +
 											"Je krijgt een fixatiekruis te zien en\n" +
@@ -179,7 +198,13 @@ string s_4AFC_Instructions_2 = "Om de definitie linksboven te selecteren\n" +
 											"selecteren druk op X; Om de definitie\n" +
 											"rechtsboven te selecteren druk op J;\n" +
 											"Om de definitie rechtsonder te\n" +
-											"selecteren druk op N.\n\n" +
+											"selecteren druk op N.";
+string s_4AFC_Instructions_22 = "Let op! In deze taak krijg je ook\n" +
+											"onbekende woorden te horen. Je moet\n" +
+											"dan 'Geen van deze' selecteren. Je\n" +
+											"moet echter ook onthouden dat je 'Geen\n" +
+											"van deze' soms ook bij bekende woorden\n" +
+											"kunt selecteren.\n\n" +
 											"Ben je er klaar voor? Druk dan op\n" + 
 											"de spatiebalk om te beginnen.";
 string s_4AFC_Instructions_3 = "Je ben klaar met de laatste taak.\nHit rate: %d%.\nDankjewel!";
