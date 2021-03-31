@@ -46,17 +46,20 @@ picture {
 	} b_MEG;
 	x = 0; y = 0;
 	
-	text {caption = ""; font_size=42; width=400; text_align=align_center;} t_MEG_top;
-	x = 0;
-	y = 120;
+	text {caption = ""; font_size = 42; width=400; text_align=align_center;} t_MEG_Q;
+	x = 0; y = 0;
 	
-	text {caption = ""; font_size=42; width=200; text_align=align_center;} t_MEG_left;
-	x = -200;
-	y = 0;
-	
-	text {caption = ""; font_size=42; width=200; text_align=align_center;} t_MEG_right;
-	x = 200;
-	y = 0;
+	#text {caption = ""; font_size=42; width=400; text_align=align_center;} t_MEG_top;
+	#x = 0;
+	#y = 120;
+	#
+	#text {caption = ""; font_size=42; width=200; text_align=align_center;} t_MEG_left;
+	#x = -200;
+	#y = 0;
+	#
+	#text {caption = ""; font_size=42; width=200; text_align=align_center;} t_MEG_right;
+	#x = 200;
+	#y = 0;
 } p_MEG;
 
 picture {
