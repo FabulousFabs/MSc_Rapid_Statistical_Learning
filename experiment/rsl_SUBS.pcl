@@ -25,9 +25,10 @@ sub ClearText begin
 	t_Text2.set_caption("", true);
 	t_2AFC_left.set_caption("", true);
 	t_2AFC_right.set_caption("", true);
-	t_MEG_top.set_caption("", true);
-	t_MEG_left.set_caption("", true);
-	t_MEG_right.set_caption("", true);
+	#t_MEG_top.set_caption("", true);
+	#t_MEG_left.set_caption("", true);
+	#t_MEG_right.set_caption("", true);
+	t_MEG_Q.set_caption("", true);
 	t_4AFC_1_top_left.set_caption("", true);
 	t_4AFC_2_bottom_left.set_caption("", true);
 	t_4AFC_3_top_right.set_caption("", true);

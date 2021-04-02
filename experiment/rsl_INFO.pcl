@@ -158,7 +158,7 @@ string s_MEG_Instructions_2 = "Je moet altijd met 'Ja' of 'Nee' antwoorden.\n" +
 										"knop om 'Nee' te selecteren en druk op de rode\n" +
 										"knop om 'Ja' te selecteren.\n" +
 										"Ben je er klaar voor? Druk dan op een knop om\n" +
-										"te beginnen."
+										"te beginnen.";
 string s_MEG_Instructions_3 = "Je ben klaar met de vijfde taak.\nLaat het de onderzoeker weten.";
 string s_MEG_Prompt_N = "Nee";				# option no
 string s_MEG_Prompt_Y = "Ja";					# option yes
@@ -170,7 +170,7 @@ array<string> as_MEG_Prompts[2] = {"levendig?", "schoenendoos?"};	# prompts
 array<int> ai_MEG_Buttons[4] = {99, 100, 103, 104}; # green right (down), red right (down), green left (down), red left (down)
 array<int> ai_MEG_Buttons_No[2] = {99, 104}; # green right (down), red left (down)
 array<int> ai_MEG_Buttons_Yes[2] = {100, 103}; # red right (down), green left (down)
-array<int> ai_MEG_Breaks[2] = {106, 211}; # trials at which we take a break before proceeding; this is useful for head repositioning
+array<int> ai_MEG_Breaks[2] = {80, 160, 240}; # trials at which we take a break before proceeding; this is useful for head repositioning
 
 int i_MEG_Trials_N = 320;		# trial count
 int i_MEG_Trials_C = 9;			# trial columns

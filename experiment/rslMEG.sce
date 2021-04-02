@@ -41,10 +41,10 @@ picture {
 } p_2AFC;
 
 picture {
-	box { 
-		height = 90; width = 3; color = 255,255,255;
-	} b_MEG;
-	x = 0; y = 0;
+	#box { 
+	#	height = 90; width = 3; color = 255,255,255;
+	#} b_MEG;
+	#x = 0; y = 0;
 	
 	text {caption = ""; font_size = 42; width=400; text_align=align_center;} t_MEG_Q;
 	x = 0; y = 0;
