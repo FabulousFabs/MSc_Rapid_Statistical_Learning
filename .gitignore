@@ -19,12 +19,35 @@
 /experiment/stimuli/txt/*
 /experiment/stimuli/audio/*
 /analyses/behavioural/data/*
+/analyses/behavioural/data_pilot/*
 /analyses/behavioural/data_evolution/*
+/analyses/behavioural/data_evolution_pilot/*
 /analyses/behavioural/raw/*
 /analyses/behavioural/aggregate.txt
 /analyses/behavioural/aggregate_old.txt
 /analyses/behavioural/aggregate_evolution.txt
+/analyses/meg/raw/*
+/analyses/meg/data/*
+
+# participant data that should be excluded already
+# (but we are adding this as a safety fall back)
 *.log
+*.ds*
+*.acq
+*.hc
+*.hist
+*.infods
+*.infods.bak
+*.meg4
+*.newds
+*.res4
+*.eeg
+*.segments
+*.cls
+*.mrk
+*DigTrigChannelInfo.txt
+*BadChannels
+
 
 # stimulus files
 *.wav
