@@ -45,6 +45,7 @@
 *.segments
 *.cls
 *.mrk
+*.IMA
 *DigTrigChannelInfo.txt
 *BadChannels
 
