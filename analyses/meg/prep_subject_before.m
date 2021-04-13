@@ -52,7 +52,7 @@ function prep_subject_before(subject)
     cfg_rjv.layout = 'CTF275.lay';
     data_clean = ft_rejectvisual(cfg_rjv, data);
     
-    tri_keep = data_clean.trialinfo(:, 2);
+    tri_keep = data_clean.trialinfo(:, 8);
     megchan_keep = data_clean.label;
     
     save(fullfile(subject.out, 'preproc-artifacts-rejectvisual-variance.mat'), 'tri_keep', 'megchan_keep');
@@ -74,7 +74,7 @@ function prep_subject_before(subject)
     cfg_rjv.layout = 'CTF275.lay';
     data_clean = ft_rejectvisual(cfg_rjv, data_muscle);
     
-    tri_keep = data_clean.trialinfo(:, 2);
+    tri_keep = data_clean.trialinfo(:, 8);
     
     save(fullfile(subject.out, 'preproc-artifacts-rejectvisual-muscle.mat'), 'tri_keep');
     
