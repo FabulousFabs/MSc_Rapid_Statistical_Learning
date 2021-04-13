@@ -58,5 +58,5 @@ function [trl, event] = helper_make_trial(cfg)
     assert(all(trl_onset_value(:) == beh(:, 7)));
     
     % make trl mat
-    trl = [real_onset_sample real_offset_sample offset trl_onset_value beh(:, 1:6) (1:length(beh))'];
+    trl = [real_onset_sample real_offset_sample offset trl_onset_value beh(:, 1:6) (1:length(beh))' ];
 end
