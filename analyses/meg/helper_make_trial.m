@@ -4,13 +4,14 @@
 %       cfg     -   Configuration
 %
 % OUTPUTS:
-%       trl     -   Trial segmentation
+%       trl     -   Trial segmentation where:
+%                   1: sample_onset, 2: sample_offset, 3: offset, 4: condition, 5: id,
+%                   6: spkr, 7: var, 8: dur, 9: pool, 10: list
 %       event   -   Event data
 
 function [trl, event] = helper_make_trial(cfg)
-    % safety
     assert(isempty(cfg) == false);
-    assert(isfield(cfg, 'dataset'));
+    assert(isfield(cfg, 'subject'));
     assert(isfield(cfg, 'trialdef'));
     assert(isfield(cfg.trialdef, 'pre'));
     assert(isfield(cfg.trialdef, 'post'));
@@ -19,9 +20,14 @@ function [trl, event] = helper_make_trial(cfg)
     assert(isfield(cfg.trialdef, 'onset'));
     assert(isfield(cfg.trialdef, 'offset'));
     
+    % behavioural events
+    cfg_beh = [];
+    cfg_beh.subject = cfg.subject;
+    beh = helper_read_beh(cfg_beh);
+    
     % read header & events
-    hdr = ft_read_header(cfg.dataset);
-    event = ft_read_event(cfg.dataset);
+    hdr = ft_read_header(cfg.subject.raw_meg);
+    event = ft_read_event(cfg.subject.raw_meg);
     
     pretrig = -round(cfg.trialdef.pre * hdr.Fs);
     posttrig = round(cfg.trialdef.post * hdr.Fs);
@@ -45,7 +51,12 @@ function [trl, event] = helper_make_trial(cfg)
     offset_idx = find(offset_m);
     real_offset_sample = me_sample(offset_idx) + posttrig;
     
+    % set offsets
     offset = pretrig * ones(length(trl_onset_value), 1);
     
-    trl = [real_onset_sample real_offset_sample offset trl_onset_value];
+    % check meg vs beh triggers
+    assert(all(trl_onset_value(:) == beh(:, 7)));
+    
+    % make trl mat
+    trl = [real_onset_sample real_offset_sample offset trl_onset_value beh(:, 6)];
 end

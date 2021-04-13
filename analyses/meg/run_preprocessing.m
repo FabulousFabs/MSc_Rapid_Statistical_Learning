@@ -8,15 +8,13 @@ addpath /users/fabianschneider/desktop/university/master/dissertation/project/an
 ft_defaults;
 
 rootdir = '/users/fabianschneider/desktop/university/master/dissertation/project/analyses/meg/';
+subjects = helper_datainfo(rootdir);
+sid = 1;
 
-%% Setup run of subject007
+%% preprocess before
+prep_subject_before(subjects(sid));
+
+%% geom realign
 cfg = [];
-cfg.rootdir = rootdir;
-cfg.dataset = 'sub007ses01SPEZL_3018012.23_20210410_01.ds';
-[data, data_raw] = run_single_subject(cfg);
-fprintf('*** Done ***');
-
-%%
-cfg2 = [];
-cfg2.channel = 'MEG';
-artf = ft_databrowser(cfg2, data);
+cfg.subject = subjects(sid);
+helper_geom_realign(cfg);
