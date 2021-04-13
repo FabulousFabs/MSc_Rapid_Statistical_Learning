@@ -3,11 +3,8 @@
 %
 % INPUTS:
 %       subject -   Subject
-%
-% OUTPUTS:
-%       mri     -   Realigned MRI
 
-function mri = prep_geom_realign(subject)
+function prep_geom_realign(subject)
     % read MRI
     fprintf('\n*** Reading MRI ***\n');
     rawmri = ft_read_mri(subject.raw_mri);

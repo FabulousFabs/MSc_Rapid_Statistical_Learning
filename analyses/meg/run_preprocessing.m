@@ -8,6 +8,7 @@ addpath /users/fabianschneider/desktop/university/master/dissertation/project/an
 ft_defaults;
 
 rootdir = '/users/fabianschneider/desktop/university/master/dissertation/project/analyses/meg/';
+sourcemodel_loc = '/users/fabianschneider/Documents/MATLAB/fieldtrip/template/sourcemodel/standard_sourcemodel3d8mm.mat';
 subjects = helper_datainfo(rootdir);
 sid = 1;
 
@@ -29,4 +30,5 @@ save(fullfile(subjects(sid).out, 'preproc-ica-badcomps.mat'), 'badcomps', 'badco
 %% preprocess MRI/pol alignment
 prep_geom_realign(subjects(sid));
 
-%% preprocess 
+%% preprocess MRI segmentation and lead fields
+prep_geom_segmentmri_and_leadfield(subjects(sid), sourcemodel_loc);
