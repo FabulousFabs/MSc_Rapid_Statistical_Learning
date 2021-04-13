@@ -6,7 +6,8 @@
 % OUTPUTS:
 %       trl     -   Trial segmentation where:
 %                   1: sample_onset, 2: sample_offset, 3: offset, 4: condition, 5: id,
-%                   6: spkr, 7: var, 8: dur, 9: pool, 10: list, 11: no.
+%                   6: spkr, 7: var, 8: dur, 9: pool, 10: list, 11: no.,
+%                   12: rt, 13: response, 14: correct
 %       event   -   Event data
 
 function [trl, event] = helper_make_trial(cfg)
@@ -58,5 +59,5 @@ function [trl, event] = helper_make_trial(cfg)
     assert(all(trl_onset_value(:) == beh(:, 7)));
     
     % make trl mat
-    trl = [real_onset_sample real_offset_sample offset trl_onset_value beh(:, 1:6) (1:length(beh))' ];
+    trl = [real_onset_sample real_offset_sample offset trl_onset_value beh(:, 1:6) (1:length(beh))' beh(:, 8:10)];
 end
