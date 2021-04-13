@@ -26,4 +26,7 @@ badcomps_reasons = {};
 
 save(fullfile(subjects(sid).out, 'preproc-ica-badcomps.mat'), 'badcomps', 'badcomps_reasons');
 
-%% 
+%% preprocess MRI/pol alignment
+prep_geom_realign(subjects(sid));
+
+%% preprocess 

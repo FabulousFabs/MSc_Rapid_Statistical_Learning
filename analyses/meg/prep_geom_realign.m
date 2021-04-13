@@ -2,18 +2,15 @@
 % to Polhemus headshape.
 %
 % INPUTS:
-%       cfg     -   Configuration
+%       subject -   Subject
 %
 % OUTPUTS:
 %       mri     -   Realigned MRI
 
-function mri = helper_geom_realign(cfg)
-    assert(isempty(cfg) == false);
-    assert(isfield(cfg, 'subject'));
-    
+function mri = prep_geom_realign(subject)
     % read MRI
     fprintf('\n*** Reading MRI ***\n');
-    rawmri = ft_read_mri(cfg.subject.raw_mri);
+    rawmri = ft_read_mri(subject.raw_mri);
     
     % fiducial positions
     fprintf('\n*** Finding fiducial positions ***\n');
@@ -24,7 +21,7 @@ function mri = helper_geom_realign(cfg)
     
     % read polhemus
     fprintf('\n*** Reading Polhemus ***\n');
-    headshape = ft_read_headshape(cfg.subject.raw_pol);
+    headshape = ft_read_headshape(subject.raw_pol);
     
     % icp
     fprintf('\n*** Running ICP ***\n');
@@ -47,5 +44,5 @@ function mri = helper_geom_realign(cfg)
     
     % save MRI
     fprintf('\n*** Saving MRI ***\n');
-    save(fullfile(cfg.subject.out, 'geom-mri-realigned.mat'), 'mri');
+    save(fullfile(subject.out, 'geom-mri-realigned.mat'), 'mri');
 end
