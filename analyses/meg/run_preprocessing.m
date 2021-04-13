@@ -3,12 +3,16 @@
 %% Preamble
 clearvars; close all;
 
-addpath /users/fabianschneider/Documents/matlab/fieldtrip;
-addpath /users/fabianschneider/desktop/university/master/dissertation/project/analyses/meg;
+%addpath /users/fabianschneider/Documents/matlab/fieldtrip;
+%addpath /users/fabianschneider/desktop/university/master/dissertation/project/analyses/meg;
+
+addpath /home/common/matlab/fieldtrip;
+addpath /project/3018012.23;
+
 ft_defaults;
 
-rootdir = '/users/fabianschneider/desktop/university/master/dissertation/project/analyses/meg/';
-sourcemodel_loc = '/users/fabianschneider/Documents/MATLAB/fieldtrip/template/sourcemodel/standard_sourcemodel3d8mm.mat';
+rootdir = '/project/3018012.23/';
+sourcemodel_loc = '/home/common/matlab/fieldtrip/template/sourcemodel/standard_sourcemodel3d8mm.mat';
 subjects = helper_datainfo(rootdir);
 sid = 1;
 
