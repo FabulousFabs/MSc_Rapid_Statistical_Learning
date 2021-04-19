@@ -3,6 +3,10 @@
 *__MACOSX
 *.icloud
 
+# HPC
+*.e*
+*.o*
+
 # participant data
 /stimulus-creation/experiment/logs/*
 /stimulus-creation/preprocessing-assignment/lists/*
