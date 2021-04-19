@@ -30,6 +30,15 @@ function subjects = helper_datainfo(rootdir)
     subjects(2).raw_pol = fullfile(rootdir, 'raw', 'sub-001', 'ses-1', 'pol', 'S1-1.pos');
     subjects(2).beh_meg = fullfile(rootdir, 'raw', 'sub-001', 'ses-1', 'beh', 'LJYOF_MEG.txt');
     
+    % sub002
+    subjects(3).ppn = 2;
+    subjects(3).code = 'VGYEQ';
+    subjects(3).raw_meg = fullfile(rootdir, 'raw', 'sub-002', 'ses-meg01', 'meg', 'sub002ses01_3018012.23_20210415_01.ds');
+    %subjects(3).raw_mri = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'mri', '022-t1_mprage_sag_p2_iso_1.0', '00001_1.3.12.2.1107.5.2.19.45416.2021040212443212786713242.IMA');
+    subjects(3).raw_edf = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'beh', 'Sub2-1.edf');
+    subjects(3).raw_pol = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'pol', 'S2-1.pos');
+    subjects(3).beh_meg = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'beh', 'VGYEQ_MEG.txt');
+    
     % add outputs + dirs
     for sid = 1:numel(subjects)
         subjects(sid).out = fullfile(rootdir, 'processed', sprintf('sub-%02d', subjects(sid).ppn));
