@@ -1,6 +1,6 @@
-% @Description: Compute TFR of trials over time for subject.
+% @Description: Compute evoked TFR of conditions for subject.
 
-function [freqs, conds] = subj_tfr_evoked(subject)
+function subj_tfr_evoked(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -54,7 +54,7 @@ function [freqs, conds] = subj_tfr_evoked(subject)
         tl = ft_timelockanalysis(cfg, data);
         
         cfg = [];
-        cfg.pad = 10;
+        cfg.pad = 7; % the absolute maximum for our trials is technically 4.671s + 2.000s (pre+post) but that's ugly
         cfg.method = 'mtmconvol';
         cfg.toi = -0.5:0.05:1.0;
         cfg.taper = 'hanning';
@@ -66,5 +66,6 @@ function [freqs, conds] = subj_tfr_evoked(subject)
         freqs{k} = rmfield(freqs{k}, 'cfg');
     end
     
+    fprintf('\n*** Saving data ***\n');
     save(fullfile(subject.out, 'sensor_evoked_tfr.mat'), 'freqs', 'conds', 'condslabels');
 end

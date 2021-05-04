@@ -20,5 +20,4 @@ subj_tfr_evoked(subjects(sid));
 %% Compute TFRs (non-locked)
 subj_tfr(subjects(sid));
 
-%% Compute theta source beamformer
-subj_source_theta_bf(subjects(sid));
+%% Compute 

@@ -13,7 +13,7 @@ sourcemodel_loc = '/home/common/matlab/fieldtrip/template/sourcemodel/standard_s
 
 %% Select participant
 subjects = helper_datainfo(rootdir);
-sid = 3;
+sid = 5;
 
 %% preprocess before
 prep_subject_before(subjects(sid));
@@ -25,7 +25,7 @@ prep_subject_ica(subjects(sid)); % we could run ICAs as a qsub at 32GB
 prep_subject_after(subjects(sid));
 
 %% preprocess after: jot down & save!
-badcomps = [4, 5, 9];
+badcomps = [1, 6, 31];
 badcomps_reasons = {"eog", "eog", "ecg"};
 
 save(fullfile(subjects(sid).out, 'preproc-ica-badcomps.mat'), 'badcomps', 'badcomps_reasons');
