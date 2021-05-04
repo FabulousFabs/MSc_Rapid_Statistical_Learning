@@ -22,3 +22,6 @@ subj_tfr(subjects(sid));
 
 %% Compute theta source beamformer
 subj_source_theta_bf(subjects(sid));
+
+%% Compute beta source beamformer
+subj_source_beta_bf(subjects(sid));

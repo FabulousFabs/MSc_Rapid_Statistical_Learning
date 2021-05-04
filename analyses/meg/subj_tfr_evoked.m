@@ -54,9 +54,11 @@ function subj_tfr_evoked(subject)
         tl = ft_timelockanalysis(cfg, data);
         
         cfg = [];
-        cfg.pad = 7; % the absolute maximum for our trials is technically 4.671s + 2.000s (pre+post) but that's ugly
+         %cfg.pad = 7; % the absolute maximum for our trials is technically 4.671s + 2.000s (pre+post) but that's ugly
+        cfg.pad = 7.5; % the absolute maximum for our trials is technically now 5.871s + 1.200s (pre+post) but that's ugly
         cfg.method = 'mtmconvol';
-        cfg.toi = -0.5:0.05:1.0;
+        %cfg.toi = -0.5:0.05:1; % theta only
+        cfg.toi = -0.5:0.05:7.5; % theta + within break beta
         cfg.taper = 'hanning';
         cfg.foi = 1:30;
         cfg.t_ftimwin = ones(size(cfg.foi)) * 0.5;
