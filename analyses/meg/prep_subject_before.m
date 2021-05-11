@@ -17,8 +17,8 @@ function prep_subject_before(subject)
     cfg_dft.trialdef.offset = 2^7;
     %cfg_dft.trialdef.pre = 1; % old theta only
     %cfg_dft.trialdef.post = 1; % old theta only
-    cfg_dft.trialdef.pre = 0.6; % now also including between trials beta window; this raises maximum trial duration to 7071
-    cfg_dft.trialdef.post = 1.8; % now also including between trials beta window; this raises maximum trial duration to 7071
+    cfg_dft.trialdef.pre = 1.0; % now also including between trials beta window; this raises maximum trial duration to 7071
+    cfg_dft.trialdef.post = 1.4; % now also including between trials beta window; this raises maximum trial duration to 7071
     cfg_dft = ft_definetrial(cfg_dft);
     
     % get data

@@ -16,12 +16,14 @@ load(fullfile(progressdir, progressf), 'prep_comp_subs');
 
 subjects = helper_datainfo(rootdir);
 
-for k = 1:size(subjects)
+for k = 1:size(subjects, 2)
     subject = subjects(k);
     
     if any(prep_comp_subs(:) == subject.ppn)
         continue
     end
+    
+    fprintf('\n*** Starting preprocessing data for k=%d, sub-%02d. *** \n', k, subject.ppn);
     
     % ideally, I would want to run the ICAs as individual qsubs but given
     % that we're not scanning fast enough due to all the issues that have
@@ -40,7 +42,7 @@ for k = 1:size(subjects)
     badcomps_reasons = {};
     
     while 1
-        comp = input('Which component should be flagged bad? (<0 to exit)');
+        comp = input('Which component should be flagged bad? (<=0 to exit)');
         
         if comp < 1
             break

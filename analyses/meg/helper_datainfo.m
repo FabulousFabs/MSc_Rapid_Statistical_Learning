@@ -65,4 +65,8 @@ function subjects = helper_datainfo(rootdir)
         mkdir(subjects(sid).out);
         warning('on', 'MATLAB:MKDIR:DirectoryExists');
     end
+    
+    warning('off', 'MATLAB:MKDIR:DirectoryExists');
+    mkdir(fullfile(rootdir, 'processed', 'combined'));
+    warning('on', 'MATLAB:MKDIR:DirectoryExists');
 end

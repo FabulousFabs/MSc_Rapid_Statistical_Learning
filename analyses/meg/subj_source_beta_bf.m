@@ -12,7 +12,7 @@ function subj_source_beta_bf(subject)
     cfg.offset = helper_get_beta_offsets(data.trialinfo, 400);
     data = ft_redefinetrial(cfg, data);
     
-    % single-trial time-resolved power 1-7 Hz
+    % single-trial time-resolved power 19-21 Hz
     fprintf('\n*** Computing single-trial beta power ***\n');
     
     cfg = [];
@@ -22,7 +22,7 @@ function subj_source_beta_bf(subject)
     cfg.foi = 20;
     cfg.toi = -0.5:0.05:1.2; % note: -0.5-0 includes response artifacts but there's no way around that
     cfg.t_ftimwin = 0.5;
-    cfg.tapsmofrq = 1; % this gives us a beta-band for 19-21Hz as per Bogaerts et al. (2020)
+    cfg.tapsmofrq = 3; % this gives us a beta-band for 17-23Hz which is slightly more inclusive than Bogaerts et al. (2020)
     freq = ft_freqanalysis(cfg, data);
     trialinds = freq.trialinfo(:,8);
     
