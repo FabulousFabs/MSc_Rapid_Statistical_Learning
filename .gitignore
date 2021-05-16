@@ -68,3 +68,6 @@
 /analyses/meg/mtimesx/*
 *.asv
 __pycache__
+*.npy
+*.ipynb_checkpoints*
+*.pyc
