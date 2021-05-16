@@ -70,6 +70,23 @@ def find_recordings(f, t):
             at.append(f)
     return at
 
+def get_max_L():
+    """Yields maximum stimulus length (useful for MEG processing later)"""
+    targets = find_recordings(pcm_folder, audio_targets)
+    L = 0
+    at = 'none'
+
+    for target in targets:
+        print('--- Checking length, current L_max = ' + str(L) + ' at = ' + at + '. ---', end='\r')
+        audio, fs = librosa.load(os.path.join(pcm_folder, target))
+        l = librosa.get_duration(y=audio, sr=fs)
+        (L, at) = (l, target) if l > L else (L, at)
+
+    print('--- Done. ---')
+    print('--- L_max = ' + str(L) + ' at = ' + at + '. ---')
+
+
+
 if __name__ == '__main__':
     if len(sys.argv) >= 1:
         for arg in sys.argv[1:]:
@@ -86,3 +103,5 @@ if __name__ == '__main__':
                 print('--- Skipping SPL, folder changed. ---\t\t')
             elif arg == '-pcm':
                 preprocess_pcm()
+            elif arg =='-L':
+                get_max_L()
