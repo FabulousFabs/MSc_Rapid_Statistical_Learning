@@ -67,3 +67,4 @@
 /analyses/meg/mtimesx.mexa64
 /analyses/meg/mtimesx/*
 *.asv
+__pycache__
