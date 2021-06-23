@@ -1,22 +1,28 @@
-% @Description: Compute beta beamformer.
+% @Description: Compute between-trial beta beamformer.
 
-function subj_source_beta_bf(subject)
+function subj_source_beta_bf_btwn(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
     data = helper_clean_data(subject);
     
+    % redefine trials and shift to 2^7 offset trigger to get at
+    % between-trials beta
+    cfg = [];
+    cfg.offset = helper_get_beta_offsets(data.trialinfo, 400);
+    data = ft_redefinetrial(cfg, data);
+    
     % single-trial time-resolved power 17-23 Hz
-    fprintf('\n*** Computing single-trial theta power ***\n');
+    fprintf('\n*** Computing single-trial beta power ***\n');
     
     cfg = [];
     cfg.method = 'mtmconvol';
     cfg.output = 'fourier';
     cfg.taper = 'dpss';
     cfg.foi = 20;
-    cfg.toi = -0.5:0.05:1;
+    cfg.toi = -0.5:0.05:0.7; % note: -0.5-0 includes response artifacts but there's no way around that
     cfg.t_ftimwin = 0.5;
-    cfg.tapsmofrq = 3;
+    cfg.tapsmofrq = 3; % this gives us a beta-band for 17-23Hz which is slightly more inclusive than Bogaerts et al. (2020)
     freq = ft_freqanalysis(cfg, data);
     trialinds = freq.trialinfo(:,8);
     
@@ -73,7 +79,7 @@ function subj_source_beta_bf(subject)
         cfg = [];
         cfg.trials = conds{k}.indices;
         cfg.avgoverrpt = 'yes';
-        cfg.latency = [0.25 0.75];
+        cfg.latency = [0 0.5];
         cfg.avgovertime = 'yes';
         sources{k} = ft_selectdata(cfg, source_pow);
         sources{k} = rmfield(sources{k}, 'cfg');
@@ -82,5 +88,5 @@ function subj_source_beta_bf(subject)
     % save
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_source_beta_bf.mat'), 'sources', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_source_beta_bf_btwn.mat'), 'sources', 'conds', 'condslabels');
 end

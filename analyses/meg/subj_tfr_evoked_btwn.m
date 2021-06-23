@@ -1,10 +1,16 @@
-% @Description: Compute evoked TFR of conditions for subject.
+% @Description: Compute between-trials evoked TFR of conditions for subject.
 
-function subj_tfr_evoked(subject)
+function subj_tfr_evoked_btwn(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
     data = helper_clean_data(subject);
+    
+    % redefine trials and shift to 2^7 offset trigger to get at
+    % between-trials beta
+    cfg = [];
+    cfg.offset = helper_get_beta_offsets(data.trialinfo, 400);
+    data = ft_redefinetrial(cfg, data);
     
     % channel repair
     fprintf ('\n*** Neighbours (skipping channel repair) ***\n');
@@ -56,7 +62,7 @@ function subj_tfr_evoked(subject)
         cfg = [];
         cfg.pad = 7.5; % the absolute maximum for our trials is technically now 5.871s + 1.200s (pre+post) but that's ugly
         cfg.method = 'mtmconvol';
-        cfg.toi = -0.5:0.05:1.2; 
+        cfg.toi = -0.5:0.05:0.7; 
         cfg.taper = 'hanning';
         cfg.foi = 1:30;
         cfg.t_ftimwin = ones(size(cfg.foi)) * 0.5;
@@ -67,5 +73,5 @@ function subj_tfr_evoked(subject)
     end
     
     fprintf('\n*** Saving data ***\n');
-    save(fullfile(subject.out, 'subj_tfr_evoked.mat'), 'freqs', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_evoked_tfr_btwn.mat'), 'freqs', 'conds', 'condslabels');
 end

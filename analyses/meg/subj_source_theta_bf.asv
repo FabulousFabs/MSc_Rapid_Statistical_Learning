@@ -1,4 +1,4 @@
-% @Description: Compute evoked TFR of conditions for subject.
+% @Description: Compute theta beamformer.
 
 function subj_source_theta_bf(subject)
     % load data
@@ -15,7 +15,7 @@ function subj_source_theta_bf(subject)
     cfg.taper = 'dpss';
     cfg.foi = 4;
     cfg.toi = -0.5:0.05:1;
-    cfg_tftimwin = 0.5;
+    cfg.t_ftimwin = 0.5;
     cfg.tapsmofrq = 3;
     freq = ft_freqanalysis(cfg, data);
     trialinds = freq.trialinfo(:,8);
@@ -68,14 +68,29 @@ function subj_source_theta_bf(subject)
     condslabels = {"L1P1", "L1P3", "L2P2", "L2P3"};
     
     sources = {};
+    sources_early = {};
+    sources_late = {};
     
-    for k = 1.size(conds, 1)
-        
-    end
-    
-    for k = 1:size(conds, 1)
+    for k = 1:size(conds, 2)
+        cfg = [];
         cfg.trials = conds{k}.indices;
-        freqs{k} = ft_freqdescriptives(cfg, freq);
-        freqs{k} = rmfield(freqs{k}, 'cfg');
+        cfg.avgoverrpt = 'yes';
+        cfg.latency = [0 0.25];
+        cfg.avgovertime = 'yes';
+        sources_early{k} = ft_selectdata(cfg, source_pow);
+        sources_early{k} = rmfield(sources_early{k}, 'cfg');
+        
+        cfg.latency = [0.3 0.75];
+        sources_late{k} = ft_selectdata(cfg, source_pow);
+        sources_late{k} = rmfield(sources_late{k}, 'cfg');
+        
+        cfg.latency = [0 0.75];
+        sources{k} = ft_selectdata(cfg, source_pow);
+        sources{k} = rmfield(sources{k}, 'cfg');
     end
+    
+    % save
+    fprintf('\n*** Saving ***\n');
+    
+    save(fullfile(subject.out, 'subj_source_theta_bf.mat'), 'sources', 'sources_early''conds', 'condslabels');
 end

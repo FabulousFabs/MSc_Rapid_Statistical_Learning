@@ -1,4 +1,4 @@
-% @Description: Compute evoked TFR of conditions for subject.
+% @Description: Compute theta beamformer.
 
 function subj_source_theta_bf(subject)
     % load data
@@ -68,13 +68,23 @@ function subj_source_theta_bf(subject)
     condslabels = {"L1P1", "L1P3", "L2P2", "L2P3"};
     
     sources = {};
+    sources_early = {};
+    sources_late = {};
     
-    for k = 1:size(conds, 1)
+    for k = 1:size(conds, 2)
         cfg = [];
         cfg.trials = conds{k}.indices;
         cfg.avgoverrpt = 'yes';
-        cfg.latency = [0 0.5];
+        cfg.latency = [0 0.25];
         cfg.avgovertime = 'yes';
+        sources_early{k} = ft_selectdata(cfg, source_pow);
+        sources_early{k} = rmfield(sources_early{k}, 'cfg');
+        
+        cfg.latency = [0.3 0.75];
+        sources_late{k} = ft_selectdata(cfg, source_pow);
+        sources_late{k} = rmfield(sources_late{k}, 'cfg');
+        
+        cfg.latency = [0 0.75];
         sources{k} = ft_selectdata(cfg, source_pow);
         sources{k} = rmfield(sources{k}, 'cfg');
     end
@@ -82,5 +92,5 @@ function subj_source_theta_bf(subject)
     % save
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_source_theta_bf.mat'), 'sources', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_source_theta_bf.mat'), 'sources', 'sources_early', 'sources_late', 'conds', 'condslabels');
 end

@@ -4,6 +4,7 @@ clearvars; close all;
 
 addpath /home/common/matlab/fieldtrip;
 addpath /project/3018012.23;
+addpath /project/3018012.23/git/analyses/meg;
 
 ft_defaults;
 
@@ -19,7 +20,15 @@ subjects = helper_datainfo(rootdir);
 for k = 1:size(subjects, 2)
     subject = subjects(k);
     
+    % make sure we preprocess only once per subject
     if any(prep_comp_subs(:) == subject.ppn)
+        fprintf('\n*** Skipping for k=%d, sub-%02d (already preprocessed). ***\n', k, subject.ppn);
+        continue
+    end
+    
+    % make sure we preprocess only if data is complete (i.e., MRI acquired)
+    if ~isfield(subject, 'raw_mri') || isempty(subject.raw_mri)
+        fprintf('\n*** Skipping for k=%d, sub-%02d (no MRI yet). ***\n', k, subject.ppn);
         continue
     end
     
@@ -29,7 +38,7 @@ for k = 1:size(subjects, 2)
     % that we're not scanning fast enough due to all the issues that have
     % been going on, that won't be an efficient use of our time. instead,
     % we're running it sequentially here.
-    % create another graphical matlab qsub to compute stuff in the mean
+    % create another graphical matlab job to compute stuff in the mean
     % time.
     
     prep_subject_before(subject);

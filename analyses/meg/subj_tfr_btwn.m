@@ -1,31 +1,28 @@
-% @Description: Compute TFR of conditions for subject.
+% @Description: Compute between-trials TFR of conditions for subject.
 
-function subj_tfr(subject)
+function subj_tfr_btwn(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
     data = helper_clean_data(subject);
     
+    % redefine trials and shift to 2^7 offset trigger to get at
+    % between-trials beta
+    cfg = [];
+    cfg.offset = helper_get_beta_offsets(data.trialinfo, 400);
+    data = ft_redefinetrial(cfg, data);
+    
     % neighbours
-    fprintf('\n*** Computing neighbours ***\n');
+    fprintf('\n*** Computing neighbours (skipping repair) ***\n');
     
     cfg = [];
     cfg.method = 'template';
     cfg.template = 'ctf275_neighb.mat';
     neighbours = ft_prepare_neighbours(cfg);
     
-    % channel repair
-    fprintf('\n*** Repairing channels ***\n');
-    
-    allchannels = ft_senslabel('ctf275');
-    if numel(allchannels) > numel(data.label)
-        cfg = [];
-        cfg.senstype = 'meg';
-        cfg.method = 'average';
-        cfg.missingchannel = setdiff(allchannels, data.label);
-        cfg.neighbours = neighbours;
-        data = ft_channelrepair(cfg, data);
-    end
+    % channel repair is currently skipped
+    % this is where we will want to implement that
+    % once we have all the data
     
     % Convert to planar
     fprintf('\n*** Converting to planar ***\n');
@@ -41,7 +38,7 @@ function subj_tfr(subject)
     cfg = [];
     cfg.pad = 7.5; % the absolute maximum for our trials is technically now 5.871s + 1.200s (pre+post) but that's ugly
     cfg.method = 'mtmconvol';
-    cfg.toi = -0.5:0.05:1.2;
+    cfg.toi = -0.5:0.05:0.7;
     cfg.keeptrials = 'yes';
     cfg.taper = 'hanning';
     cfg.foi = 1:30;
@@ -92,5 +89,5 @@ function subj_tfr(subject)
     % save 
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_tfr.mat'), 'freqs', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_tfr_btwn.mat'), 'freqs', 'conds', 'condslabels');
 end
