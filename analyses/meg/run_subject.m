@@ -35,10 +35,16 @@ for k = 1:size(subjects, 2)
     % separate qsubs per k such that we can save some time - one run of the
     % functions below should be 30mins ish so that's acceptable
     
-    subj_tfr(subject);
-    subj_tfr_evoked(subject);
-    subj_tfr_btwn(subject);
-    subj_tfr_evoked_btwn(subject);
+    subj_tfr(rootdir, subject);
+    subj_tfr_evoked(rootdir, subject);
+    subj_tfr_btwn(rootdir, subject);
+    subj_tfr_evoked_btwn(rootdir, subject);
+    
+    if subject.ppn == 32
+        fprintf('\n*** Partial skip for k=%d, sub-%02d (no MRI acquired due to early exclusion). ***\n', k, subject.ppn);
+        continue
+    end
+    
     subj_source_theta_bf(subject);
     subj_source_beta_bf(subject);
     subj_source_beta_bf_btwn(subject);

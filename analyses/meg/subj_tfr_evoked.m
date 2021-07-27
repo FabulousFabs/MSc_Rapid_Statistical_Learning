@@ -1,6 +1,6 @@
 % @Description: Compute evoked TFR of conditions for subject.
 
-function subj_tfr_evoked(subject)
+function subj_tfr_evoked(rootdir, subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -13,12 +13,19 @@ function subj_tfr_evoked(subject)
     cfg.template = 'ctf275_neighb.mat';
     neighbours = ft_prepare_neighbours(cfg);
     
-    % comment:
-    % this is the place where we would want to do
-    % channel repair as Eelke does it as well but
-    % I'm afraid we just don't have enough of the
-    % data set to think about that yet
-    % @todo: channel repair
+    % channel repair
+    fprintf('\n*** Repairing channels ***\n');
+    
+    load(fullfile(rootdir, 'processed', 'combined', 'chandata.mat'), 'allchannels');
+    
+    if numel(allchannels) > numel(data.label)
+        cfg = [];
+        cfg.senstype = 'meg';
+        cfg.method = 'average';
+        cfg.missingchannel = setdiff(allchannels, data.label);
+        cfg.neighbours = neighbours;
+        data = ft_channelrepair(cfg, data);
+    end
     
     % baseline demean
     fprintf('\n*** Baseline correction ***\n');

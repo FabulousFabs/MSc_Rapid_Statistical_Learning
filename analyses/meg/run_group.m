@@ -11,8 +11,196 @@ ft_defaults;
 rootdir = '/project/3018012.23/';
 sourcemodel_loc = '/home/common/matlab/fieldtrip/template/sourcemodel/standard_sourcemodel3d8mm.mat';
 
-% Select participant
 subjects = helper_datainfo(rootdir);
+
+%% STEP 1: AGGREGATE
+fprintf('\n*** Aggregating data across subjects ***\n');
+    
+    ind_allfreqs = {};
+    evo_allfreqs = {};
+    btw_allfreqs = {};
+    
+    allconds = {};
+    condslabels = {};
+    
+    for k=1:numel(subjects)
+        
+        % make sure we include only data from participants where we made
+        % the decision to include their data in analyses
+        if subjects(k).include ~= true
+            fprintf('\n*** Excluding k=%d for sub-%02d. *** \n', k, subjects(k).ppn);
+            continue
+        end
+        
+        load(fullfile(subjects(k).out, 'subj_tfr.mat'), 'freqs', 'conds', 'condslabels');
+        
+        ind_allfreqs{k} = freqs;
+        allconds{k} = conds;
+        condslabels = condslabels;
+        
+        clear freqs;
+        
+        load(fullfile(subjects(k).out, 'subj_tfr_evoked.mat'), 'freqs');
+        
+        evo_allfreqs{k} = freqs;
+        
+        clear freqs;
+        
+        load(fullfile(subjects(k).out, 'subj_tfr_btwn.mat'), 'freqs');
+        
+        btw_allfreqs{k} = freqs;
+        
+        clear freqs;
+    end
+    
+    ind_allfreqs = cat(1, ind_allfreqs{:}); % subject x condition
+    evo_allfreqs = cat(1, evo_allfreqs{:}); % subject x condition
+    btw_allfreqs = cat(1, btw_allfreqs{:}); % subject x condition
+    
+%% STEP 2: grand average
+fprintf('\n*** Creating grand average plots ***\n');
+
+ga_ind = ft_freqgrandaverage([], ind_allfreqs{:,:});
+ga_evo = ft_freqgrandaverage([], evo_allfreqs{:,:});
+ga_btw = ft_freqgrandaverage([], btw_allfreqs{:,:});
+
+ga_ind_L1P1 = ft_freqgrandaverage([], ind_allfreqs{:,1});
+ga_ind_L1P3 = ft_freqgrandaverage([], ind_allfreqs{:,2});
+ga_ind_L2P2 = ft_freqgrandaverage([], ind_allfreqs{:,3});
+ga_ind_L2P3 = ft_freqgrandaverage([], ind_allfreqs{:,4});
+
+ga_btw_L1P1 = ft_freqgrandaverage([], btw_allfreqs{:,1});
+ga_btw_L1P3 = ft_freqgrandaverage([], btw_allfreqs{:,2});
+ga_btw_L2P2 = ft_freqgrandaverage([], btw_allfreqs{:,3});
+ga_btw_L2P3 = ft_freqgrandaverage([], btw_allfreqs{:,4});
+
+cfg = [];
+cfg.avgovrchan = 'yes';
+ga_ind = ft_selectdata(cfg, ga_ind);
+ga_evo = ft_selectdata(cfg, ga_evo);
+ga_btw = ft_selectdata(cfg, ga_btw);
+ga_ind_L1P1 = ft_selectdata(cfg, ga_ind_L1P1);
+ga_ind_L1P3 = ft_selectdata(cfg, ga_ind_L1P3);
+ga_ind_L2P2 = ft_selectdata(cfg, ga_ind_L2P2);
+ga_ind_L2P3 = ft_selectdata(cfg, ga_ind_L2P3);
+ga_btw_L1P1 = ft_selectdata(cfg, ga_btw_L1P1);
+ga_btw_L1P3 = ft_selectdata(cfg, ga_btw_L1P3);
+ga_btw_L2P2 = ft_selectdata(cfg, ga_btw_L2P2);
+ga_btw_L2P3 = ft_selectdata(cfg, ga_btw_L2P3);
+
+%%
+cfg = [];
+cfg.baseline = [-0.5 -0.1];
+cfg.baselinetype = 'absolute';
+cfg.parameter = 'powspctrm';
+cfg.interactive = 'no';
+%cfg.colormap = ft_colormap('viridis', 256);
+cfg.colormap = brewermap(256, '*RdYlBu');
+cfg.gridscale = 96;
+cfg.zlim = [-0.05 0.25];
+ft_singleplotTFR(cfg, ga_ind_L1P1);
+ft_singleplotTFR(cfg, ga_ind_L1P3);
+ft_singleplotTFR(cfg, ga_ind_L2P2);
+ft_singleplotTFR(cfg, ga_ind_L2P3);
+
+%%
+cfg = [];
+cfg.baseline = [-0.5 -0.1];
+cfg.baselinetype = 'zscore';
+cfg.parameter = 'powspctrm';
+cfg.interactive = 'no';
+cfg.colormap = brewermap(256, '*RdYlBu');
+%cfg.colormap = ft_colormap('viridis', 256);
+cfg.gridscale = 96;
+ft_singleplotTFR(cfg, ga_ind);
+
+%%
+ft_singleplotTFR(cfg, ga_btw_L1P1);
+ft_singleplotTFR(cfg, ga_btw_L1P3);
+ft_singleplotTFR(cfg, ga_btw_L2P2);
+ft_singleplotTFR(cfg, ga_btw_L2P3);
+
+%%
+ft_singleplotTFR(cfg, ga_ind);
+
+%% STEP 3: cluster tests
+    
+    % load neighbours
+    fprintf('\n*** Loading neighbours ***\n');
+    
+    cfg = [];
+    cfg.method = 'template';
+    cfg.template = 'ctf275_neighb.mat';
+    neighbours = ft_prepare_neighbours(cfg);
+    
+    %%
+    
+    % cluster-based permutations 
+    fprintf('\n*** Computing cluster-based permutations ***\n');
+    
+    % setup configuration to use
+    cfg = [];
+    cfg.method = 'montecarlo';
+    cfg.statistic = 'ft_statfun_depsamplesT';
+    cfg.clusterthreshold = 'parametric';
+    cfg.clusterstatistic = 'maxsum';
+    cfg.numrandomization = 1000;
+    cfg.correctm = 'cluster';
+    cfg.neighbours = neighbours;
+    cfg.minnbchan = 2;
+    cfg.tail = 0;
+    cfg.clustertail = 0;
+    nobs = size(ind_allfreqs, 1);
+    cfg.design = [
+        ones(1,nobs)*1 ones(1,nobs)*2
+        1:nobs 1:nobs
+    ]';
+    cfg.ivar = 1;
+    cfg.uvar = 2;
+    
+    % compute theta responses
+    cfg.frequency = [1 7];
+    
+    %% induced: theta1
+    cfg.latency = [0.1 0.4];
+    ind_theta1_l1p1_l1p3 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,2});
+    ind_theta1_l2p2_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,3}, ind_allfreqs{:,4});
+    ind_theta1_l1p1_l2p2 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,3});
+    ind_theta1_l1p3_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,2}, ind_allfreqs{:,4});
+    
+    %% induced: theta2
+    cfg.latency = [0.4 0.8];
+    ind_theta2_l1p1_l1p3 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,2});
+    ind_theta2_l2p2_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,3}, ind_allfreqs{:,4});
+    ind_theta2_l1p1_l2p2 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,3});
+    ind_theta2_l1p3_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,2}, ind_allfreqs{:,4});
+    
+    %% induced: theta3
+    cfg.latency = [0.0 0.8];
+    ind_theta3_l1p1_l1p3 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,2});
+    ind_theta3_l2p2_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,3}, ind_allfreqs{:,4});
+    ind_theta3_l1p1_l2p2 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,3});
+    ind_theta3_l1p3_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,2}, ind_allfreqs{:,4});
+    
+    %% induced: beta_low
+    cfg.latency = [0.45 1.00];
+    cfg.frequency = [13 16];
+    ind_beta_low_l1p1_l1p3 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,2});
+    ind_beta_low_l2p2_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,3}, ind_allfreqs{:,4});
+    ind_beta_low_l1p1_l2p2 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,3});
+    ind_beta_low_l1p3_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,2}, ind_allfreqs{:,4});
+    
+    %% induced: beta_high
+    cfg.latency = [0.6 0.8];
+    cfg.frequency = [20 24];
+    ind_beta_high_l1p1_l1p3 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,2});
+    ind_beta_high_l2p2_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,3}, ind_allfreqs{:,4});
+    ind_beta_high_l1p1_l2p2 = ft_freqstatistics(cfg, ind_allfreqs{:,1}, ind_allfreqs{:,3});
+    ind_beta_high_l1p3_l2p3 = ft_freqstatistics(cfg, ind_allfreqs{:,2}, ind_allfreqs{:,4});
+    
+    %% plots
+    helper_tfrclusterplot(ind_theta1_l1p3_l2p3, 0.5, true);
+
 
 %%
 fprintf('\n*** Aggregating data across subjects ***\n');
@@ -139,7 +327,7 @@ fprintf('\n*** Aggregating data across subjects ***\n');
     
     %cfg.location = [42.9 -30.5 -9.3];
     
-    ft_sourceplot(cfg, theta2_stat_l2p2_l2p3_interp);
+    ft_sourceplot(cfg, theta2_stat_l1p3_l2p3_interp);
     %cfg.roi = {'Hippocampus_L', 'Hippocampus_R', 'ParaHippocampal_L', 'ParaHippocampal_R', 'Frontal_Sup_L', 'Frontal_Sup_R'};
     %cfg.roi = {'Hippocampus_R', 'Frontal_Sup_L', 'Heschl_L', 'Temporal_Sup_L'};
     %cfg.roi = {'Hippocampus_R'};
@@ -357,6 +545,9 @@ fprintf('\n*** Aggregating data across subjects ***\n');
     evo_theta_l1p1_l2p2 = ft_freqstatistics(cfg, evo_allfreqs{:,1}, evo_allfreqs{:,3});
     % evoked: L1P3 - L2P3
     evo_theta_l1p3_l2p3 = ft_freqstatistics(cfg, evo_allfreqs{:,2}, evo_allfreqs{:,4});
+    
+    %%
+    helper_tfrclusterplot(ind_theta_l1p1_l1p3, 0.7, true);
     
     %%
     cfg = [];
@@ -634,7 +825,8 @@ fprintf('\n*** Aggregating data across subjects ***\n');
     cfg.baselinetype = 'absolute';
     cfg.parameter = 'powspctrm';
     cfg.interactive = 'yes';
-    ft_singleplotTFR(cfg, ind_L1L2_diff_ga_avg);
+    cfg.zlim = [-0.03 0.04];
+    ft_singleplotTFR(cfg, ind_L1_ga_avg);
     
     
     

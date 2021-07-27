@@ -1,6 +1,6 @@
 % @Description: Compute between-trials TFR of conditions for subject.
 
-function subj_tfr_btwn(subject)
+function subj_tfr_btwn(rootdir, subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -20,9 +20,19 @@ function subj_tfr_btwn(subject)
     cfg.template = 'ctf275_neighb.mat';
     neighbours = ft_prepare_neighbours(cfg);
     
-    % channel repair is currently skipped
-    % this is where we will want to implement that
-    % once we have all the data
+    % channel repair
+    fprintf('\n*** Repairing channels ***\n');
+    
+    load(fullfile(rootdir, 'processed', 'combined', 'chandata.mat'), 'allchannels');
+    
+    if numel(allchannels) > numel(data.label)
+        cfg = [];
+        cfg.senstype = 'meg';
+        cfg.method = 'average';
+        cfg.missingchannel = setdiff(allchannels, data.label);
+        cfg.neighbours = neighbours;
+        data = ft_channelrepair(cfg, data);
+    end
     
     % Convert to planar
     fprintf('\n*** Converting to planar ***\n');

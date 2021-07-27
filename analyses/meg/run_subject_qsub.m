@@ -39,7 +39,11 @@ for k = 1:size(subjects, 2)
         continue
     end
     
-    subject_jobs{end+1} = qsubfeval(@qsub_run_subject, subject, 'memreq', 32*(1024^3), 'timreq', 60*60*1);
+    % technically, these jobs should all finish <30min, but it looks like
+    % we are hitting some resource constraints on the cluster that slows
+    % down some jobs extremely, ergo we're going to give them a lot of
+    % extra time to finish running
+    subject_jobs{end+1} = qsubfeval(@qsub_run_subject, rootdir, subject, 'memreq', 16*(1024^3), 'timreq', 120*60*1);
 end
 
 cd /project/3018012.23/git/analyses/meg/;

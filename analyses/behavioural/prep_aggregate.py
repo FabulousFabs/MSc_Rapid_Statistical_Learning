@@ -9,9 +9,12 @@ from pathlib import Path
 setup
 '''
 
+flag_all = '--all' in sys.argv
+flag_target = 'MEG' if '--MEG' in sys.argv else '2AFCW' if '--2AFCW' in sys.argv else '2AFCD' if '--2AFCD' in sys.argv else '4AFC'
+
 dir_traverse = '/project/3018012.23/raw/'
-target = '*_4AFC.txt'
-out = '/project/3018012.23/processed/combined/union_4AFC.txt'
+target = '*_' + flag_target  + '.txt'
+out = '/project/3018012.23/processed/combined/union_' + flag_target + '_' + str(flag_all) + '.txt'
 
 '''
 exclude pilots
@@ -46,12 +49,14 @@ def mk_line(ins):
 traverse and collect
 '''
 
+print('Mode: aggregate.py --all=%s --%s' % (flag_all, flag_target))
+
 i = 0
 
 with open(out, 'w+') as master:
     for p in Path(dir_traverse).rglob(target):
         ppn = p.name.split('_')[0]
-        if ppn in pilots: continue # skip pilots
+        if not flag_all and ppn in pilots: continue # skip pilots
         content = read_txt(p, s = True) if i > 0 else read_txt(p, s = False)
         
         for n in range(len(content)):

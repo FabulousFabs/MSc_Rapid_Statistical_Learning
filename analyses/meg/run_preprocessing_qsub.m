@@ -18,6 +18,7 @@ load(fullfile(progressdir, progressf), 'prep_comp_subs');
 subjects = helper_datainfo(rootdir);
 
 %%
+fprintf('\n*** Running before-ICA. ***\n');
 
 for k = 1:size(subjects, 2)
     subject = subjects(k);
@@ -28,24 +29,64 @@ for k = 1:size(subjects, 2)
         continue
     end
     
-    % make sure we preprocess only if data is complete (i.e., MRI acquired)
-    if ~isfield(subject, 'raw_mri') || isempty(subject.raw_mri)
-        fprintf('\n*** Skipping for k=%d, sub-%02d (no MRI yet). ***\n', k, subject.ppn);
+    prep_subject_before(subject);
+    
+    if input('Continue with next subject? (Y/N)', 's') ~= 'Y'
+        break
+    end
+end
+
+
+%% 
+fprintf('\n*** Running ICAs. ***\n');
+
+ica_jobs = {};
+jobdir = '/project/3018012.23/.jobs/';
+jobf = 'jobs.mat';
+
+cd /project/3018012.23/.jobs/;
+
+for k = 1:size(subjects, 2)
+    subject = subjects(k);
+    
+    % make sure we preprocess only once per subject
+    if any(prep_comp_subs(:) == subject.ppn)
+        fprintf('\n*** Skipping for k=%d, sub-%02d (already preprocessed). ***\n', k, subject.ppn);
         continue
     end
     
+    ica_jobs{end+1} = qsubfeval(@prep_subject_ica, subject, 'memreq', 16*(1024^3), 'timreq', 360*60*1);
+end
+
+cd /project/3018012.23/git/analyses/meg/;
+
+save(fullfile(jobdir, jobf), 'subject_jobs');
+
+%%
+fprintf('\n*** Fetching ICAs. ***\n');
+
+load(fullfile(jobdir, jobf), 'ica_jobs');
+cd /project/3018012.23/.jobs/;
+
+outputs = {};
+for k = 1:size(subject_jobs, 2)
+    outputs{end+1} = qsubget(ica_jobs{k});
+end
+
+cd /project/3018012.23/git/analyses/meg/;
+fprintf('*** Check the outputs manually, please. ***\n');
+
+%%
+fprintf('\n*** Visual ICA inspection. ***\n');
+
+for k = 1:size(subjects, 2)
+    subject = subjects(k);
     
-    fprintf('\n*** Starting preprocessing data for k=%d, sub-%02d. *** \n', k, subject.ppn);
-    
-    % ideally, I would want to run the ICAs as individual qsubs but given
-    % that we're not scanning fast enough due to all the issues that have
-    % been going on, that won't be an efficient use of our time. instead,
-    % we're running it sequentially here.
-    % create another graphical matlab job to compute stuff in the mean
-    % time.
-    
-    prep_subject_before(subject);
-    prep_subject_ica(subject);
+    % make sure we preprocess only once per subject
+    if any(prep_comp_subs(:) == subject.ppn)
+        fprintf('\n*** Skipping for k=%d, sub-%02d (already preprocessed). ***\n', k, subject.ppn);
+        continue
+    end
     
     fprintf('*** Please jot down bad comps and reasons now. ***\n');
     prep_subject_after(subject);
@@ -68,13 +109,9 @@ for k = 1:size(subjects, 2)
     
     save(fullfile(subject.out, 'preproc-ica-badcomps.mat'), 'badcomps', 'badcomps_reasons');
     
-    prep_geom_realign(subject);
-    prep_geom_segmentmri_and_leadfield(subject, sourcemodel_loc);
-    
-    prep_comp_subs(end+1) = subject.ppn;
-    save(fullfile(progressdir, progressf), 'prep_comp_subs');
-    
     if input('Continue with next subject? (Y/N)', 's') ~= 'Y'
         break
     end
 end
+
+%% 

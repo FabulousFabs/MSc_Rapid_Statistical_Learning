@@ -126,11 +126,11 @@ function subjects = helper_datainfo(rootdir)
     subjects(12).ppn = 21;
     subjects(12).code = 'WFUQS';
     subjects(12).raw_meg = fullfile(rootdir, 'raw', 'sub-021', 'ses-meg01', 'meg', 'sub021ses01_3018012.23_20210608_01.ds');
-    %subjects(12).raw_mri = fullfile(rootdir, 'raw', 'sub-021', 'ses-1', 'mri', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021011513121073910912534.IMA');
+    subjects(12).raw_mri = fullfile(rootdir, 'raw', 'sub-021', 'ses-1', 'mri', '002-t1_mprage_sag_p2_iso_1.0', '00001_1.3.12.2.1107.5.2.19.45416.2021070810433612889335386.IMA');
     subjects(12).raw_edf = fullfile(rootdir, 'raw', 'sub-021', 'ses-1', 'beh', 'Sub21-1.edf');
     subjects(12).raw_pol = fullfile(rootdir, 'raw', 'sub-021', 'ses-1', 'pol', 'S21-1.pos');
     subjects(12).beh_meg = fullfile(rootdir, 'raw', 'sub-021', 'ses-1', 'beh', 'WFUQS_MEG.txt');
-    subjects(12).include = false;
+    subjects(12).include = true;
     
     % sub019
     subjects(13).ppn = 19;
@@ -206,11 +206,122 @@ function subjects = helper_datainfo(rootdir)
     subjects(20).ppn = 4;
     subjects(20).code = 'RCPSD';
     subjects(20).raw_meg = fullfile(rootdir, 'raw', 'sub-004', 'ses-meg01', 'meg', 'sub004ses01_3018012.23_20210621_02.ds');
-    %subjects(20).raw_mri = fullfile(rootdir, 'raw', 'sub-004', 'ses-1', 'mri', '', '');
+    subjects(20).raw_mri = fullfile(rootdir, 'raw', 'sub-004', 'ses-1', 'mri', '00001_1.3.12.2.1107.5.2.19.45416.2021060711272078366762592.IMA');
     subjects(20).raw_edf = fullfile(rootdir, 'raw', 'sub-004', 'ses-1', 'beh', 'Sub4-1.edf');
     subjects(20).raw_pol = fullfile(rootdir, 'raw', 'sub-004', 'ses-1', 'pol', 'S4-1.pos');
     subjects(20).beh_meg = fullfile(rootdir, 'raw', 'sub-004', 'ses-1', 'beh', 'RCPSD_MEG.txt');
-    subjects(20).include = false;
+    subjects(20).include = true;
+    
+    % sub017
+    subjects(21).ppn = 17;
+    subjects(21).code = 'BGJZK';
+    subjects(21).raw_meg = fullfile(rootdir, 'raw', 'sub-017', 'ses-meg01', 'meg', 'sub017ses01_3018012.23_20210627_01.ds');
+    subjects(21).raw_mri = fullfile(rootdir, 'raw', 'sub-017', 'ses-1', 'mri', 'MR000000.img');
+    subjects(21).raw_edf = fullfile(rootdir, 'raw', 'sub-017', 'ses-1', 'beh', 'Sub17-1.edf');
+    subjects(21).raw_pol = fullfile(rootdir, 'raw', 'sub-017', 'ses-1', 'pol', 'S17-1.pos');
+    subjects(21).beh_meg = fullfile(rootdir, 'raw', 'sub-017', 'ses-1', 'beh', 'BGJZK_MEG.txt');
+    subjects(21).include = true;
+    
+    % sub033
+    subjects(22).ppn = 33;
+    subjects(22).code = 'CAJTU';
+    subjects(22).raw_meg = fullfile(rootdir, 'raw', 'sub-033', 'ses-meg01', 'meg', 'sub033ses01_3018012.23_20210628_01.ds');
+    subjects(22).raw_mri = fullfile(rootdir, 'raw', 'sub-033', 'ses-1', 'mri', 'MR000000.img');
+    subjects(22).raw_edf = fullfile(rootdir, 'raw', 'sub-033', 'ses-1', 'beh', 'Sub33-1.edf');
+    subjects(22).raw_pol = fullfile(rootdir, 'raw', 'sub-033', 'ses-1', 'pol', 'S33-1.pos');
+    subjects(22).beh_meg = fullfile(rootdir, 'raw', 'sub-033', 'ses-1', 'beh', 'CAJTU_MEG.txt');
+    subjects(22).include = true;
+    
+    % sub028
+    subjects(23).ppn = 28;
+    subjects(23).code = 'IKLYM';
+    subjects(23).raw_meg = fullfile(rootdir, 'raw', 'sub-028', 'ses-meg01', 'meg', 'sub028ses01_3018012.23_20210629_01.ds');
+    subjects(23).raw_mri = fullfile(rootdir, 'raw', 'sub-028', 'ses-1', 'mri', '00001_1.3.12.2.1107.5.2.43.67027.2021021212504191482602347.IMA');
+    subjects(23).raw_edf = fullfile(rootdir, 'raw', 'sub-028', 'ses-1', 'beh', 'Sub28-1.edf');
+    subjects(23).raw_pol = fullfile(rootdir, 'raw', 'sub-028', 'ses-1', 'pol', 'S28-1.pos');
+    subjects(23).beh_meg = fullfile(rootdir, 'raw', 'sub-028', 'ses-1', 'beh', 'IKLYM_MEG.txt');
+    subjects(23).include = true;
+    
+    % sub020
+    subjects(24).ppn = 20;
+    subjects(24).code = 'IMLOH';
+    subjects(24).raw_meg = fullfile(rootdir, 'raw', 'sub-020', 'ses-meg01', 'meg', 'sub020ses01_3018012.23_20210701_01.ds');
+    subjects(24).raw_mri = fullfile(rootdir, 'raw', 'sub-020', 'ses-mri01', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021070616043840981040365.IMA');
+    subjects(24).raw_edf = fullfile(rootdir, 'raw', 'sub-020', 'ses-1', 'beh', 'Sub20-1.edf');
+    subjects(24).raw_pol = fullfile(rootdir, 'raw', 'sub-020', 'ses-1', 'pol', 'S20-1.pos');
+    subjects(24).beh_meg = fullfile(rootdir, 'raw', 'sub-020', 'ses-1', 'beh', 'IMLOH_MEG.txt');
+    subjects(24).include = true;
+    
+    % sub025
+    subjects(25).ppn = 25;
+    subjects(25).code = 'FTRSD';
+    subjects(25).raw_meg = fullfile(rootdir, 'raw', 'sub-025', 'ses-meg01', 'meg', 'sub025ses01_3018012.23_20210702_01.ds');
+    subjects(25).raw_mri = fullfile(rootdir, 'raw', 'sub-025', 'ses-mri01', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021070615284872139037460.IMA');
+    subjects(25).raw_edf = fullfile(rootdir, 'raw', 'sub-025', 'ses-1', 'beh', 'Sub25-1.edf');
+    subjects(25).raw_pol = fullfile(rootdir, 'raw', 'sub-025', 'ses-1', 'pol', 'S25-1.pos');
+    subjects(25).beh_meg = fullfile(rootdir, 'raw', 'sub-025', 'ses-1', 'beh', 'FTRSD_MEG.txt');
+    subjects(25).include = true;
+    
+    % sub023
+    subjects(26).ppn = 23;
+    subjects(26).code = 'YSOMC';
+    subjects(26).raw_meg = fullfile(rootdir, 'raw', 'sub-023', 'ses-meg01', 'meg', 'sub023ses01_3018012.23_20210707_01.ds');
+    subjects(26).raw_mri = fullfile(rootdir, 'raw', 'sub-023', 'ses-1', 'mri', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021062914060268890780426.IMA');
+    subjects(26).raw_edf = fullfile(rootdir, 'raw', 'sub-023', 'ses-1', 'beh', 'Sub23-1.edf');
+    subjects(26).raw_pol = fullfile(rootdir, 'raw', 'sub-023', 'ses-1', 'pol', 'S23-1.pos');
+    subjects(26).beh_meg = fullfile(rootdir, 'raw', 'sub-023', 'ses-1', 'beh', 'YSOMC_MEG.txt');
+    subjects(26).include = true;
+    
+    % sub034
+    subjects(27).ppn = 34;
+    subjects(27).code = 'GGJRK';
+    subjects(27).raw_meg = fullfile(rootdir, 'raw', 'sub-034', 'ses-meg01', 'meg', 'sub034ses01_3018012.23_20210715_01.ds');
+    subjects(27).raw_mri = fullfile(rootdir, 'raw', 'sub-034', 'ses-mri01', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021071616222226235777517.IMA');
+    subjects(27).raw_edf = fullfile(rootdir, 'raw', 'sub-034', 'ses-1', 'beh', 'Sub34-1.edf');
+    subjects(27).raw_pol = fullfile(rootdir, 'raw', 'sub-034', 'ses-1', 'pol', 'S34-1.pos');
+    subjects(27).beh_meg = fullfile(rootdir, 'raw', 'sub-034', 'ses-1', 'beh', 'GGJRK_MEG.txt');
+    subjects(27).include = true;
+    
+    % sub032
+    subjects(28).ppn = 32;
+    subjects(28).code = 'GCICK';
+    subjects(28).raw_meg = fullfile(rootdir, 'raw', 'sub-032', 'ses-meg01', 'meg', 'sub032ses01_3018012.23_20210716_01.ds');
+    %subjects(28).raw_mri = fullfile(rootdir, 'raw', 'sub-032', 'ses-mri01', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021071616222226235777517.IMA');
+    subjects(28).raw_edf = fullfile(rootdir, 'raw', 'sub-032', 'ses-1', 'beh', 'Sub32-1.edf');
+    subjects(28).raw_pol = fullfile(rootdir, 'raw', 'sub-032', 'ses-1', 'pol', 'S32-1.pos');
+    subjects(28).beh_meg = fullfile(rootdir, 'raw', 'sub-032', 'ses-1', 'beh', 'GCICK_MEG.txt');
+    subjects(28).include = false;
+    
+    % sub029
+    subjects(29).ppn = 29;
+    subjects(29).code = 'PDQEU';
+    subjects(29).raw_meg = fullfile(rootdir, 'raw', 'sub-029', 'ses-meg01', 'meg', 'sub029ses01_3018012.23_20210720_01.ds');
+    subjects(29).raw_mri = fullfile(rootdir, 'raw', 'sub-029', 'ses-1', 'mri', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021021611563543670240873.IMA');
+    subjects(29).raw_edf = fullfile(rootdir, 'raw', 'sub-029', 'ses-1', 'beh', 'Sub29-1.edf');
+    subjects(29).raw_pol = fullfile(rootdir, 'raw', 'sub-029', 'ses-1', 'pol', 'S29-1.pos');
+    subjects(29).beh_meg = fullfile(rootdir, 'raw', 'sub-029', 'ses-1', 'beh', 'PDQEU_MEG.txt');
+    subjects(29).include = true;
+    
+    % sub030
+    subjects(30).ppn = 30;
+    subjects(30).code = 'MRVHX';
+    subjects(30).raw_meg = fullfile(rootdir, 'raw', 'sub-030', 'ses-meg01', 'meg', 'sub030ses01_3018012.23_20210722_01.ds');
+    subjects(30).raw_mri = fullfile(rootdir, 'raw', 'sub-030', 'ses-1', 'mri', '011-t1_mprage_sag_ipat2_1p0iso', '00001_1.3.12.2.1107.5.2.43.66068.2021071214200427436082009.IMA');
+    subjects(30).raw_edf = fullfile(rootdir, 'raw', 'sub-030', 'ses-1', 'beh', 'Sub30-1.edf');
+    subjects(30).raw_pol = fullfile(rootdir, 'raw', 'sub-030', 'ses-1', 'pol', 'S30-1.pos');
+    subjects(30).beh_meg = fullfile(rootdir, 'raw', 'sub-030', 'ses-1', 'beh', 'MRVHX_MEG.txt');
+    subjects(30).include = true;
+    
+    % sub031
+    subjects(31).ppn = 31;
+    subjects(31).code = 'LDYBM';
+    subjects(31).raw_meg = fullfile(rootdir, 'raw', 'sub-031', 'ses-meg01', 'meg', 'sub031ses01_3018012.23_20210722_01.ds');
+    %subjects(31).raw_mri = fullfile(rootdir, 'raw', 'sub-031', 'ses-mri01', '011-t1_mprage_sag_ipat2_1p0iso', '00001_1.3.12.2.1107.5.2.43.66068.2021071214200427436082009.IMA');
+    subjects(31).raw_edf = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'beh', 'Sub31-1.edf');
+    subjects(31).raw_pol = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'pol', 'S31-1.pos');
+    subjects(31).beh_meg = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'beh', 'LDYBM_MEG.txt');
+    subjects(31).include = false;
+    
     
     % add outputs + dirs
     for sid = 1:numel(subjects)

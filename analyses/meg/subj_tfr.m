@@ -1,6 +1,6 @@
 % @Description: Compute TFR of conditions for subject.
 
-function subj_tfr(subject)
+function subj_tfr(rootdir, subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -17,7 +17,8 @@ function subj_tfr(subject)
     % channel repair
     fprintf('\n*** Repairing channels ***\n');
     
-    allchannels = ft_senslabel('ctf275');
+    load(fullfile(rootdir, 'processed', 'combined', 'chandata.mat'), 'allchannels');
+    
     if numel(allchannels) > numel(data.label)
         cfg = [];
         cfg.senstype = 'meg';
