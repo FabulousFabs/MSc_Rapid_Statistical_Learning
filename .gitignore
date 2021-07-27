@@ -27,11 +27,13 @@
 /analyses/behavioural/data_evolution/*
 /analyses/behavioural/data_evolution_pilot/*
 /analyses/behavioural/raw/*
+/analyses/behavioural/outs/*
 /analyses/behavioural/aggregate.txt
 /analyses/behavioural/aggregate_old.txt
 /analyses/behavioural/aggregate_evolution.txt
 /analyses/meg/raw/*
 /analyses/meg/data/*
+union_*.txt
 
 # participant data that should be excluded already
 # (but we are adding this as a safety fall back)
@@ -54,7 +56,6 @@
 *.mat
 *DigTrigChannelInfo.txt
 *BadChannels
-
 
 # stimulus files
 *.wav
