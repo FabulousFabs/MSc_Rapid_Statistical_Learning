@@ -56,6 +56,10 @@ file <- "/users/fabianschneider/desktop/university/master/dissertation/project/a
 outdir <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/out/";
 
 
+system("module unload python && module load python/3.4.2 && cd /project/3018012.23/git/analyses/behavioural/ && python prep_aggregate.py --none --4AFC"); # collect data on /project/
+
+
+
 ### 1: load, recode and preprocess data
 data <- read.delim(file, header = TRUE, sep = "\t", dec=".");
 
