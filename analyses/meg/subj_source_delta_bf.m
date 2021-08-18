@@ -1,20 +1,20 @@
-% @Description: Compute beta beamformer.
+% @Description: Compute delta beamformer.
 
-function subj_source_beta_bf(subject)
+function subj_source_delta_bf(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
     data = helper_clean_data(subject);
     
-    % single-trial time-resolved power 17-23 Hz
-    fprintf('\n*** Computing single-trial theta power ***\n');
+    % single-trial time-resolved power 1-4 Hz
+    fprintf('\n*** Computing single-trial delta power ***\n');
     
     cfg = [];
     cfg.method = 'mtmconvol';
     cfg.output = 'fourier';
     cfg.taper = 'dpss';
-    cfg.foi = 20;
-    cfg.toi = 0:0.05:0.9;
+    cfg.foi = 1;
+    cfg.toi = -0.5:0.05:0.95;
     cfg.t_ftimwin = 0.5;
     cfg.tapsmofrq = 3;
     freq = ft_freqanalysis(cfg, data);
@@ -93,19 +93,30 @@ function subj_source_beta_bf(subject)
     condslabels = {"L1P1", "L1P3", "L2P2", "L2P3"};
     
     sources = {};
+    sources_early = {};
+    sources_late = {};
     
     for k = 1:size(conds, 2)
         cfg = [];
         cfg.trials = conds{k}.indices;
         cfg.avgoverrpt = 'yes';
-        cfg.latency = [0.5 0.9];
+        cfg.latency = [0.1 0.9];
         cfg.avgovertime = 'yes';
+        
         sources{k} = ft_selectdata(cfg, source_pow);
         sources{k} = rmfield(sources{k}, 'cfg');
+        
+        cfg.latency = [0.1 0.3];
+        sources_early{k} = ft_selectdata(cfg, source_pow);
+        sources_early{k} = rmfield(sources_early{k}, 'cfg');
+        
+        cfg.latency = [0.5 0.9];
+        sources_late{k} = ft_selectdata(cfg, source_pow);
+        sources_late{k} = rmfield(sources_late{k}, 'cfg');
     end
     
     % save
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_source_beta_bf.mat'), 'sources', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_source_delta_bf.mat'), 'sources', 'sources_early', 'sources_late', 'conds', 'condslabels');
 end

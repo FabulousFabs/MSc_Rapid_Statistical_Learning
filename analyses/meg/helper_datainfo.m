@@ -40,7 +40,7 @@ function subjects = helper_datainfo(rootdir)
     subjects(3).raw_edf = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'beh', 'Sub2-1.edf');
     subjects(3).raw_pol = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'pol', 'S2-1.pos');
     subjects(3).beh_meg = fullfile(rootdir, 'raw', 'sub-002', 'ses-1', 'beh', 'VGYEQ_MEG.txt');
-    subjects(3).include = true;
+    subjects(3).include = false;
     
     % sub008
     subjects(4).ppn = 8;
@@ -136,11 +136,11 @@ function subjects = helper_datainfo(rootdir)
     subjects(13).ppn = 19;
     subjects(13).code = 'BMDMO';
     subjects(13).raw_meg = fullfile(rootdir, 'raw', 'sub-019', 'ses-meg01', 'meg', 'sub019ses01_3018012.23_20210609_01.ds');
-    %subjects(13).raw_mri = fullfile(rootdir, 'raw', 'sub-019', 'ses-1', 'mri', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021011513121073910912534.IMA');
+    subjects(13).raw_mri = fullfile(rootdir, 'raw', 'sub-019', 'ses-1', 'mri', '036-T1w', '00001_1.3.12.2.1107.5.2.43.67027.2021080320465231029217173.IMA');
     subjects(13).raw_edf = fullfile(rootdir, 'raw', 'sub-019', 'ses-1', 'beh', 'Sub19-1.edf');
     subjects(13).raw_pol = fullfile(rootdir, 'raw', 'sub-019', 'ses-1', 'pol', 'S19-1.pos');
     subjects(13).beh_meg = fullfile(rootdir, 'raw', 'sub-019', 'ses-1', 'beh', 'BMDMO_MEG.txt');
-    subjects(13).include = false;
+    subjects(13).include = true;
     
     % sub006
     subjects(14).ppn = 6;
@@ -316,11 +316,11 @@ function subjects = helper_datainfo(rootdir)
     subjects(31).ppn = 31;
     subjects(31).code = 'LDYBM';
     subjects(31).raw_meg = fullfile(rootdir, 'raw', 'sub-031', 'ses-meg01', 'meg', 'sub031ses01_3018012.23_20210722_01.ds');
-    %subjects(31).raw_mri = fullfile(rootdir, 'raw', 'sub-031', 'ses-mri01', '011-t1_mprage_sag_ipat2_1p0iso', '00001_1.3.12.2.1107.5.2.43.66068.2021071214200427436082009.IMA');
+    subjects(31).raw_mri = fullfile(rootdir, 'raw', 'sub-031', 'ses-mri01', '006-t1_mprage_sag_ipat2_1p0iso_20ch-head-neck', '00001_1.3.12.2.1107.5.2.19.45416.2021072715185291692402391.IMA');
     subjects(31).raw_edf = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'beh', 'Sub31-1.edf');
     subjects(31).raw_pol = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'pol', 'S31-1.pos');
     subjects(31).beh_meg = fullfile(rootdir, 'raw', 'sub-031', 'ses-1', 'beh', 'LDYBM_MEG.txt');
-    subjects(31).include = false;
+    subjects(31).include = true;
     
     
     % add outputs + dirs

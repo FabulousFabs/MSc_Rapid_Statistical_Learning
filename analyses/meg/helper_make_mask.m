@@ -1,6 +1,6 @@
 % @Description: Eelke's make mask function.
 
-function mask = helper_make_mask(dat, thr)
+function mask = helper_make_mask(dat, thr, dir)
 % This function generates an opacity-ramping mask with a decent plateau and
 % nice ramp-on/ramp-off. Useful for presenting e.g. t-maps thresholded at
 % some % of maximum.
@@ -22,6 +22,16 @@ function mask = helper_make_mask(dat, thr)
 
 if nargin < 2
   thr = [0.5 0.8];
+end
+
+if nargin < 3
+    dir = 'none';
+end
+
+if strcmp(dir, 'neg')
+    dat(dat > 0) = 0;
+elseif strcmp(dir, 'pos')
+    dat(dat < 0) = 0;
 end
 
 % if data contains negatives, ensure strongly negative values are given as

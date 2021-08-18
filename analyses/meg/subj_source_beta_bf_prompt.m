@@ -1,6 +1,6 @@
-% Description: Compute between-trials TFR of conditions for subject.
+% @Description: Compute between-trial beta beamformer.
 
-function subj_tfr_btwn(rootdir, subject)
+function subj_source_beta_bf_prompt(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -20,50 +20,21 @@ function subj_tfr_btwn(rootdir, subject)
     %end
     
     cfg = [];
-    cfg.offset = -helper_get_beta_offsets(data.trialinfo, data.fsample);
+    cfg.offset = -floor((data.trialinfo(:,5) + 300) / 1000 * data.fsample);
     data = ft_redefinetrial(cfg, data);
     
-    % neighbours
-    fprintf('\n*** Computing neighbours ***\n');
+    % single-trial time-resolved power 17-23 Hz
+    fprintf('\n*** Computing single-trial beta power ***\n');
     
     cfg = [];
-    cfg.method = 'template';
-    cfg.template = 'ctf275_neighb.mat';
-    neighbours = ft_prepare_neighbours(cfg);
-    
-    % channel repair
-    fprintf('\n*** Repairing channels ***\n');
-    
-    load(fullfile(rootdir, 'processed', 'combined', 'chandata.mat'), 'allchannels');
-    
-    if numel(allchannels) > numel(data.label)
-        cfg = [];
-        cfg.senstype = 'meg';
-        cfg.method = 'average';
-        cfg.missingchannel = setdiff(allchannels, data.label);
-        cfg.neighbours = neighbours;
-        data = ft_channelrepair(cfg, data);
-    end
-    
-    % Convert to planar
-    fprintf('\n*** Converting to planar ***\n');
-    
-    cfg = [];
-    cfg.neighbours = neighbours;
-    cfg.planarmethod = 'sincos';
-    data = ft_megplanar(cfg, data);
-    
-    % mtmconvol
-    fprintf('\n*** Computing mtmconvol ***\n');
-    
-    cfg = [];
-    cfg.pad = 7.5; % the absolute maximum for our trials is technically now 5.871s + 1.200s (pre+post) but that's ugly
     cfg.method = 'mtmconvol';
+    cfg.output = 'fourier';
+    cfg.taper = 'dpss';
+    cfg.foi = 20;
     cfg.toi = -0.5:0.05:0.9;
-    cfg.keeptrials = 'yes';
-    cfg.taper = 'hanning';
-    cfg.foi = 1:30;
-    cfg.t_ftimwin = ones(size(cfg.foi)) * 0.5;
+    cfg.t_ftimwin = 0.5;
+    cfg.tapsmofrq = 3; % this means our freq is slightly off here, but sadly that's a compromise we have to take
+    
     
     if subject.ppn == 10
         % hacky work-around to fix one participant's data (the trigger
@@ -77,28 +48,45 @@ function subj_tfr_btwn(rootdir, subject)
     
     freq = ft_freqanalysis(cfg, data);
     
-    % combine planar
-    fprintf('\n*** Combining planar ***\n');
+    trialinds = freq.trialinfo(:,8);
     
-    freq = ft_combineplanar([], freq);
+    % load leadfields + head model
+    fprintf('\n*** Loading leadfields + headmodel. ***\n');
+    
+    load(fullfile(subject.out, 'geom-leadfield-mni-8mm-megchans.mat'), 'headmodel', 'leadfield');
+    
+    % source analysis to compute DICS spatial filters
+    fprintf('\n*** Computing DICS spatial filters ***\n');
+    
+    cfg = [];
+    cfg.method = 'dics';
+    cfg.grid = leadfield;
+    cfg.headmodel = headmodel;
+    cfg.keeptrials = 'yes';
+    cfg.dics.lambda = '10%';
+    cfg.dics.projectnoise = 'no';
+    cfg.dics.keepfilter = 'yes';
+    cfg.dics.fixedori = 'yes';
+    cfg.dics.realfilter = 'yes';
+    source = ft_sourceanalysis(cfg, freq);
+    
+    % apply filters to fourier spectra & compute time-resolved power
+    source_pow = helper_compute_single_trial_power(source, freq);
+    source_pow.dimord = 'pos_rpt_time';
     
     % regress out linear trend
     %fprintf('\n*** Regressing out linear trend ***\n');
     %
-    %trialinds = freq.trialinfo(:,8);
-    %grad = freq.grad;
     %cfg = [];
     %cfg.confound = helper_get_linear_confound();
     %cfg.confound = cfg.confound(trialinds,:);
-    %freq = ft_regressconfound(cfg, freq);
-    %freq.grad = grad;
+    %source_pow = ft_regressconfound(cfg, source_pow);
     
     % regress out movement
     %fprintf('\n*** Regressing out movement ***\n');
     %
     %load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
     %
-    %grad = freq.grad;
     %cfg = [];
     %cfg.confound = [cc_dm ones(size(cc_dm, 1), 1)];
     %
@@ -108,8 +96,7 @@ function subj_tfr_btwn(rootdir, subject)
     %end
     %
     %cfg.reject = [1:6];
-    %freq = ft_regressconfound(cfg, freq);
-    %freq.grad = grad;
+    %source_pow = ft_regressconfound(cfg, source_pow);
     
     % regress out confounds
     fprintf('\n*** Regressing out confounds ***\n');
@@ -117,7 +104,7 @@ function subj_tfr_btwn(rootdir, subject)
     load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
     
     con_pw = helper_get_linear_confound();
-    con_pw = con_pw(freq.trialinfo(:,8),:);
+    con_pw = con_pw(trialinds,:);
     con_mv = [cc_dm ones(size(cc_dm, 1), 1)];
     
     if subject.ppn == 10
@@ -125,21 +112,18 @@ function subj_tfr_btwn(rootdir, subject)
         con_mv = con_mv([timing_on],:);
     end
     
-    grad = freq.grad;
     cfg = [];
     cfg.confound = cat(2, con_pw, con_mv);
     cfg.reject = [1:9];
-    freq = ft_regressconfound(cfg, freq);
-    freq.grad = grad;
+    source_pow = ft_regressconfound(cfg, source_pow);
     
-    % individual baseline correction
-    % of course, also using the z-score used by eelke
+    % baseline correct individual trials using z-score as per eelke's code
     % see Spaak & de Lange (2020) or Grandchamp & Delorme (2011)
-    fprintf('\n*** Individual baseline correction ***\n');
+    fprintf('\n*** Correcting baselines ***\n');
     
-    mu = mean(freq.powspctrm, 4);
-    sd = std(freq.powspctrm, [], 4);
-    freq.powspctrm = (freq.powspctrm - mu) ./ sd;
+    mu = mean(source_pow.pow, 3);
+    sd = std(source_pow.pow, [], 3);
+    source_pow.pow = (source_pow.pow - mu) ./ sd;
     
     % conditioning
     fprintf('\n*** Conditioning :-) ***\n');
@@ -148,17 +132,20 @@ function subj_tfr_btwn(rootdir, subject)
     conds = helper_partition_trials(freq, conds);
     condslabels = {"L1P1", "L1P3", "L2P2", "L2P3"};
     
-    freqs = {};
-    cfg = [];
+    sources = {};
     
     for k = 1:size(conds, 2)
+        cfg = [];
         cfg.trials = conds{k}.indices;
-        freqs{k} = ft_freqdescriptives(cfg, freq);
-        freqs{k} = rmfield(freqs{k}, 'cfg');
+        cfg.avgoverrpt = 'yes';
+        cfg.latency = [0.3 0.6];
+        cfg.avgovertime = 'yes';
+        sources{k} = ft_selectdata(cfg, source_pow);
+        sources{k} = rmfield(sources{k}, 'cfg');
     end
     
-    % save 
+    % save
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_tfr_btwn.mat'), 'freqs', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_source_beta_bf_prompt.mat'), 'sources', 'conds', 'condslabels');
 end

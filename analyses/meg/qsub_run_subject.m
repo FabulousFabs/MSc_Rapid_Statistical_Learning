@@ -7,17 +7,9 @@ function exit = qsub_run_subject(rootdir, subject)
 
     subj_tfr(rootdir, subject);
     subj_tfr_evoked(rootdir, subject);
+    subj_tfr_prompt(rootdir, subject);
     subj_tfr_btwn(rootdir, subject);
     subj_tfr_evoked_btwn(rootdir, subject);
-    
-    if subject.ppn == 32
-        exit = true;
-        return;
-    end
-    
-    subj_source_theta_bf(subject);
-    subj_source_beta_bf(subject);
-    subj_source_beta_bf_btwn(subject);
     
     exit = true;
 end

@@ -20,7 +20,7 @@ function subj_tfr_btwn(rootdir, subject)
     %end
     
     cfg = [];
-    cfg.offset = -helper_get_beta_offsets(data.trialinfo, data.fsample);
+    cfg.offset = -floor((data.trialinfo(:,5) + 300) / 1000 * data.fsample);
     data = ft_redefinetrial(cfg, data);
     
     % neighbours
@@ -160,5 +160,5 @@ function subj_tfr_btwn(rootdir, subject)
     % save 
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_tfr_btwn.mat'), 'freqs', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_tfr_prompt.mat'), 'freqs', 'conds', 'condslabels');
 end

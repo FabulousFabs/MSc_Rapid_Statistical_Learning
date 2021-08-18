@@ -8,8 +8,19 @@ function subj_tfr_evoked_btwn(rootdir, subject)
     
     % redefine trials and shift to 2^7 offset trigger to get at
     % between-trials beta
+    % note: ft_redefinetrial could not be used here because none of the
+    % options really do what we need. instead, i wrote a very hacky
+    % work-around to re-cut and re-centre the data manually.
+    %offsets = helper_get_beta_offsets(data.trialinfo, 400);
+    %
+    %for i = 1:size(offsets, 1)
+    %    trl = data.trial{i};
+    %    data.trial{i} = trl(:, offsets(i):end);
+    %    data.time{i} = -0.5:(1/400):((size(data.trial{i}, 2) / 400) - 0.5 - (1/400));
+    %end
+    
     cfg = [];
-    cfg.offset = helper_get_beta_offsets(data.trialinfo, 400);
+    cfg.offset = -helper_get_beta_offsets(data.trialinfo, data.fsample);
     data = ft_redefinetrial(cfg, data);
     
     % channel repair
@@ -38,7 +49,7 @@ function subj_tfr_evoked_btwn(rootdir, subject)
     
     cfg = [];
     cfg.demean = 'yes';
-    cfg.baselinewindow = [-0.5 0];
+    cfg.baselinewindow = [0 0.1];
     data = ft_preprocessing(cfg, data);
     
     % convert to planar
@@ -69,7 +80,7 @@ function subj_tfr_evoked_btwn(rootdir, subject)
         cfg = [];
         cfg.pad = 7.5; % the absolute maximum for our trials is technically now 5.871s + 1.200s (pre+post) but that's ugly
         cfg.method = 'mtmconvol';
-        cfg.toi = -0.5:0.05:0.7; 
+        cfg.toi = 0:0.05:0.9; 
         cfg.taper = 'hanning';
         cfg.foi = 1:30;
         cfg.t_ftimwin = ones(size(cfg.foi)) * 0.5;

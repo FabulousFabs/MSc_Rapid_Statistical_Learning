@@ -21,7 +21,7 @@ progressf = 'preprocessing_completed.mat';
 load(fullfile(progressdir, progressf), 'prep_comp_subs');
 
 % Initialise job id tracking
-subject_jobs = {};
+subject_source_jobs = {};
 jobdir = '/project/3018012.23/.jobs/';
 jobf = 'jobs.mat';
 
@@ -41,24 +41,24 @@ for k = 1:size(subjects, 2)
         continue
     end
     
-    % technically, these jobs should all finish <30min, but it looks like
+    % technically, these jobs should all finish <5min, but it looks like
     % we are hitting some resource constraints on the cluster that slows
     % down some jobs extremely, ergo we're going to give them a lot of
     % extra time to finish running
-    subject_jobs{end+1} = qsubfeval(@qsub_run_subject, rootdir, subject, 'memreq', 16*(1024^3), 'timreq', 120*60*1);
+    subject_source_jobs{end+1} = qsubfeval(@qsub_run_subject_source, rootdir, subject, 'memreq', 16*(1024^3), 'timreq', 15*60*1);
 end
 
 cd /project/3018012.23/git/analyses/meg/;
 
-save(fullfile(jobdir, jobf), 'subject_jobs');
+save(fullfile(jobdir, jobf), 'subject_source_jobs');
 
 %% read qsubs
-load(fullfile(jobdir, jobf), 'subject_jobs');
+load(fullfile(jobdir, jobf), 'subject_source_jobs');
 cd /project/3018012.23/.jobs/;
 
 outputs = {};
-for k = 1:size(subject_jobs, 2)
-    outputs{end+1} = qsubget(subject_jobs{k});
+for k = 1:size(subject_source_jobs, 2)
+    outputs{end+1} = qsubget(subject_source_jobs{k});
 end
 
 cd /project/3018012.23/git/analyses/meg/;

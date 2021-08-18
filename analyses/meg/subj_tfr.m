@@ -55,13 +55,41 @@ function subj_tfr(rootdir, subject)
     freq = ft_combineplanar([], freq);
     
     % regress out linear trend
-    fprintf('\n*** Regressing out linear trend ***\n');
+    %fprintf('\n*** Regressing out linear trend ***\n');
+    %
+    %trialinds = freq.trialinfo(:,8);
+    %grad = freq.grad;
+    %cfg = [];
+    %cfg.confound = helper_get_linear_confound();
+    %cfg.confound = cfg.confound(trialinds,:);
+    %freq = ft_regressconfound(cfg, freq);
+    %freq.grad = grad;
     
-    trialinds = freq.trialinfo(:,8);
+    % regress out movement
+    %fprintf('\n*** Regressing out movement ***\n');
+    %
+    %load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
+    %
+    %grad = freq.grad;
+    %cfg = [];
+    %cfg.confound = [cc_dm ones(size(cc_dm, 1), 1)];
+    %cfg.reject = [1:6];
+    %freq = ft_regressconfound(cfg, freq);
+    %freq.grad = grad;
+    
+    % regress out confounds
+    fprintf('\n*** Regressing out confounds ***\n');
+    
+    load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
+    
+    con_pw = helper_get_linear_confound();
+    con_pw = con_pw(freq.trialinfo(:,8),:);
+    con_mv = [cc_dm ones(size(cc_dm, 1), 1)];
+    
     grad = freq.grad;
     cfg = [];
-    cfg.confound = helper_get_linear_confound();
-    cfg.confound = cfg.confound(trialinds,:);
+    cfg.confound = cat(2, con_pw, con_mv);
+    cfg.reject = [1:9];
     freq = ft_regressconfound(cfg, freq);
     freq.grad = grad;
     

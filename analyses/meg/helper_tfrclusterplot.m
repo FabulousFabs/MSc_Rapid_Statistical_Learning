@@ -1,4 +1,5 @@
-% @Description: Eelke's TFR cluster plots with minor updates to work properly.
+% @Description: A slightly altered version of Eelke's TFR plotting
+% function that works better with what we're doing here.
 
 function helper_tfrclusterplot(stat, alpha, hq, include_posclusters, include_negclusters)
 %
@@ -73,7 +74,7 @@ end
 function makeplots(clusters, labelmat, include)
   for k = 1:numel(clusters)
     if clusters(k).prob < alpha && ismember(k, include)
-      figure();
+      f = figure();
       
       % make one topo with highlighted channels that have *any* significant
       % time/freq voxel (chanmask)
@@ -81,11 +82,10 @@ function makeplots(clusters, labelmat, include)
       tfrmask = squeeze(any(labelmat==k,1)); % any sig channel (tfrmask)
       
       % the TFR
-      if hq
-        subplot(2,1,1);
-      else
-        axes('Position', [0.1 0.1 0.8 0.8]);
-      end
+      %axes('Position', [0.1 0.3 0.64 0.64]);
+      ax1 = axes();
+      ax1.Position = [0.1 0.2 0.64 0.64];
+      
       cfg = [];
       cfg.channel = stat.label(chanmask);
       cfg.avgoverchan = 'yes';
@@ -94,23 +94,36 @@ function makeplots(clusters, labelmat, include)
       cfg = [];
       cfg.parameter = 'stat';
       cfg.maskparameter = 'mask';
-      cfg.maskalpha = 0.3;
-      %cfg.zlim = [-2 2];%'maxabs';
-      if hq
-        cfg.colormap = brewermap(256, '*RdYlBu');
-      else
-        cfg.colormap = brewermap(64, '*RdYlBu');
-      end
-      cfg.colorbar = 'yes';
-      cfg.title = '';
-      cfg.figure = 'gcf';
+      cfg.maskalpha = 0.4;
+      cfg.zlim = [-2.5 2.5];
+      cfg.colormap = brewermap(256, '*RdYlBu');
+      cfg.colorbar = 'no';
+      cfg.figure = f;
       ft_singleplotTFR(cfg, tmpstat);
-      
-      if hq
-        subplot(2,1,2);
-      else
-        axes('Position', [0.1 0.7 0.4 0.4]);
+      title('');
+      % silly little insertion to hide uneven y-ticklabels
+      ytck = yticks();
+      ytcklabels = yticklabels();
+      for j = 1:numel(ytck)
+          if round(ytck(j)) ~= ytck(j)
+              ytcklabels{j} = '';
+          end
       end
+      yticklabels(ytcklabels);
+      xlabel('Time (s)', 'FontWeight', 'bold');
+      ylabel('Frequency (Hz)', 'FontWeight', 'bold');
+      c = colorbar('northoutside');
+      c.Position = c.Position + [0.31 0.15 -0.4 -0.03];
+      c.Label.String = 'Power (t-statistic)';
+      c.Label.FontName = 'Roboto';
+      c.Label.FontWeight = 'bold';
+      c.Label.FontSize = 8;
+      ax1.FontName = 'Roboto'; 
+      ax1.FontSize = 8;
+      
+      %axes('Position', [0.1 0.7 0.3 0.3]);
+      ax2 = axes();
+      ax2.Position = [0.1 0.7 0.28 0.28];
       
       cfg = [];
       cfg.parameter = 'stat';
@@ -119,14 +132,10 @@ function makeplots(clusters, labelmat, include)
       cfg.highlight = 'on';
       cfg.interactive = 'no';
       cfg.style = 'straight';
-      %cfg.zlim = [-2 2];'maxabs';
-      %cfg.comment = 'no';
-      if hq
-        cfg.colormap = brewermap(256, '*RdYlBu');
-        cfg.gridscale = 96;
-      else
-        cfg.colormap = brewermap(64, '*RdYlBu');
-      end
+      cfg.zlim = [-2.5 2.5];
+      cfg.comment = 'no';
+      cfg.colormap = brewermap(256, '*RdYlBu');
+      cfg.gridscale = 96;
       % time and freq limits determined by circumscribed rectangle in
       % tfrmask
       tmp = squeeze(any(tfrmask, 1));
@@ -135,10 +144,12 @@ function makeplots(clusters, labelmat, include)
       cfg.ylim = [stat.freq(find(tmp, 1, 'first')) stat.freq(find(tmp, 1, 'last'))];
       cfg.highlightchannel = find(chanmask);
       cfg.highlightsymbol = '.';
-      cfg.figure = 'gcf';
+      cfg.figure = f;
       ft_topoplotTFR(cfg, stat);
+      ax2.FontName = 'Roboto'; 
+      ax2.FontSize = 8;
 
-      sgtitle(sprintf('p = %.03f', clusters(k).prob));
+      %title(sprintf('p = %.03f', clusters(k).prob));
     end
   end
 

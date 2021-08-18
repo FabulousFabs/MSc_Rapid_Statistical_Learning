@@ -78,3 +78,45 @@ for k = 1:size(subjects, 2)
         break
     end
 end
+
+%% run trend visualisation
+group_trend(subjects, rootdir);
+
+
+%% run qsubs for movement control (final quality checks)
+% Initialise job id tracking
+mvm_jobs = {};
+jobdir = '/project/3018012.23/.jobs/';
+jobf = 'jobs.mat';
+
+cd /project/3018012.23/.jobs/;
+
+% Launch qsubs for each participant
+for k = 1:size(subjects, 2)
+    subject = subjects(k);
+    
+    % technically, these jobs should all finish <5min, but it looks like
+    % we are hitting some resource constraints on the cluster that slows
+    % down some jobs extremely, ergo we're going to give them a lot of
+    % extra time to finish running
+    mvm_jobs{end+1} = qsubfeval(@qsub_subj_movement, subject, rootdir, 'memreq', 16*(1024^3), 'timreq', 15*60*1);
+end
+
+cd /project/3018012.23/git/analyses/meg/;
+
+save(fullfile(jobdir, jobf), 'mvm_jobs');
+
+
+%% read qsubs for movement control (final quality checks)
+load(fullfile(jobdir, jobf), 'mvm_jobs');
+cd /project/3018012.23/.jobs/;
+
+outputs = {};
+for k = 1:size(mvm_jobs, 2)
+    outputs{end+1} = qsubget(mvm_jobs{k});
+end
+
+cd /project/3018012.23/git/analyses/meg/;
+fprintf('*** Check the outputs manually, please. ***\n');
+fprintf('*** Also make sure to change the inclusion specifications in helper_datainfo _NOW_. ***\n');
+

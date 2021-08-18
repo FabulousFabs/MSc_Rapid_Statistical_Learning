@@ -14,7 +14,7 @@ function subj_source_theta_bf(subject)
     cfg.output = 'fourier';
     cfg.taper = 'dpss';
     cfg.foi = 4;
-    cfg.toi = -0.5:0.05:1;
+    cfg.toi = -0.5:0.05:0.95;
     cfg.t_ftimwin = 0.5;
     cfg.tapsmofrq = 3;
     freq = ft_freqanalysis(cfg, data);
@@ -45,12 +45,37 @@ function subj_source_theta_bf(subject)
     source_pow.dimord = 'pos_rpt_time';
     
     % regress out linear trend
-    fprintf('\n*** Regressing out linear trend ***\n');
+    %fprintf('\n*** Regressing out linear trend ***\n');
+    %
+    %cfg = [];
+    %cfg.confound = helper_get_linear_confound();
+    %cfg.confound = cfg.confound(trialinds,:);
+    %source_pow = ft_regressconfound(cfg, source_pow);
+    
+    % regress out movement
+    %fprintf('\n*** Regressing out movement ***\n');
+    %
+    %load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
+    %
+    %cfg = [];
+    %cfg.confound = [cc_dm ones(size(cc_dm, 1), 1)];
+    %cfg.reject = [1:6];
+    %source_pow = ft_regressconfound(cfg, source_pow);
+    
+    % regress out confounds
+    fprintf('\n*** Regressing out confounds ***\n');
+    
+    load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
+    
+    con_pw = helper_get_linear_confound();
+    con_pw = con_pw(trialinds,:);
+    con_mv = [cc_dm ones(size(cc_dm, 1), 1)];
     
     cfg = [];
-    cfg.confound = helper_get_linear_confound();
-    cfg.confound = cfg.confound(trialinds,:);
+    cfg.confound = cat(2, con_pw, con_mv);
+    cfg.reject = [1:9];
     source_pow = ft_regressconfound(cfg, source_pow);
+    
     
     % baseline correct individual trials using z-score as per eelke's code
     % see Spaak & de Lange (2020) or Grandchamp & Delorme (2011)
@@ -75,18 +100,19 @@ function subj_source_theta_bf(subject)
         cfg = [];
         cfg.trials = conds{k}.indices;
         cfg.avgoverrpt = 'yes';
-        cfg.latency = [0 0.25];
+        cfg.latency = [0.1 0.9];
         cfg.avgovertime = 'yes';
+        
+        sources{k} = ft_selectdata(cfg, source_pow);
+        sources{k} = rmfield(sources{k}, 'cfg');
+        
+        cfg.latency = [0.1 0.3];
         sources_early{k} = ft_selectdata(cfg, source_pow);
         sources_early{k} = rmfield(sources_early{k}, 'cfg');
         
-        cfg.latency = [0.3 0.75];
+        cfg.latency = [0.5 0.9];
         sources_late{k} = ft_selectdata(cfg, source_pow);
         sources_late{k} = rmfield(sources_late{k}, 'cfg');
-        
-        cfg.latency = [0 0.75];
-        sources{k} = ft_selectdata(cfg, source_pow);
-        sources{k} = rmfield(sources{k}, 'cfg');
     end
     
     % save

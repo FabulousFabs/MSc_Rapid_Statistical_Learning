@@ -7,5 +7,7 @@
 %   offset      - Offset vector for all trials
 
 function offset = helper_clean_data(trialinfo, fs)
-    offset = floor(((1/fs) * ((trialinfo(:,5) + 300 + trialinfo(:,9)) / 1000)) * 1000);
+    %offset = floor(((1/fs) * ((trialinfo(:,5) + 300 + trialinfo(:,9)) / 1000)) * 1000);
+    %offset = floor((trialinfo(:,5) + 300 + trialinfo(:,9)) / 1000 * fs);
+    offset = floor((trialinfo(:,5) + 300 + trialinfo(:,9)) / 1000 * fs);
 end
