@@ -85,9 +85,6 @@ data$unique <- seq_along(data$ppn);                   # unique identifier (for r
 # recode repetitions
 data$rep <- 0;
 
-#for (it in data$unique) {
-#  data[data$unique == it,]$rep = NROW(subset(data, ppn == data[data$unique == it,]$ppn & unique <= it & id == #data[data$unique == it,]$id));
-#}
 for (it in data$unique) {
   data[data$unique == it,]$rep = NROW(subset(data, ppn == data[data$unique == it,]$ppn & unique <= it & id == data[data$unique == it,]$id & list == data[data$unique == it,]$list & pool == data[data$unique == it,]$pool));
 }
@@ -102,9 +99,20 @@ data[data$list == 2 & data$pool == 3,]$condition <- 'L2P3';
 data$condition <- factor(data$condition);
 
 
+# check question type stats
+questiondesc <- aggregate(t ~ ppn, data, table);
+questionstat <- chisq.test(questiondesc$t); # no diff
+
+
+# check question type stats more in-depth
+questiondesc_id <- aggregate(t ~ ppn:id, data, table);
+hist(questiondesc_id$t);
+questiondesc_id_c <- table(questiondesc_id$t); # bit annoying but not a problem, only 8 cases of a question not being asked for a word
+
+
 # check differences in no-responses between conditions
 responsedesc <- aggregate(r ~ list:pool, data, table);
-responsestat <- chisq.test(responsedesc$r[1:4]);
+responsestat <- chisq.test(responsedesc$r[1:4]); # no diff
 
 
 # remove no-responses
@@ -184,7 +192,7 @@ cmp.complex.3 <- anova(lme.complex.2, lme.complex.3); # better
 
 # add slope by time only
 lme.complex.4 <- lmer(rt ~ RepM*ConditionM + Iz + (1|ppn) + (1|t:def) + (1|id:spkr:var) + (0+rep|ppn) + (0+Iz|ppn), data.controlled.mad);
-isSingular(lme.complex.3); # true, move on
+isSingular(lme.complex.4); # true, move on
 
 
 # add slope for time:rep by ppn
@@ -248,26 +256,43 @@ lme.best.dat <- data.controlled.mad;
 lme.best.dat$fitted <- fitted(lme.best);
 lme.best.ppnstats <- aggregate(fitted ~ ppn + condition, lme.best.dat, mean);
 lme.best.ppnstats$condition <- factor(lme.best.ppnstats$condition, levels=c('L1P1', 'L1P3', 'L2P2', 'L2P3'));
-
+lme.best.repstats <- aggregate(fitted ~ ppn + rep:condition, lme.best.dat, mean);
+lme.best.repstats$condition <- factor(lme.best.repstats$condition, levels=c('L1P1', 'L1P3', 'L2P2', 'L2P3'));
 
 plt.main.l1 <- subset(lme.best.ppnstats, condition == 'L1P1' |
                                          condition == 'L1P3');
 plt.main.l2 <- subset(lme.best.ppnstats, condition == 'L2P2' |
                                          condition == 'L2P3');
 
+plt.rep.l1 <- subset(lme.best.repstats, condition == 'L1P1' |
+                                        condition == 'L1P3');
+plt.rep.l2 <- subset(lme.best.repstats, condition == 'L2P2' |
+                                        condition == 'L2P3');
+
 
 plt.coef <- data.frame(emmeans(lme.best, "ConditionM"));
 plt.coef$condition <- factor(plt.coef$ConditionM, levels=c('L1P1', 'L1P3', 'L2P2', 'L2P3'));
 
+
+plt2.coef <- data.frame(emmeans(lme.best, pairwise ~ RepM | ConditionM));
+plt2.coef <- plt2.coef[1:16, 1:8];
+plt2.coef$condition <- as.factor(plt2.coef$ConditionM);
+plt2.coef$rep <- plt2.coef$RepM;
+plt2.coef$RepM <- as.factor(plt2.coef$RepM);
 
 plt.coef.l1 <- subset(plt.coef, condition == 'L1P1' |
                                 condition == 'L1P3');
 plt.coef.l2 <- subset(plt.coef, condition == 'L2P2' |
                                 condition == 'L2P3');
 
+plt2.coef.l1 <- subset(plt2.coef, ConditionM == 'L1P1' |
+                                  ConditionM == 'L1P3');
+plt2.coef.l2 <- subset(plt2.coef, ConditionM == 'L2P2' |
+                                  ConditionM == 'L2P3');
 
 ver_stat <-
   ggplot () + 
+  
   # add fitted conditional responses by participant (L1)
   geom_line(data = plt.main.l1, aes(x = condition, y = fitted, group = ppn, color = condition), size = .4, show.legend = FALSE) + 
   geom_point(data = plt.main.l1, aes(x = condition, y = fitted, group = ppn, color = condition, shape = condition), size = .8, show.legend = FALSE) +
@@ -305,3 +330,46 @@ ver_stat <-
   theme(text = element_text(family = "Roboto"))
 ggsave(file=file.path(outdir, "run_meg_ver_stat.svg"), width=4, height=4, plot=ver_stat)
 ggsave(file=file.path(outdir, "run_meg_ver_stat.png"), width=4, height=4, plot=ver_stat)
+
+reps <- 
+  ggplot () + 
+  
+  # add fitted conditional responses by participant (L1)
+  geom_line(data = plt.rep.l1, aes(x = rep, y = fitted, group = ppn, color = rep), size = .4, show.legend = FALSE) + 
+  geom_point(data = plt.rep.l1, aes(x = rep, y = fitted, group = ppn, color = rep, shape = condition), size = .8, show.legend = FALSE) +
+  facet_wrap(~ condition) + 
+  
+  # add fitted conditional responses by participant (L2)
+  geom_line(data = plt.rep.l2, aes(x = rep, y = fitted, group = ppn, color = rep), size = .4, show.legend = FALSE) + 
+  geom_point(data = plt.rep.l2, aes(x = rep, y = fitted, group = ppn, color = rep, shape = condition), size = .8, show.legend = FALSE) +
+  facet_wrap(~ condition) + 
+
+  # add emmeans per condition (L1)
+  geom_line(data = plt2.coef.l1, aes(x = as.numeric(rep), y = emmean, group = 1, color = as.numeric(rep)), size = 1.0, alpha = 1.0, show.legend = FALSE) + 
+  geom_errorbar(data = plt2.coef.l1, aes(x = as.numeric(rep), ymin = emmean-SE, ymax = emmean+SE, group = 1, color = as.numeric(rep)), size = 1, width = .08, alpha = 1.0, show.legend = FALSE) + 
+  geom_point(data = plt2.coef.l1, aes(x = as.numeric(rep), y = emmean, group = 1, color = as.numeric(rep), shape = condition), size = 2, alpha = 1.0, show.legend = FALSE) + 
+  facet_wrap(~ condition) + 
+  
+  # add emmeans per condition (L2)
+  geom_line(data = plt2.coef.l2, aes(x = as.numeric(rep), y = emmean, group = 1, color = as.numeric(rep)), size = 1.0, alpha = 1.0, show.legend = FALSE) + 
+  geom_errorbar(data = plt2.coef.l2, aes(x = as.numeric(rep), ymin = emmean-SE, ymax = emmean+SE, group = 1, color = as.numeric(rep)), size = 1, width = .08, alpha = 1.0, show.legend = FALSE) + 
+  geom_point(data = plt2.coef.l2, aes(x = as.numeric(rep), y = emmean, group = 1, color = as.numeric(rep), shape = condition), size = 2, alpha = 1.0, show.legend = FALSE) + 
+  facet_wrap(~ condition, labeller = labeller(condition = c("L1P1" = "Low-variability veridical", "L1P3" = "Low-variability statistical", "L2P2" = "High-variability veridical", "L2P3" = "High-variability statistical"))) + 
+  
+  # add labels
+  labs(x = 'Repetition', y = "RT (ms)") + 
+  
+  # set limit
+  ylim(350, 2300) + 
+  
+  # add comparisons
+  geom_signif(data = plt.rep.l1, aes(x = as.numeric(rep), y = fitted, annotations = '*'), manual = TRUE, annotations = '.05', y_position = 2200, xmin=1, xmax=2, size = 0.2, textsize=3.0) + 
+  geom_signif(data = plt.rep.l2, aes(x = as.numeric(rep), y = fitted, annotations = '*'), manual = TRUE, annotations = '.05', y_position = 2200, xmin=1, xmax=2, size = 0.2, textsize=3.0) + 
+
+  # stylise
+  scale_fill_viridis() + 
+  scale_color_viridis(discrete = FALSE, alpha = 0.4, begin = 0.3, end = 0.6) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Roboto"))
+ggsave(file=file.path(outdir, "run_meg_reps.svg"), width=4, height=4, plot=reps)
+ggsave(file=file.path(outdir, "run_meg_reps.png"), width=4, height=4, plot=reps)

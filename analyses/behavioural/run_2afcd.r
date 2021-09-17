@@ -52,11 +52,11 @@ library(svglite);
 
 
 setwd("/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/")
-file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/union_4AFC_False.txt"; # collection to load
+file <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/union_2AFCD_False.txt"; # collection to load
 outdir <- "/users/fabianschneider/desktop/university/master/dissertation/project/analyses/behavioural/out/";
 
 
-system("module unload python && module load python/3.4.2 && cd /project/3018012.23/git/analyses/behavioural/ && python prep_aggregate.py --none --4AFC"); # collect data on /project/
+system("module unload python && module load python/3.4.2 && cd /project/3018012.23/git/analyses/behavioural/ && python prep_aggregate.py --none --2AFCD"); # collect data on /project/
 
 
 
@@ -74,13 +74,12 @@ data$f <- as.character(data$f);                       # string: file
 data$pool <- factor(data$pool);                       # factor: speaker pool
 data$list <- factor(data$list);                       # factor: item list
 data$def <- factor(data$def);                         # factor: definition id
-data$s <- factor(data$s);                             # factor: speaker sex
-data$o1 <- factor(data$o1);                           # factor: option1
-data$o2 <- factor(data$o2);                           # factor: option2
-data$o3 <- factor(data$o3);                           # factor: option3
-data$o4 <- factor(data$o4);                           # factor: option4
+id <- factor(data$f_spkr);                            # fix the miscoding of spkr/id
+data$f_spkr <- factor(data$f_id);                     # factor: foil speaker
+data$f_id <- factor(id);                              # factor: foil id
+data$f_var <- factor(data$f_var);                     # factor: foil var
+data$f_dur <- factor(data$f_dur);                     # factor: foil duration
 data$c <- as.numeric(as.character(data$c));           # continuous: correct response (1 = TRUE, 0 = FALSE)
-data$r <- factor(data$r);                             # factor: response given
 data$rt <- as.numeric(as.character(data$rt));         # continuous: reaction time (ms)
 data$i <- as.numeric(as.character(data$i));           # continuous: time progression
 data$rtl <- log10(as.numeric(as.character(data$rt))); # continuous: reaction time (log10)
@@ -91,41 +90,33 @@ data$unique <- seq_along(data$ppn);                   # unique identifier (for r
 data$rep <- 0;
 
 for (it in data$unique) {
-  data[data$unique == it,]$rep = NROW(subset(data, ppn == data[data$unique == it,]$ppn & unique <= it & id == data[data$unique == it,]$id));
+  data[data$unique == it,]$rep = NROW(subset(data, ppn == data[data$unique == it,]$ppn & unique <= it & id == data[data$unique == it,]$id & list == data[data$unique == it,]$list & pool == data[data$unique == it,]$pool));
 }
 
 
 # recode conditions
 data$condition <- 0;
 data[data$list == 1 & data$pool == 1,]$condition <- 'L1P1';
-data[data$list == 1 & data$pool == 2,]$condition <- 'L1P2';
-data[data$list == 1 & data$pool == 3,]$condition <- 'L1P3';
-data[data$list == 2 & data$pool == 1,]$condition <- 'L2P1';
 data[data$list == 2 & data$pool == 2,]$condition <- 'L2P2';
-data[data$list == 2 & data$pool == 3,]$condition <- 'L2P3';
-data[data$list == 3 & data$pool == 1,]$condition <- 'L3P1';
-data[data$list == 3 & data$pool == 2,]$condition <- 'L3P2';
-data[data$list == 3 & data$pool == 3,]$condition <- 'L3P3';
 data$condition <- factor(data$condition);
 
 
-# recode correct location in grid
-fn.recode_od <- function(r) { 
-  if (r[[9]] == r[[11]]) { return('top_left'); } 
-  if (r[[9]] == r[[12]]) { return('bottom_left'); } 
-  if (r[[9]] == r[[13]]) { return('top_right'); } 
-  return('bottom_right'); 
-};
-data$loc <- factor(apply(data, MARGIN=1, FUN=fn.recode_od)); # factor: correct option position in grid
+# recode no-responses
+data$nr <- as.numeric(data$rt == 1500);
 
 
 # check differences in no-responses between conditions
-responsedesc <- aggregate(r ~ list:pool, data, table);
-responsestat <- chisq.test(responsedesc$r[1:9], simulate.p.value = TRUE);
+responsedesc <- aggregate(nr ~ list:pool, data, table);
+responsestat <- chisq.test(responsedesc$nr[1:2], simulate.p.value = TRUE);
+
+
+# check differences in errors
+errordesc <- aggregate(c ~ list:pool, data, table);
+errorstat <- chisq.test(errordesc$c[1:2], simulate.p.value = TRUE);
 
 
 # remove no-responses
-data.controlled <- subset(data, r == 1 | r == 2 | r == 3 | r == 4);
+data.controlled <- subset(data, nr == 0);
 
 
 # remove errors
@@ -133,7 +124,7 @@ data.controlled <- subset(data.controlled, c == 1);
 
 
 # control learning
-learning.hr <- t.test(data$c, mu = 1/4, alternative = "greater"); 
+learning.hr <- t.test(data$c, mu = 1/2, alternative = "greater"); 
 # ceiling effect! with mean of .96
 
 
@@ -152,44 +143,34 @@ data.controlled.loss.mad <- (1 - NROW(data.controlled.mad) / NROW(data.controlle
 
 
 ### 2: modelling of data
-# run last checks of data; this is an important step because we _know_ that we only sampled items from each condition (i.e., we are now using 20 items per condition rather than 80, as is the case in, for example, the MEG task) - we landed on this compromise to even make this study doable time-wise (we were already hitting 3hrs per session), but this _might_ create bias in what words/speakers occur in which conditions, on average, which has some implications for the kinds of random effects we can fit in the 4AFC model
-words_by_cond_plot <- ggplot(aggregate(rt ~ condition:id, data.controlled.mad, NROW), aes(x = id, y = rt, group = condition)) + geom_bar(stat = "identity");
-words_by_cond_plot + facet_wrap(~condition);
-# this shows pretty clearly that this random effect is unbalanced in the design and we should, as such, not fit it in our models
-
-
-# let's look at the same problem for speakers, too
-spkrs_by_cond_plot <- ggplot(aggregate(rt ~ condition:spkr, data.controlled.mad, NROW), aes(x = spkr, y = rt, group = condition)) + geom_bar(stat = "identity");
-spkrs_by_cond_plot + facet_wrap(~condition);
-# and this, too, shows that it's a little bit unbalanced (particularly between speakers 4 & 10) - this could make for a real problem in our random effects structure, i'm afraid. i think it's best to leave out intercepts by word id or speaker in this model - we had that in the MEG data, at least, but the design here doesnt really allow for it, i'm afraid
+ggplot(aggregate(c ~ condition:rep, data.controlled.mad, NROW), aes(x = rep, y = c, group = condition)) + geom_bar(stat = "identity") + facet_wrap(~condition)
 
 
 # make contrast matrix for condition
-M <- rbind(c(1, 0, -1, 0, 0, 0, 0, 0, 0),
-           c(0, 0, 1, 0, 0, 0, 0, 0, -1),
-           c(0, 0, 0, 0, 1, -1, 0, 0, 0),
-           c(0, 0, 0, 0, 0, 1, 0, 0, -1),
-           c(0, 0, 0, 0, 0, 0, 0, 1, -1),
-           c(0, 0, 0, 0, 0, 0, 1, 0, -1),
-           c(0, 1, -1, 0, 0, 0, 0, 0, 0),
-           c(0, 0, 0, 1, 0, -1, 0, 0, 0)
-           );
-rownames(M) <- c('L1P1_L1P3', 'L1P3_L3P3', 'L2P2_L2P3', 'L2P3_L3P3', 'L3P2_L3P3', 'L3P1_L3P3', 'L1P2_L1P3', 'L2P1_L2P3');
-colnames(M) <- levels(data.controlled.mad$condition);
-CM <- ginv(M);
-dimnames(CM) <- rev(dimnames(M));
 data.controlled.mad$ConditionM <- factor(data.controlled.mad$condition);
-contrasts(data.controlled.mad$ConditionM) <- CM;
+contrasts(data.controlled.mad$ConditionM) <- MASS::contr.sdif(levels(data.controlled.mad$condition));
+
+
+# transform i
+data.controlled.mad$Iz <- (data.controlled.mad$i - mean(data.controlled.mad$i)) / sd(data.controlled.mad$i);
 
 
 # make contrast matrix for RepM
-data.controlled.mad$Iz <- (data.controlled.mad$i - mean(data.controlled.mad$i)) / sd(data.controlled.mad$i);
 data.controlled.mad$RepM <- factor(data.controlled.mad$rep);
 contrasts(data.controlled.mad$RepM) <- MASS::contr.sdif(levels(data.controlled.mad$RepM));
 
 
 # fit most basic model
-lme.basic <- lmer(rtl ~ RepM + ConditionM + Iz + (1|ppn), data.controlled.mad);
+lme.basic <- lmer(1/rt ~ RepM + ConditionM + ConditionM:rep + Iz + (1|ppn), data.controlled.mad);
+
+
+# tests
+plot_model(lme.basic, type = "pred", terms = c("RepM", "ConditionM"))
+
+
+
+# add intercept by spkr
+lme.complex.1 <- lmer(1/rt ~ RepM + ConditionM + ConditionM:rep + Iz + (1|ppn), data.controlled.mad);
 
 
 # add intercept for location
