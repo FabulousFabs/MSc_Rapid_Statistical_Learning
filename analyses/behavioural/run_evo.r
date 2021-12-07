@@ -282,6 +282,17 @@ data$RepS <- factor(data$reps);
 
 ### 2: model effects and plot results
 ## 2.1: extract learning effects
+# The rationale here is the, essentially, we want to fit LMMs 
+# per participant to extract ß-values of interest (similar to
+# how we would analyse fMRI data). In this case, we do so for
+# data from only L1P1 & L2P2 across all tasks. For all model
+# contrasts, we use the identity matrix of our variables. We
+# then extract the slopes (repetition crossed by variable),
+# z-transform them (within participant), evaluate their dis-
+# tribution and finally calculate their spearman correlation.
+# We plot data to show: a GLM slope + CI, distance from the
+# predictions for each data point, rho and significance.
+
 df <- data.frame(ppn = character(0),
                  word = character(0),
                  speaker = character(0),
@@ -360,7 +371,7 @@ hist(df_avail_l2$zspkr)
 
 
 # all data
-overall_corr <- cor.test(df_avail$zspkr, df_avail$zword);
+overall_corr <- cor.test(df_avail$zspkr, df_avail$zword, method = 'spearman', exact = FALSE);
 
 corr.x <- seq(from = min(df_avail$zspkr), to = max(df_avail$zspkr), by = 0.01);
 corr.y <- corr.x * overall_corr[["estimate"]][1];
@@ -415,7 +426,7 @@ ggsave(file=file.path(outdir, "run_evo_l.png"), width=4, height=4, plot=mt)
 
 
 # low variability
-l1_corr <- cor.test(df_avail_l1$zspkr, df_avail_l1$zword);
+l1_corr <- cor.test(df_avail_l1$zspkr, df_avail_l1$zword, method = 'spearman', exact = FALSE);
 
 l1corr.x <- seq(from = min(df_avail_l1$zspkr), to = max(df_avail_l1$zspkr), by = 0.01);
 l1corr.y <- l1corr.x * l1_corr[["estimate"]][1];
@@ -469,7 +480,7 @@ ggsave(file=file.path(outdir, "run_evo_lv_l.png"), width=4, height=4, plot=mt_l1
 
 
 # high variability
-l2_corr <- cor.test(df_avail_l2$zspkr, df_avail_l2$zword);
+l2_corr <- cor.test(df_avail_l2$zspkr, df_avail_l2$zword, method = 'spearman', exact = FALSE);
 
 l2corr.x <- seq(from = min(df_avail_l2$zspkr), to = max(df_avail_l2$zspkr), by = 0.01);
 l2corr.y <- l2corr.x * l2_corr[["estimate"]][1];
@@ -527,6 +538,19 @@ writeMat(file.path(outdir, "learning_scores.mat"), x = as.matrix(df_avail));
 
 
 ## 2.3: extract word- and speaker-specific recognition effects
+# The rationale here is the, essentially, we want to fit LMMs 
+# per participant to extract ß-values of interest (similar to
+# how we would analyse fMRI data). In this case, we do so for
+# data from only L1P1, L2P2, L1P3, L2P3, L3P3 across all tasks. 
+# For all model contrasts, we use the identity matrix of our
+# variables, but then set the respective controls (i.e., list3
+# or pool3) as the intercept of the model. Finally, we then 
+# extract the ß-estimates (in this case, from our factors),
+# z-transform them (within participant), evaluate their dis-
+# tribution and finally calculate their spearman correlation.
+# We plot data to show: a GLM slope + CI, distance from the
+# predictions for each data point, rho and significance.
+
 df <- data.frame(ppn = character(0),
                  word = character(0),
                  speaker = character(0),
@@ -620,7 +644,7 @@ hist(df_avail_l2$zspkr)
 
 
 # all data
-overall_corr <- cor.test(df_avail$zspkr, df_avail$zword);
+overall_corr <- cor.test(df_avail$zspkr, df_avail$zword, method = 'spearman', exact = FALSE);
 
 corr.x <- seq(from = min(df_avail$zspkr), to = max(df_avail$zspkr), by = 0.01);
 corr.y <- corr.x * overall_corr[["estimate"]][1];
@@ -729,7 +753,7 @@ ggsave(file=file.path(outdir, "run_evo_lv_ws.png"), width=4, height=4, plot=mt_l
 
 
 # high-variability
-l2_corr <- cor.test(df_avail_l2$zspkr, df_avail_l2$zword);
+l2_corr <- cor.test(df_avail_l2$zspkr, df_avail_l2$zword, method = 'spearman', exact = FALSE);
 
 l2corr.x <- seq(from = min(df_avail_l2$zspkr), to = max(df_avail_l2$zspkr), by = 0.01);
 l2corr.y <- l2corr.x * l2_corr[["estimate"]][1];
