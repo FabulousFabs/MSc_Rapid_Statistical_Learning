@@ -1,6 +1,6 @@
-% @Description: Compute between-trial beta beamformer.
+% @Description: Compute beta ROI power.
 
-function subj_source_beta_bf_prompt(subject)
+function subj_source_beta_ROI(subject)
     % load data
     fprintf('\n*** Loading data ***\n');
     
@@ -15,8 +15,9 @@ function subj_source_beta_bf_prompt(subject)
     cfg.offset = -floor((data.trialinfo(:,5) + 300) / 1000 * data.fsample);
     data = ft_redefinetrial(cfg, data);
     
-    % single-trial time-resolved power 17-23 Hz
-    fprintf('\n*** Computing single-trial beta power ***\n');
+    
+    % single-trial time-resolved power 17-23Hz
+    fprintf('\n*** Computing single-trial theta power ***\n');
     
     cfg = [];
     cfg.method = 'mtmconvol';
@@ -25,8 +26,7 @@ function subj_source_beta_bf_prompt(subject)
     cfg.foi = 20;
     cfg.toi = -0.5:0.05:0.9;
     cfg.t_ftimwin = 0.25;
-    cfg.tapsmofrq = 4; % this means our freq is slightly off here, but sadly that's a compromise we have to take
-    
+    cfg.tapsmofrq = 4;
     
     if subject.ppn == 10
         % hacky work-around to fix one participant's data (the trigger
@@ -39,13 +39,18 @@ function subj_source_beta_bf_prompt(subject)
     end
     
     freq = ft_freqanalysis(cfg, data);
-    
     trialinds = freq.trialinfo(:,8);
     
     % load leadfields + head model
     fprintf('\n*** Loading leadfields + headmodel. ***\n');
     
     load(fullfile(subject.out, 'geom-leadfield-mni-8mm-megchans.mat'), 'headmodel', 'leadfield');
+    
+    % right SMG; right MTG; right MFG; right pars triangularis
+    roi = [6218; 5676; 6416; 6317];
+    leadfield.pos = leadfield.pos(roi,:);
+    leadfield.leadfield = leadfield.leadfield(roi);
+    leadfield.inside = true(numel(roi), 1);
     
     % source analysis to compute DICS spatial filters
     fprintf('\n*** Computing DICS spatial filters ***\n');
@@ -66,30 +71,6 @@ function subj_source_beta_bf_prompt(subject)
     source_pow = helper_compute_single_trial_power(source, freq);
     source_pow.dimord = 'pos_rpt_time';
     
-    % regress out linear trend
-    %fprintf('\n*** Regressing out linear trend ***\n');
-    %
-    %cfg = [];
-    %cfg.confound = helper_get_linear_confound();
-    %cfg.confound = cfg.confound(trialinds,:);
-    %source_pow = ft_regressconfound(cfg, source_pow);
-    
-    % regress out movement
-    %fprintf('\n*** Regressing out movement ***\n');
-    %
-    %load(fullfile(subject.out, 'regressor-movement.mat'), 'cc_dm');
-    %
-    %cfg = [];
-    %cfg.confound = [cc_dm ones(size(cc_dm, 1), 1)];
-    %
-    %if subject.ppn == 10
-    %    % again, the classic work-around
-    %    cfg.confound = cfg.confound([timing_on],:);
-    %end
-    %
-    %cfg.reject = [1:6];
-    %source_pow = ft_regressconfound(cfg, source_pow);
-    
     % regress out confounds
     fprintf('\n*** Regressing out confounds ***\n');
     
@@ -109,6 +90,7 @@ function subj_source_beta_bf_prompt(subject)
     cfg.reject = [1:9];
     source_pow = ft_regressconfound(cfg, source_pow);
     
+    
     % baseline correct individual trials using z-score as per eelke's code
     % see Spaak & de Lange (2020) or Grandchamp & Delorme (2011)
     fprintf('\n*** Correcting baselines ***\n');
@@ -117,37 +99,21 @@ function subj_source_beta_bf_prompt(subject)
     sd = std(source_pow.pow, [], 3);
     source_pow.pow = (source_pow.pow - mu) ./ sd;
     
-    % conditioning
-    fprintf('\n*** Conditioning :-) ***\n');
+    % average
+    fprintf('\n*** Averaging ***\n');
     
-    conds = [1 3 5 6];
-    conds = helper_partition_trials(freq, conds);
-    condslabels = {"L1P1", "L1P3", "L2P2", "L2P3"};
+    cfg = [];
+    cfg.latency = [0.3 0.4];
+    cfg.avgovertime = 'yes';
+    source_pow_early = ft_selectdata(cfg, source_pow);
+    source_pow_early.trialinfo = freq.trialinfo;
     
-    sources = {};
-    sources_early = {};
-    sources_late = {};
-    
-    for k = 1:size(conds, 2)
-        cfg = [];
-        cfg.trials = conds{k}.indices;
-        cfg.avgoverrpt = 'yes';
-        cfg.latency = [0.3 0.6];
-        cfg.avgovertime = 'yes';
-        sources{k} = ft_selectdata(cfg, source_pow);
-        sources{k} = rmfield(sources{k}, 'cfg');
-        
-        cfg.latency = [0.25 0.45];
-        sources_early{k} = ft_selectdata(cfg, source_pow);
-        sources_early{k} = rmfield(sources_early{k}, 'cfg');
-        
-        cfg.latency = [0.4 0.6];
-        sources_late{k} = ft_selectdata(cfg, source_pow);
-        sources_late{k} = rmfield(sources_late{k}, 'cfg');
-    end
+    cfg.latency = [0.4 0.6];
+    source_pow_late = ft_selectdata(cfg, source_pow);
+    source_pow_late.trialinfo = freq.trialinfo;
     
     % save
     fprintf('\n*** Saving ***\n');
     
-    save(fullfile(subject.out, 'subj_source_beta_bf_prompt.mat'), 'sources', 'sources_early', 'sources_late', 'conds', 'condslabels');
+    save(fullfile(subject.out, 'subj_source_beta_roi.mat'), 'source_pow_early', 'source_pow_late');
 end

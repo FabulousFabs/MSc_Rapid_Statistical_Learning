@@ -2,9 +2,18 @@
 
 function group_source_beta(subjects, rootdir)
     beta_sources = {};
+    beta_sources_early = {};
+    beta_sources_late = {};
 
     beta_diff_L1 = {};
     beta_diff_L2 = {};
+    
+    beta_early_diff_L1 = {};
+    beta_early_diff_L2 = {};
+    
+    beta_late_diff_L1 = {};
+    beta_late_diff_L2 = {};
+    
     
     for k = 1:numel(subjects)
         if subjects(k).include ~= true
@@ -12,23 +21,47 @@ function group_source_beta(subjects, rootdir)
             continue
         end
 
-        load(fullfile(subjects(k).out, 'subj_source_beta_bf_prompt.mat'), 'sources');
+        load(fullfile(subjects(k).out, 'subj_source_beta_bf_prompt.mat'), 'sources', 'sources_early', 'sources_late');
         beta_sources{k} = sources;
+        beta_sources_early{k} = sources_early;
+        beta_sources_late{k} = sources_late;
         
         beta_diff_L1{k} = sources{1};
         beta_diff_L1{k}.pow = (sources{1}.pow - sources{2}.pow);
 
         beta_diff_L2{k} = sources{2};
         beta_diff_L2{k}.pow = (sources{3}.pow - sources{4}.pow);
+        
+        beta_early_diff_L1{k} = sources_early{1};
+        beta_early_diff_L1{k}.pow = (sources_early{1}.pow - sources_early{2}.pow);
+        
+        beta_early_diff_L2{k} = sources_early{3};
+        beta_early_diff_L2{k}.pow = (sources_early{3}.pow - sources_early{4}.pow);
+        
+        beta_late_diff_L1{k} = sources_late{1};
+        beta_late_diff_L1{k}.pow = (sources_late{1}.pow - sources_late{2}.pow);
+        
+        beta_late_diff_L2{k} = sources_late{3};
+        beta_late_diff_L2{k}.pow = (sources_late{3}.pow - sources_late{4}.pow);
     end
 
     beta_sources = cat(1, beta_sources{:}); % subject x condition
+    beta_sources_early = cat(1, beta_sources_early{:}); % subject x condition
+    beta_sources_late = cat(1, beta_sources_late{:}); % subject x condition
     
     beta_diff_L1 = beta_diff_L1(~cellfun('isempty', beta_diff_L1))';
     beta_diff_L2 = beta_diff_L2(~cellfun('isempty', beta_diff_L2))';
+    
+    beta_early_diff_L1 = beta_early_diff_L1(~cellfun('isempty', beta_early_diff_L1))';
+    beta_early_diff_L2 = beta_early_diff_L2(~cellfun('isempty', beta_early_diff_L2))';
+    
+    beta_late_diff_L1 = beta_late_diff_L1(~cellfun('isempty', beta_late_diff_L1))';
+    beta_late_diff_L2 = beta_late_diff_L2(~cellfun('isempty', beta_late_diff_L2))';
 
     %%
     allsources = [beta_sources beta_diff_L1 beta_diff_L2];
+    allsources_early = [beta_sources_early beta_early_diff_L1 beta_early_diff_L2];
+    allsources_late = [beta_sources_late beta_late_diff_L1 beta_late_diff_L2];
 
     %%
     load(sourcemodel_loc, 'sourcemodel');
@@ -44,6 +77,26 @@ function group_source_beta(subjects, rootdir)
         tmp = allsources{k}.pow;
         allsources{k}.pow = nan(size(template_grid.pos, 1), size(tmp, 2), size(tmp, 3));
         allsources{k}.pow(template_grid.inside, :, :) = tmp;
+    end
+    
+    for k = 1:numel(allsources_early)
+        allsources_early{k}.inside = template_grid.inside;
+        allsources_early{k}.pos = template_grid.pos;
+        allsources_early{k}.dim = template_grid.dim;
+
+        tmp = allsources_early{k}.pow;
+        allsources_early{k}.pow = nan(size(template_grid.pos, 1), size(tmp, 2), size(tmp, 3));
+        allsources_early{k}.pow(template_grid.inside, :, :) = tmp;
+    end
+    
+    for k = 1:numel(allsources_late)
+        allsources_late{k}.inside = template_grid.inside;
+        allsources_late{k}.pos = template_grid.pos;
+        allsources_late{k}.dim = template_grid.dim;
+
+        tmp = allsources_late{k}.pow;
+        allsources_late{k}.pow = nan(size(template_grid.pos, 1), size(tmp, 2), size(tmp, 3));
+        allsources_late{k}.pow(template_grid.inside, :, :) = tmp;
     end
 
     %%
@@ -63,15 +116,19 @@ function group_source_beta(subjects, rootdir)
     cfg.uvar = 2;
 
     %%
-    stat_l1p1_l1p3 = ft_sourcestatistics(cfg, allsources{:,1}, allsources{:,2});
+    stat_l1p1_l1p3 = ft_sourcestatistics(cfg, allsources_late{:,1}, allsources_late{:,2});
     stat_l2p2_l2p3 = ft_sourcestatistics(cfg, allsources{:,3}, allsources{:,4});
-    stat_l1p1_l2p2 = ft_sourcestatistics(cfg, allsources{:,1}, allsources{:,3});
-    stat_l1p3_l2p3 = ft_sourcestatistics(cfg, allsources{:,2}, allsources{:,4});
+    stat_l1p1_l2p2 = ft_sourcestatistics(cfg, allsources_late{:,1}, allsources_late{:,3});
+    stat_l1p3_l2p3 = ft_sourcestatistics(cfg, allsources_late{:,2}, allsources_late{:,4});
     stat_diff_l1l2 = ft_sourcestatistics(cfg, allsources{:,5}, allsources{:,6});
 
     %%
     mri = ft_read_mri(fullfile(rootdir, 'processed', 'combined', 'average305_t1_tal_lin.nii'));
     mri.coordsys = 'mni';
+    
+    %%
+    %mri = ft_read_mri(fullfile('/home', 'common', 'matlab', 'spm12', 'canonical', 'avg152T1.nii'));
+    %mri.coordsys = 'mni';
 
     %%
     cfg = [];
@@ -88,6 +145,7 @@ function group_source_beta(subjects, rootdir)
     interp_l2p2_l2p3.nice_mask = helper_make_mask(interp_l2p2_l2p3.stat, [.5 .8], 'neg');
     interp_l1p1_l2p2.nice_mask = helper_make_mask(interp_l1p1_l2p2.stat, [.5 .8], 'neg');
     interp_l1p3_l2p3.nice_mask = helper_make_mask(interp_l1p3_l2p3.stat, [.5 .8], 'pos');
+    interp_l1p3_l2p3.nice_mask2 = helper_make_mask(interp_l1p3_l2p3.stat, [.3 .6], 'pos');
     interp_diff_l1l2.nice_mask = helper_make_mask(interp_diff_l1l2.stat, [.5 .8], 'neg');
 
     %%
@@ -105,8 +163,8 @@ function group_source_beta(subjects, rootdir)
     ft_sourceplot(cfg, interp_l1p1_l1p3);
     
     %%
-    mask_ro = helper_mask_ROI(mri, atl, {'Angular_L', 'Angular_R', 'SupraMarginal_L', 'SupraMarginal_R', 'Occipital_Mid_L', 'Occipital_Mid_R'});
-    mask_tf = helper_mask_ROI(mri, atl, {'Temporal_Sup_L', 'Temporal_Sup_R', 'Frontal_Sup_L', 'Frontal_Sup_R'});
+    mask_ro = helper_mask_ROI(mri, atl, {'Angular_L', 'Angular_R', 'SupraMarginal_L', 'SupraMarginal_R', 'Temporal_Sup_R'});
+    mask_tf = helper_mask_ROI(mri, atl, {'Frontal_Sup_R', 'Frontal_Inf_Oper_R', 'Rolandic_R'});
     
     %%
     f1 = figure('visible', 'off');
@@ -163,7 +221,7 @@ function group_source_beta(subjects, rootdir)
     
     %%
     mask_ti = helper_mask_ROI(mri, atl, {'Insula_L', 'Insula_R', 'Frontal_Inf_Oper_L', 'Frontal_Inf_Oper_R', 'Putamen_L', 'Putamen_R', 'Pallidum_L', 'Pallidum_R'});
-    mask_om = helper_mask_ROI(mri, atl, {'Occipital_Sup_L', 'Occipital_Sup_R', 'Occipital_Mid_L', 'Occipital_Mid_R', 'Cuneus_L', 'Cuneus_R'});
+    mask_om = helper_mask_ROI(mri, atl, {'SupraMarginal_L', 'SupraMarginal_R', 'Angular_L', 'Angular_R'});
     
     %%
     f4 = figure('visible', 'off');
@@ -193,6 +251,12 @@ function group_source_beta(subjects, rootdir)
     cfg = rmfield(cfg, 'location');
     
     %% explore source space l1p3-l2p3
+    ft_sourceplot(cfg, interp_l1p3_l2p3);
+    
+    %% 
+    mask_til = helper_mask_ROI(mri, atl, {'Insula_L', 'Frontal_Inf_Oper_L', 'Temporal_Sup_L', 'Temporal_Mid_L', 'Temporal_Inf_L', 'Parietal_Sup_L', 'Postcentral_L', 'Parietal_Mid_L', 'Angular_L', 'SupraMarginal_L'});
+    
+    %% explore source space l1p3-l2p3
     cfg.maskparameter = 'nice_mask';
     % actually, we're going to do this slightly differently here.
     % it's a little bit awkward because somehow there's a pretty massive
@@ -209,19 +273,17 @@ function group_source_beta(subjects, rootdir)
     saveas(f6, fullfile(rootdir, 'results', 'source_beta_l1p3_l2p3_rt.png'), 'png');
     
     %%
-    mask_ps = helper_mask_ROI(mri, atl, {'Parietal_Sup_L', 'Postcentral_L', 'Parietal_Mid_L', 'Angular_L', 'SupraMarginal_L'});
-    
-    %%
     f7 = figure('visible', 'off');
-    [~, cfg.location] = helper_peak_in_ROI(interp_l1p3_l2p3, mask_ps);
+    cfg.maskparameter = 'nice_mask2';
+    [~, cfg.location] = helper_peak_in_ROI(interp_l1p3_l2p3, mask_til);
     ft_sourceplot(cfg, interp_l1p3_l2p3);
     ax = gca;
     ax.FontName = 'Roboto';
     ax.FontSize = 8;
     set(findall(f7, '-property', 'FontName'), 'FontName', 'Roboto');
     set(findall(f7, '-property', 'FontSize'), 'FontSize', 8);
-    saveas(f7, fullfile(rootdir, 'results', 'source_beta_l1p3_l2p3_ps.svg'), 'svg');
-    saveas(f7, fullfile(rootdir, 'results', 'source_beta_l1p3_l2p3_ps.png'), 'png');
+    saveas(f7, fullfile(rootdir, 'results', 'source_beta_l1p3_l2p3_til.svg'), 'svg');
+    saveas(f7, fullfile(rootdir, 'results', 'source_beta_l1p3_l2p3_til.png'), 'png');
     
     %%
     cfg = rmfield(cfg, 'location');
