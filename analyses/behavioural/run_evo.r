@@ -722,7 +722,7 @@ l1mod <- lm(zword ~ zspkr, df_avail_l1);
 l1mod.p <- predict.lm(l1mod, data.frame(zspkr = l1corr$zspkr), interval = "confidence");
 l1mod.v <- data.frame(x = l1corr$zspkr, y = l1mod.p[,1], ci_lb = l1mod.p[,2], ci_ub = l1mod.p[,3]);
 
-df_avail_l1$dist <- apply(df_avail_l1, MARGIN=1, FUN=l1corr.dist, A = c(l1mod.v[1,]$x, l1mod.v[1,]$y), B = c(l1mod.v[NROW(l1mod.v),]$x, l1mod.v[NROW(l1mod.v),]$y));
+df_avail_l1$dist <- apply(df_avail_l1, MARGIN=1, FUN=l1corr.dist, A, B = c(l1mod.v[NROW(l1mod.v),]$x, l1mod.v[NROW(l1mod.v),]$y));
 
 mt_l1 <- 
   ggplot() + 
@@ -808,3 +808,108 @@ ggsave(file=file.path(outdir, "run_evo_hv_ws.png"), width=4, height=4, plot=mt_l
 
 # export to matlab
 writeMat(file.path(outdir, "ws_scores.mat"), x = as.matrix(df_avail));
+
+
+
+## 2.4: extract effects of veridical and statistical learning and test for dissociation within-participants
+# The rationale here is that we want to fit a model that looks at performance in veridical and
+# statistical conditions across all participants to look at the relationship between veridical
+# and statistical performance (i.e., what is the direction of the correlation there?). We do
+# this to investigate whether it really holds that if veridically well-learned, then also success
+# in statistical conditions (which should be true).
+
+data_vs <- subset(data, task == 'MEG' | task == '4AFC');
+data_vs$type <- ifelse(data_vs$condition == 'L1P1' | data_vs$condition == 'L2P2', 'V', 'S');
+data_vs$type <- factor(data_vs$type, c('V', 'S'));
+
+# model fitting
+vs.model <- lmer(rt ~ ppn:type + rep + reps + (rep:reps|task), data = data_vs);
+# fails to converge
+
+vs.model <- lmer(rt ~ ppn:type + rep + reps + (reps|task), data = data_vs);
+# fails to converge
+
+vs.model <- lmer(rt ~ ppn:type + rep + reps + (rep|task), data = data_vs);
+# singular fit
+
+vs.model <- lmer(rt ~ ppn:type + rep + reps + (1|task), data = data_vs);
+# ok
+
+vs.fixef <- data.frame(ppn = character(0), 
+                       V = double(0), 
+                       S = double(0), stringsAsFactors = FALSE);
+
+for (ppn in unique(data_vs$ppn)) {
+  vs.fixef[NROW(vs.fixef)+1,] <- c(ppn,
+                                   fixef(vs.model)[sprintf("ppn%s:type%s", ppn, "V")][1],
+                                   fixef(vs.model)[sprintf("ppn%s:type%s", ppn, "S")][1]);
+}
+
+vs.fixef$ppn <- factor(vs.fixef$ppn);
+vs.fixef$V <- as.numeric(vs.fixef$V);
+vs.fixef$S <- as.numeric(vs.fixef$S);
+
+vs.fixef$zV <- 0;
+vs.fixef$zS <- 0;
+
+vs.fixef.o <- na.omit(vs.fixef);
+vs.fixef.o$ppn <- factor(vs.fixef.o$ppn);
+
+for (ppn in unique(vs.fixef.o$ppn)) {
+  vs.fixef.o[vs.fixef.o$ppn == ppn,]$zV <- (vs.fixef.o[vs.fixef.o$ppn == ppn,]$V - mean(vs.fixef.o$V)) / sd(vs.fixef.o$V);
+  vs.fixef.o[vs.fixef.o$ppn == ppn,]$zS <- (vs.fixef.o[vs.fixef.o$ppn == ppn,]$S - mean(vs.fixef.o$S)) / sd(vs.fixef.o$S);
+}
+
+hist(vs.fixef.o$zV);
+hist(vs.fixef.o$zS);
+
+vs.corr <- cor.test(vs.fixef.o$zV, vs.fixef.o$zS, method = "spearman", exact = TRUE);
+vs.corr.x <- seq(from = min(vs.fixef.o$zV), to = max(vs.fixef.o$zV), by = 0.01);
+vs.corr.y <- vs.corr.x * vs.corr[["estimate"]][1];
+vs.corr.m <- data.frame(zv = vs.corr.x, zs = vs.corr.y);
+
+vs.corr.a <- data.frame(x = c(2.25), y = c(1.8), label = c(sprintf('\U000003C1 = %.2f', vs.corr[["estimate"]][1])));
+vs.corr.p <- vs.corr[["p.value"]][1]
+if (vs.corr.p <= 1e-3) { vs.corr.p <- '***'; } else if (vs.corr.p <= 1e-2) { vs.corr.p <- '**'; } else if (vs.corr.p <= 5e-2) { vs.corr.p <- '*'; } else { vs.corr.p <- 'n.s.'; }
+vs.corr.s <- data.frame(x = c(2.25), y = c(2.2), label = c(vs.corr.p));
+
+vs.corr.dist <- function(r, A, B) {
+  p <- c(as.numeric(r[[5]]), as.numeric(r[[4]]));
+  v1 <- A - B;
+  v2 <- p - A;
+  m <- cbind(v1, v2);
+  d <- abs(det(m)) / sqrt(sum(v1**2))
+}
+
+vsmod <- lm(zV ~ zS, vs.fixef.o);
+vsmod.p <- predict.lm(vsmod, data.frame(zS = vs.corr.m$zv), interval = "confidence");
+vsmod.v <- data.frame(x = vs.corr.m$zv, y = vsmod.p[,1], ci_lb = vsmod.p[,2], ci_ub = vsmod.p[,3]);
+
+vs.fixef.o$dist <- apply(vs.fixef.o, MARGIN=1, FUN=vs.corr.dist, A = c(vsmod.v[1,]$x, vsmod.v[1,]$y), B = c(vsmod.v[NROW(vsmod.v),]$x, vsmod.v[NROW(vsmod.v),]$y));
+
+mt_vs <- 
+  ggplot() + 
+  
+  # add scatter
+  geom_point(data = vs.fixef.o, aes(x = zV, y = zS, colour = dist), show.legend = FALSE) + 
+  
+  # add trend
+  geom_line(data = vsmod.v, aes(x = x, y = y)) + 
+  geom_ribbon(data = vsmod.v, aes(x = x, ymin = ci_lb, ymax = ci_ub), alpha = 0.15) + 
+  
+  # annotate
+  geom_text(data = vs.corr.a, aes(x = x, y = y, label = label)) + 
+  geom_text(data = vs.corr.s, aes(x = x, y = y, label = label)) + 
+  
+  # add labels
+  labs(x = TeX("Veridical effect (z-score)"), y = "Statistical effect (z-score)") + 
+  ylim(-2.5, 2.5) + 
+  xlim(-2.5, 2.5) + 
+  
+  # stylise
+  scale_fill_viridis() + 
+  scale_color_viridis(discrete = FALSE, alpha = 0.4, begin = 0.1, end = 0.6) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Roboto"))
+ggsave(file=file.path(outdir, "run_evo_vs.svg"), width=4, height=4, plot=mt_vs)
+ggsave(file=file.path(outdir, "run_evo_vs.png"), width=4, height=4, plot=mt_vs)
