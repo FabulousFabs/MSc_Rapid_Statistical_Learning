@@ -1,5 +1,5 @@
 '''
-All plotting utilities
+Helper file for easy plots
 '''
 
 import numpy as np

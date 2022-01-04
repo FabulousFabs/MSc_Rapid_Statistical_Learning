@@ -1,22 +1,13 @@
-''' Solver utilities '''
+'''
+Solver utilities
+'''
 
 import numpy as np
 
-'''
-Diffeq solvers
-
-Note:
-I am implementing Heuns, Eulers and Runge-Kutta to test what the effects of each
-would be. From past experience, Euler's is not great if we want to include AdEx
-because it will likely go off, whereas Heuns should do just fine (albeit being
-a little inaccurate, of course). Runge-Kutta would be the gold standard in most
-cases, but is computationally very expensive compared to the simple Heuns we
-have here. In fact, it might be _too_ expensive for our intents, hence why I am
-leaving all three in for now.
-'''
-
 def Heuns(x0, t0, dt, dxdt, **kwargs):
-    ''' Heun's method for pedantically solving diffeqs '''
+    '''
+    Heun's method for pedantically solving diffeqs
+    '''
 
     t1 = t0 + dt
     dxdt0 = dxdt(t0, x0, kwargs)
@@ -25,7 +16,9 @@ def Heuns(x0, t0, dt, dxdt, **kwargs):
     return x0 + (dt / 2) * (dxdt0 + dxdt1)
 
 def Eulers(x0, t0, dt, dxdt, h = None, n = 10, **kwargs):
-    ''' Euler's method for pedantically solving diffeqs '''
+    '''
+    Euler's method for pedantically solving diffeqs
+    '''
 
     if h is None:
         h = dt / n
@@ -41,7 +34,9 @@ def Eulers(x0, t0, dt, dxdt, h = None, n = 10, **kwargs):
     return x0
 
 def RungeKutta(x0, t0, dt, dxdt, h = None, n = 10, **kwargs):
-    ''' Runge-Kutta's method for pedantically solving diffeqs '''
+    '''
+    Runge-Kutta's method for pedantically solving diffeqs
+    '''
 
     if h is None:
         h = dt / n
