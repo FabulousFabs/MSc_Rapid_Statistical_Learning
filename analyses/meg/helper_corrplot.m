@@ -23,7 +23,7 @@ function [f, R, P] = helper_corrplot(x, y, x_lim, y_lim, x_lab, y_lab, t)
     dist = arrayfun(@(xn, yn) d_d([xn, yn], d_A, d_B), x, y);
     
     f = figure; hold on
-    scatter(x, y, 1, dist, '.');
+    scatter(x, y, 10, dist, 'o');
     ft_colormap('viridis', 512);
     xlim(x_lim);
     ylim(y_lim);
