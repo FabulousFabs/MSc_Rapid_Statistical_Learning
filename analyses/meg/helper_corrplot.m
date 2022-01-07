@@ -22,8 +22,9 @@ function [f, R, P] = helper_corrplot(x, y, x_lim, y_lim, x_lab, y_lab, t)
     d_B = [xpred(end), ypred(end)];
     dist = arrayfun(@(xn, yn) d_d([xn, yn], d_A, d_B), x, y);
     
-    f = figure; hold on
-    scatter(x, y, 10, dist, 'o');
+    f = figure('Position', [0 0 300 300]); hold on; grid on;
+    scatter(x, y, 15, dist, 'o', 'filled', 'MarkerFaceAlpha', 0.4);
+    scatter(x, y, 15, dist, 'o', 'MarkerFaceAlpha', 0.8);
     ft_colormap('viridis', 512);
     xlim(x_lim);
     ylim(y_lim);
@@ -31,8 +32,8 @@ function [f, R, P] = helper_corrplot(x, y, x_lim, y_lim, x_lab, y_lab, t)
     h = fill_between(xpred, yci(:, 1), yci(:, 2));
     h.EdgeColor = 'none';
     h.FaceColor = [0 0 0];
-    h.FaceAlpha = 0.2;
-    plot(xpred, ypred, 'k-');
+    h.FaceAlpha = 0.1;
+    plot(xpred, ypred, 'k-', 'LineWidth', 2);
     [R, P] = corrcoef(x, y, 'rows', 'complete');
 
     p_t = 'n.s.';
@@ -44,9 +45,9 @@ function [f, R, P] = helper_corrplot(x, y, x_lim, y_lim, x_lab, y_lab, t)
         p_t = '*';
     end
 
-    text(x_lim(2) * 0.9, y_lim(2) * 0.9, sprintf('\\rho = %.2f', R(1,2)), 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8);
+    text(x_lim(2) * 0.75, y_lim(2) * 0.78, sprintf('\\rho = %.2f', R(1,2)), 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8, 'FontWeight', 'bold');
     %text(x_lim(2) * 0.9, y_lim(2) * 0.9, sprintf('p < %.2f', P(1,2)), 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
-    text(x_lim(2) * 0.9, y_lim(2) * 0.95, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8);
+    text(x_lim(2) * 0.75, y_lim(2) * 0.85, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8, 'FontWeight', 'bold');
     xlabel(x_lab);
     ylabel(y_lab);
     

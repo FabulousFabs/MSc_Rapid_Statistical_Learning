@@ -202,7 +202,8 @@ function group_roi_theta(subjects, rootdir)
     vs_rtcon(:, :, :, 2) = rtavg_items(:, :, :, 3) - rtavg_items(:, :, :, 4);
     vs_rtcon(:, :, :, 3) = rtavg_items(:, :, :, 1) - rtavg_items(:, :, :, 3);
     vs_rtcon(:, :, :, 4) = rtavg_items(:, :, :, 2) - rtavg_items(:, :, :, 4);
-
+    
+    % plot
     fprintf('\n*** Computing and plotting. ***\n');
     
     % setup matrix containing all comparisons of interest
@@ -222,7 +223,7 @@ function group_roi_theta(subjects, rootdir)
                 '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'corr_lvls_delta_acc';
                 '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'corr_lvls_delta_hpc';
                 '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'corr_hvhs_delta_pt';
-                '\Delta Source power CN (z-score)', 'High var. (veridical - statistical) \delta', 'corr_hvhs_delta_cn';
+                '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'corr_lshs_delta_cn';
                 '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'corr_lshs_delta_phc'};
     
     % create correlation plots power x rt for all contrasts
@@ -237,7 +238,7 @@ function group_roi_theta(subjects, rootdir)
         saveas(f, fullfile(rootdir, 'results', sprintf('%s.svg', run_labs{k, 3})), 'svg');
         saveas(f, fullfile(rootdir, 'results', sprintf('%s.png', run_labs{k, 3})), 'png');
     end
-    
+
     % setup power contrasts (by block!)
     bp_pwrcon = nan(size(power_by_block));
     bp_pwrcon(:, :, :, 1, :) = power_by_block(:, :, :, 1, :) - power_by_block(:, :, :, 2, :);
@@ -255,7 +256,7 @@ function group_roi_theta(subjects, rootdir)
                 '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'blocks_lvls_delta_acc', 'Veridical', 'Statistical';
                 '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'blocks_lvls_delta_hpc', 'Veridical', 'Statistical';
                 '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'blocks_hvhs_delta_pt', 'Veridical',' Statistical';
-                '\Delta Source power CN (z-score)', 'High var. (veridical - statistical) \delta', 'blocks_hvhs_delta_cn', 'Veridical', 'Statistical';
+                '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'blocks_hvhs_delta_cn', 'Low var.', 'High var.';
                 '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'blocks_lshs_delta_phc', 'Low var.', 'High var.'};
     
     % setup alpha
@@ -273,18 +274,28 @@ function group_roi_theta(subjects, rootdir)
         kC1 = run_comps(k, 4);
         kC2 = run_comps(k, 5);
         
-        f = figure(); hold on
+        f = figure('Position', [0 0 300 300]); hold on; grid on;
     
         hl = zeros(2, 1);
         cols = ft_colormap('viridis', 2);
         
-        hl(1) = boundedline(squeeze(rep_by_block(1, kR, kT, kC1, :)), squeeze(bp_pwrmu(1, kR, kT, kC1, :)), squeeze(bp_pwrci(1, kR, kT, kC1, :)), 's-', 'cmap', cols(1, :), 'alpha');
-        set(hl(1), 'markerfacecolor', get(hl(1), 'color'), 'markersize', 3);
-        hl(2) = boundedline(squeeze(rep_by_block(1, kR, kT, kC2, :)), squeeze(bp_pwrmu(1, kR, kT, kC2, :)), squeeze(bp_pwrci(1, kR, kT, kC2, :)), 's-', 'cmap', cols(2, :), 'alpha');
-        set(hl(2), 'markerfacecolor', get(hl(2), 'color'), 'markersize', 3);
-    
-        for j = 1:4
+        hl(1) = boundedline(squeeze(rep_by_block(1, kR, kT, kC1, :)), squeeze(bp_pwrmu(1, kR, kT, kC1, :)), squeeze(bp_pwrci(1, kR, kT, kC1, :)), 's-', 'cmap', cols(1, :), 'alpha', 'transparency', 0.1);
+        set(hl(1), 'markerfacecolor', get(hl(1), 'color'), 'markersize', 3, 'linewidth', 2);
+        hl(2) = boundedline(squeeze(rep_by_block(1, kR, kT, kC2, :)), squeeze(bp_pwrmu(1, kR, kT, kC2, :)), squeeze(bp_pwrci(1, kR, kT, kC2, :)), 's-', 'cmap', cols(2, :), 'alpha', 'transparency', 0.1);
+        set(hl(2), 'markerfacecolor', get(hl(2), 'color'), 'markersize', 3, 'linewidth', 2);
+        
+        s = 0.1;
+        ds = 1 / s;
+
+        x_sig = 1:4;
+        y_sig = nan(size(x_sig));
+
+        for j = x_sig
             [~, p] = ttest(bp_pwrcon(:, kR, kT, kC, j));
+
+            if p <= alpha
+                y_sig(j) = -0.15;
+            end
             
             p_t = 'n.s.';
     
@@ -297,9 +308,31 @@ function group_roi_theta(subjects, rootdir)
             end
     
             if p <= alpha
-                text(j, -0.17, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8);
+                text(j, -0.17, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8, 'FontWeight', 'bold');
             end
         end
+
+        px_sig = 1-s:s:4+s;
+        py_sig = nan(size(px_sig));
+
+        for j = x_sig
+            if j == max(x_sig)
+                break
+            end
+
+            if ~isnan(y_sig(x_sig(j)))
+                s = (j-1)*ds + 1;
+                e = (j-1)*ds + 3;
+
+                if ~isnan(y_sig(x_sig(j+1)))
+                    e = j*ds + 3;
+                end
+
+                py_sig(s:e) = y_sig(j);
+            end
+        end
+
+        plot(px_sig, py_sig, 'k-', 'LineWidth', 2)
     
         xlim([0.75, 4.25]);
         xticks([1, 2, 3, 4]);
@@ -317,6 +350,192 @@ function group_roi_theta(subjects, rootdir)
         saveas(f, fullfile(rootdir, 'results', sprintf('%s.png', run_labs{k, 3})), 'png');
     end
     
+    % setup power and zdim contrasts
+    zdim_avg = squeeze(nanmean(zdim_by_item, 5));
+    zdim_con = nan(size(zdim_avg));
+    zdim_con(:, :, :, 1, :, :) = zdim_avg(:, :, :, 1, :, :) - zdim_avg(:, :, :, 2, :, :);
+    zdim_con(:, :, :, 2, :, :) = zdim_avg(:, :, :, 3, :, :) - zdim_avg(:, :, :, 4, :, :);
+    zdim_con(:, :, :, 3, :, :) = zdim_avg(:, :, :, 1, :, :) - zdim_avg(:, :, :, 3, :, :);
+    zdim_con(:, :, :, 4, :, :) = zdim_avg(:, :, :, 2, :, :) - zdim_avg(:, :, :, 4, :, :);
+
+    pwr_avg = nanmean(nanmean(power_clean, 5), 6);
+    pwr_con = nan([size(pwr_avg, 1:3), 4]);
+    pwr_con(:, :, :, 1) = pwr_avg(:, :, :, 1) - pwr_avg(:, :, :, 2);
+    pwr_con(:, :, :, 2) = pwr_avg(:, :, :, 3) - pwr_avg(:, :, :, 4);
+    pwr_con(:, :, :, 3) = pwr_avg(:, :, :, 1) - pwr_avg(:, :, :, 3);
+    pwr_con(:, :, :, 4) = pwr_avg(:, :, :, 2) - pwr_avg(:, :, :, 4);
+    pwr_con = repmat(pwr_con, 1, 1, 1, 1, 2, 2);
+
+    % setup comparisons to run
+    % ROI x TOI x COI x POI x ZOI
+    run_comps = [1, 2, 1, 1, 1;
+                 3, 1, 1, 1, 1;
+                 5, 1, 1, 1, 1;
+                 2, 2, 2, 1, 1;
+                 6, 2, 4, 1, 1;
+                 4, 2, 4, 1, 1];
+    
+    % setup labels for runs
+    % x-label, y-label, title, figname
+    run_labs = {'\Delta Word effect (z-score)', '\Delta Source power SFG (z-score)', 'Low var. (veridical - statistical) \theta', 'wecorr_lvls_theta_sfg'; 
+                '\Delta Word effect (z-score)', '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'wecorr_lvls_delta_hpc';
+                '\Delta Word effect (z-score)', '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'wecorr_lvls_delta_acc';
+                '\Delta Word effect (z-score)', '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'wecorr_hvhs_delta_pt';
+                '\Delta Word effect (z-score)', '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'wecorr_lshs_delta_cn';
+                '\Delta Word effect (z-score)', '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'wecorr_lshs_delta_phc'};
+    
+    % setup correlations and plots to look at whether
+    % the word effects we extracted from the behavioural
+    % data (see run_evo.R for modelling details) correspond
+    % with MEG power in the relevant contrasts; this is
+    % an interesting sanity check for us - not sure how
+    % relevant this really is in terms of outcomes - it
+    % should largely reflect the power x RT correlations
+    for k = 1:size(run_comps, 1)
+        tR = run_comps(k, 1);
+        tT = run_comps(k, 2);
+        tC = run_comps(k, 3);
+        tP = run_comps(k, 4);
+        tZ = run_comps(k, 5);
+
+        indx = ~isnan(zdim_con(:, tR, tT, tC, tP, tZ)) & ~isnan(pwr_con(:, tR, tT, tC, tP, tZ));
+        this_z = zdim_con(:, tR, tT, tC, tP, tZ);
+        this_z = this_z(indx);
+        this_pwr = pwr_con(:, tR, tT, tC, tP, tZ);
+        this_pwr = this_pwr(indx);
+
+        minmaxz = max(abs([min(this_z), max(this_z)])) * 1.1;
+        minmaxp = max(abs([min(this_pwr), max(this_pwr)])) * 1.1;
+
+        [f, r, p] = helper_corrplot(this_z(:), this_pwr(:), [-minmaxz minmaxz], [-minmaxp minmaxp], run_labs{k,1}, run_labs{k,2}, run_labs{k,3})
+        saveas(f, fullfile(rootdir, 'results', sprintf('%s.svg', run_labs{k,4})), 'svg');
+        saveas(f, fullfile(rootdir, 'results', sprintf('%s.png', run_labs{k,4})), 'png');
+    end
+    
+    % collect data into new structures for MT analyses
+    fprintf('\n*** Collecting MT data structures. ***\n');
+    
+    pwr_items = nan([size(power_clean, 1:4), 20, 4]);
+    lbl_items = nan([size(power_clean, 1:4), 20]);
+    pwr_speakers = nan([size(power_clean, 1:4), 4, 20]);
+    lbl_speakers = nan([size(power_clean, 1:4), 4]);
+    
+    for k = 1:size(allsources{1}, 1)
+        % ^ loop over sources
+        for m = 1:size(allsources, 2)
+            % ^ loop over windows
+            for c = 1:size(conditions, 1)
+                % ^ loop over conditions
+                l = conditions(c,1);
+                p = conditions(c,2);
+                
+                trials = find(allsources{m}{k}.trialinfo(:,6) == p & ...
+                              allsources{m}{k}.trialinfo(:,7) == l);
+                ids = allsources{m}{k}.trialinfo(trials, 2);
+                spkrs = allsources{m}{k}.trialinfo(trials, 3);
+                
+                lbl_items(k, :, m, c, :) = repmat(reshape(unique(ids), 1, 1, 1, 1, numel(unique(ids))), 1, size(lbl_items, 2), 1, 1, 1);
+                lbl_speakers(k, :, m, c, :) = repmat(reshape(unique(spkrs), 1, 1, 1, 1, numel(unique(spkrs))), 1, size(lbl_speakers, 2), 1, 1, 1);
+                
+                for j = 1:size(allsources{m}{k}.pow, 1)
+                    % ^ loop over ROIs
+                    for h = 1:size(trials, 1)
+                        pwr_items(k, j, m, c, find(unique(ids) == ids(h)), ceil(trials(h) / 80)) = allsources{m}{k}.pow(j,trials(h));
+                        pwr_speakers(k, j, m, c, find(unique(spkrs) == spkrs(h)), find(isnan(pwr_speakers(k, j, m, c, find(unique(spkrs) == spkrs(h)), :)), 1, 'first')) = allsources{m}{k}.pow(j,trials(h));
+                    end
+                end
+            end
+        end
+    end
+    
+    % make easily readable averages matrix
+    mt_pwr = nan([size(pwr_items, 1:4), 80, 2]);
+    
+    pwr_items_avg = nanmean(pwr_items, 6);
+    pwr_speakers_avg = nanmean(pwr_speakers, 6);
+    
+    for k = 1:size(allsources{1}, 1)
+        % ^ loop over all sources
+        for c = 1:size(conditions, 1)
+            % ^ loop over all conditions
+            l = conditions(c,1);
+            p = conditions(c,2);
+            
+            trials = find(allsources{1}{k}.trialinfo(:,6) == p & ...
+                          allsources{1}{k}.trialinfo(:,7) == l);
+            ids = allsources{1}{k}.trialinfo(trials, 2);
+            uids = unique(ids);
+            spkrs = allsources{1}{k}.trialinfo(trials, 3);
+            uspkrs = unique(spkrs);
+            
+            for n = 1:size(trials, 1)
+                mt_pwr(k, :, :, c, n, 1) = pwr_items_avg(k, :, :, c, find(uids == ids(n)));
+                mt_pwr(k, :, :, c, n, 2) = pwr_speakers_avg(k, :, :, c, find(uspkrs == spkrs(n)));
+            end
+        end
+    end
+
+
+    fprintf('\n*** Computing and plotting. ***\n');
+    
+    % subset matrix by word and speaker dimension
+    mt_pwr_word = squeeze(mt_pwr(:, :, :, :, :, 1));
+    mt_pwr_spkr = squeeze(mt_pwr(:, :, :, :, :, 2));
+
+    % setup comparisons to run
+    % ROI x TOI x COIw x COIs
+    run_comps = {1, 1, 1:2, 1:2;
+                 5, 2, 1:2, 1:2;
+                 3, 2, 1:2, 1:2;
+                 2, 2, 1:2, 1:2;
+                 6, 2, 1:2, 1:2;
+                 4, 2, 1:2, 1:2;
+                 1, 1, 3:4, 3:4;
+                 5, 2, 3:4, 3:4;
+                 3, 2, 3:4, 3:4;
+                 2, 2, 3:4, 3:4;
+                 6, 2, 3:4, 3:4;
+                 4, 2, 3:4, 3:4;
+                 };
+
+    % setup labels for comparisons
+    % x-label, y-label, title, figname
+    run_labs = {'Source power SFG by speaker (z-score)', 'Source power SFG by word (z-score)', 'Low-variability training \theta', 'mtmeg_sfg_low';
+                'Source power ACC by speaker (z-score)', 'Source power ACC by word (z-score)', 'Low-variability training \delta', 'mtmeg_acc_low';
+                'Source power HPC by speaker (z-score)', 'Source power HPC by word (z-score)', 'Low-variability training \delta', 'mtmeg_hpc_low';
+                'Source power PT by speaker (z-score)', 'Source power PT by word (z-score)', 'Low-variability training \delta', 'mtmeg_pt_low';
+                'Source power CN by speaker (z-score)', 'Source power CN by word (z-score)', 'Low-variability training \delta', 'mtmeg_cn_low';
+                'Source power PHC by speaker (z-score)', 'Source power PHC by word (z-score)', 'Low-variability training \delta', 'mtmeg_phc_low';
+                'Source power SFG by speaker (z-score)', 'Source power SFG by word (z-score)', 'High-variability training \theta', 'mtmeg_sfg_high';
+                'Source power ACC by speaker (z-score)', 'Source power ACC by word (z-score)', 'High-variability training \delta', 'mtmeg_acc_high';
+                'Source power HPC by speaker (z-score)', 'Source power HPC by word (z-score)', 'High-variability training \delta', 'mtmeg_hpc_high';
+                'Source power PT by speaker (z-score)', 'Source power PT by word (z-score)', 'High-variability training \delta', 'mtmeg_pt_high';
+                'Source power CN by speaker (z-score)', 'Source power CN by word (z-score)', 'High-variability training \delta', 'mtmeg_cn_high';
+                'Source power PHC by speaker (z-score)', 'Source power PHC by word (z-score)', 'High-variability training \delta', 'mtmeg_phc_high'};
+    
+    % compute and plot correlations between word- and speaker-
+    % -averaged power to see if we see something similar to the
+    % behavioural case, although it is really quite unlikely
+    % we should be able to produce the exact same result - 
+    % instead, it should probably be a similar result but
+    % with the correlation being almost certainly positive
+    for k = 1:size(run_comps, 1)
+        tR = run_comps{k, 1};
+        tT = run_comps{k, 2};
+        tCw = run_comps{k, 3};
+        tCs = run_comps{k, 4};
+
+        indxw = false(size(mt_pwr, 1:5));
+        indxw(:, tR, tT, tCw, :) = ~isnan(mt_pwr(:, tR, tT, tCw, :, 1)) & ~isnan(mt_pwr(:, tR, tT, tCs, :, 2));
+        indxs = false(size(mt_pwr, 1:5));
+        indxs(:, tR, tT, tCs, :) = ~isnan(mt_pwr(:, tR, tT, tCw, :, 1)) & ~isnan(mt_pwr(:, tR, tT, tCs, :, 2));
+
+        [f, r, p] = helper_corrplot(mt_pwr_word(indxs), mt_pwr_spkr(indxw), [-1.75 1.75], [-1.75 1.75], run_labs{k,1}, run_labs{k,2}, run_labs{k,3});
+        saveas(f, fullfile(rootdir, 'results', sprintf('%s.svg', run_labs{k,4})), 'svg');
+        saveas(f, fullfile(rootdir, 'results', sprintf('%s.png', run_labs{k,4})), 'png');
+    end
+    
+    % save
     fprintf('\n*** Saving workspace. ***\n');
     clear f;
     save(fullfile(rootdir, 'results', 'group_roi_delta.mat'));
