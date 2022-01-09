@@ -46,8 +46,8 @@ function subj_source_beta_ROI(subject)
     
     load(fullfile(subject.out, 'geom-leadfield-mni-8mm-megchans.mat'), 'headmodel', 'leadfield');
     
-    % right SMG; right MTG; right MFG; right pars triangularis
-    roi = [6218; 5676; 6416; 6317];
+    % right SMG; right RO; right PUT; right MTG; left IFG
+    roi = [6218; 5777; 5294; 5676; 4825];
     leadfield.pos = leadfield.pos(roi,:);
     leadfield.leadfield = leadfield.leadfield(roi);
     leadfield.inside = true(numel(roi), 1);

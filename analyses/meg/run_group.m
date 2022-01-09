@@ -44,3 +44,4 @@ group_source_beta(subjects, rootdir);
 % sure that these are valid before proceeding.
 % Please run run_subject_qsub_ROI.m before proceeding.
 group_roi_theta(subjects, rootdir);
+group_roi_beta(subjects, rootdir);

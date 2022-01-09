@@ -1,6 +1,6 @@
-% @Description: Compute group-level theta/delta sources for visual inspection.
+% @Description: Compute group-level beta sources for visual inspection.
 
-function group_roi_theta(subjects, rootdir)
+function group_roi_beta(subjects, rootdir)
     fprintf('\n*** Collecting data. ***\n');
     
     % load source power data
@@ -14,7 +14,7 @@ function group_roi_theta(subjects, rootdir)
             continue
         end
         
-        load(fullfile(subjects(k).out, 'subj_source_delta_roi.mat'), 'source_pow_early', 'source_pow_late');
+        load(fullfile(subjects(k).out, 'subj_source_beta_roi.mat'), 'source_pow_early', 'source_pow_late');
         inc_subjects{end+1} = subjects(k).code;
     
         allsources_early{k} = source_pow_early;
@@ -43,16 +43,15 @@ function group_roi_theta(subjects, rootdir)
     
     % source power matrices
     % subject x roi x window x condition x repetition x trial
-    % ROI:  1 - left mSFG
-    %       2 - left PT
-    %       3 - right HPC
-    %       4 - right pHPC
-    %       5 - left ACC
-    %       6 - left CN
+    % ROI:  1 - right SMG
+    %       2 - right RO
+    %       3 - right PUTAMEN
+    %       4 - right MTG
+    %       5 - left IFG
     % WDW:  1 - early
     %       2 - late
-    power = NaN(size(allsources{1}, 1), 6, 2, 4, 4, 20); 
-    power_clean = NaN(size(allsources{1}, 1), 6, 2, 4, 4, 20);
+    power = NaN(size(allsources{1}, 1), 5, 2, 4, 4, 20); 
+    power_clean = NaN(size(allsources{1}, 1), 5, 2, 4, 4, 20);
     
     % rt matrices
     % subject x condition x repetition x trial
@@ -128,7 +127,7 @@ function group_roi_theta(subjects, rootdir)
     power_clean = power;
     
     for k = 1:size(allsources, 1) % subjects x
-        for j = 1:4 % rois x 
+        for j = 1:5 % rois x 
             for m = 1:2 % windows x
                 for i = 1:4 % conditions x
                     for l = 1:4 % repetitions
@@ -180,10 +179,10 @@ function group_roi_theta(subjects, rootdir)
     
     % item-wise RT, power and z-dim setup
     % subject x roi x window x condition x item [x beta-type x z-dim]
-    rt_by_item = squeeze(nanmean(rts_clean_match, mu_ax2));
+    rt_by_item = squeeze(nanmean(rts_clean_match(:, 1:5, :, :, :), mu_ax2));
     power_by_item = squeeze(nanmean(power_clean, mu_ax2));
     zdim_by_item = squeeze(nanmean(zdim, mu_ax2-2));
-    zdim_by_item = repmat(reshape(zdim_by_item, size(zdim_by_item, 1), 1, 1, size(zdim_by_item, 2), size(zdim_by_item, 3), size(zdim_by_item, 4), size(zdim_by_item, 5)), 1, 6, 2, 1, 1, 1, 1);
+    zdim_by_item = repmat(reshape(zdim_by_item, size(zdim_by_item, 1), 1, 1, size(zdim_by_item, 2), size(zdim_by_item, 3), size(zdim_by_item, 4), size(zdim_by_item, 5)), 1, 5, 2, 1, 1, 1, 1);
     
     % create power and rt averages (over repetitions)
     pwravg_items = nanmean(power_by_item, 5);
@@ -209,22 +208,22 @@ function group_roi_theta(subjects, rootdir)
     % setup matrix containing all comparisons of interest
     % these are taken from the significant results of the cluster tests
     % ROI x TOI x COI x COND1 x COND2
-    run_comps = [1, 1, 1, 1, 2; % (lvv - lvs): smg (early) x rt
-                 5, 2, 1, 1, 2; % (lvv - lvs): acc (late) x rt
-                 3, 2, 1, 1, 2; % (lvv - lvs): hpc (late) x rt
-                 2, 2, 2, 3, 4; % (hvv - hvs): pt (late) x rt
-                 6, 2, 4, 2, 4; % (lvs - hvs): cn (late) x rt
-                 4, 2, 4, 2, 4  % (lvs - hvs): phpc (late) x rt
+    run_comps = [1, 2, 1, 1, 2; % (lvv - lvs): smg (late) x rt
+                 2, 1, 2, 3, 4; % (hvv - hvs): ro (early) x rt
+                 3, 1, 2, 3, 4; % (lvv - lvs): put (early) x rt
+                 1, 2, 3, 1, 3; % (lvv - hvv): smg (late) x rt
+                 4, 2, 4, 2, 4; % (lvs - hvs): mtg (late) x rt
+                 5, 2, 4, 2, 4  % (lvs - hvs): ifg (late) x rt
                  ];
     
     % setup labels for power x rt correlations
     % y-axis, title, figure name
-    run_labs = {'\Delta Source power SFG (z-score)', 'Low var. (veridical - statistical) \theta', 'corr_lvls_theta_smg';
-                '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'corr_lvls_delta_acc';
-                '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'corr_lvls_delta_hpc';
-                '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'corr_hvhs_delta_pt';
-                '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'corr_lshs_delta_cn';
-                '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'corr_lshs_delta_phc'};
+    run_labs = {'\Delta Source power SMG (z-score)', 'Low var. (veridical - statistical) \beta', 'corr_lvls_beta_smg';
+                '\Delta Source power RO (z-score)', 'High var. (veridical - statistical) \beta', 'corr_hvhs_beta_ro';
+                '\Delta Source power PU (z-score)', 'Low var. (veridical - statistical) \beta', 'corr_lvls_beta_pu';
+                '\Delta Source power SMG (z-score)', 'Veridical (low var. - high var.) \beta', 'corr_lvhv_beta_smg';
+                '\Delta Source power MTG (z-score)', 'Statistical (low var. - high var.) \beta', 'corr_lshs_beta_mtg';
+                '\Delta Source power IFG (z-score)', 'Statistical (low var. - high var.) \beta', 'corr_lshs_beta_ifg'};
     
     % create correlation plots power x rt for all contrasts
     % to see which source contrasts explain the corresponding
@@ -252,12 +251,12 @@ function group_roi_theta(subjects, rootdir)
     
     % setup labels for block-wise comparisons
     % y-axis, title, figure name, legend1, legend2
-    run_labs = {'\Delta Source power SFG (z-score)', 'Low var. (veridical - statistical) \theta', 'blocks_lvls_theta_smg', 'Veridical', 'Statistical';
-                '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'blocks_lvls_delta_acc', 'Veridical', 'Statistical';
-                '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'blocks_lvls_delta_hpc', 'Veridical', 'Statistical';
-                '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'blocks_hvhs_delta_pt', 'Veridical',' Statistical';
-                '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'blocks_hvhs_delta_cn', 'Low var.', 'High var.';
-                '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'blocks_lshs_delta_phc', 'Low var.', 'High var.'};
+    run_labs = {'\Delta Source power SMG (z-score)', 'Low var. (veridical - statistical) \beta', 'blocks_lvls_beta_smg', 'Veridical', 'Statistical';
+                '\Delta Source power RO (z-score)', 'High var. (veridical - statistical) \beta', 'blocks_hvhs_beta_ro', 'Veridical', 'Statistical';
+                '\Delta Source power PU (z-score)', 'High var. (veridical - statistical) \beta', 'blocks_hvhs_beta_pu', 'Veridical', 'Statistical';
+                '\Delta Source power SMG (z-score)', 'Veridical (low var. - high var.) \beta', 'blocks_lvhv_beta_smg', 'Low var.',' High var.';
+                '\Delta Source power MTG (z-score)', 'Statistical (low var. - high var.) \beta', 'blocks_lshs_beta_mtg', 'Low var.', 'High var.';
+                '\Delta Source power IFG (z-score)', 'Statistical (low var. - high var.) \beta', 'blocks_lshs_beta_ifg', 'Low var.', 'High var.'};
     
     % setup alpha
     alpha = 0.05;
@@ -294,7 +293,7 @@ function group_roi_theta(subjects, rootdir)
             [~, p] = ttest(bp_pwrcon(:, kR, kT, kC, j));
 
             if p <= alpha
-                y_sig(j) = -0.15;
+                y_sig(j) = -0.25;
             end
             
             p_t = 'n.s.';
@@ -308,7 +307,7 @@ function group_roi_theta(subjects, rootdir)
             end
     
             if p <= alpha
-                text(j, -0.17, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8, 'FontWeight', 'bold');
+                text(j, -0.26, p_t, 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontName', 'Roboto', 'FontSize', 8, 'FontWeight', 'bold');
             end
         end
 
@@ -336,7 +335,7 @@ function group_roi_theta(subjects, rootdir)
     
         xlim([0.75, 4.25]);
         xticks([1, 2, 3, 4]);
-        ylim([-0.18, 0.18]);
+        ylim([-0.27, 0.27]);
         xlabel('Block (#)');
         ylabel(run_labs(k, 1));
         title(run_labs(k, 2));
@@ -369,20 +368,20 @@ function group_roi_theta(subjects, rootdir)
     % setup comparisons to run
     % ROI x TOI x COI x POI x ZOI
     run_comps = [1, 2, 1, 1, 1;
-                 3, 1, 1, 1, 1;
-                 5, 1, 1, 1, 1;
-                 2, 2, 2, 1, 1;
-                 6, 2, 4, 1, 1;
-                 4, 2, 4, 1, 1];
+                 2, 1, 2, 1, 1;
+                 3, 1, 2, 1, 1;
+                 1, 2, 3, 1, 1;
+                 4, 2, 4, 1, 1;
+                 5, 2, 4, 1, 1];
     
     % setup labels for runs
     % x-label, y-label, title, figname
-    run_labs = {'\Delta Word effect (z-score)', '\Delta Source power SFG (z-score)', 'Low var. (veridical - statistical) \theta', 'wecorr_lvls_theta_sfg'; 
-                '\Delta Word effect (z-score)', '\Delta Source power HPC (z-score)', 'Low var. (veridical - statistical) \delta', 'wecorr_lvls_delta_hpc';
-                '\Delta Word effect (z-score)', '\Delta Source power ACC (z-score)', 'Low var. (veridical - statistical) \delta', 'wecorr_lvls_delta_acc';
-                '\Delta Word effect (z-score)', '\Delta Source power PT (z-score)', 'High var. (veridical - statistical) \delta', 'wecorr_hvhs_delta_pt';
-                '\Delta Word effect (z-score)', '\Delta Source power CN (z-score)', 'Statistical (low var. - high var.) \delta', 'wecorr_lshs_delta_cn';
-                '\Delta Word effect (z-score)', '\Delta Source power PHC (z-score)', 'Statistical (low var. - high var.) \delta', 'wecorr_lshs_delta_phc'};
+    run_labs = {'\Delta Word effect (z-score)', '\Delta Source power SMG (z-score)', 'Low var. (veridical - statistical) \beta', 'wecorr_lvls_beta_smg'; 
+                '\Delta Word effect (z-score)', '\Delta Source power RO (z-score)', 'High var. (veridical - statistical) \beta', 'wecorr_hvhs_beta_ro';
+                '\Delta Word effect (z-score)', '\Delta Source power PU (z-score)', 'High var. (veridical - statistical) \beta', 'wecorr_hvhs_beta_pu';
+                '\Delta Word effect (z-score)', '\Delta Source power SMG (z-score)', 'Veridical (low var. - high var.) \beta', 'wecorr_lvhv_beta_smg';
+                '\Delta Word effect (z-score)', '\Delta Source power MTG (z-score)', 'Statistical (low var. - high var.) \beta', 'wecorr_lshs_beta_mtg';
+                '\Delta Word effect (z-score)', '\Delta Source power IFG (z-score)', 'Statistical (low var. - high var.) \beta', 'wecorr_lshs_beta_ifg'};
     
     % setup correlations and plots to look at whether
     % the word effects we extracted from the behavioural
@@ -484,34 +483,23 @@ function group_roi_theta(subjects, rootdir)
 
     % setup comparisons to run
     % ROI x TOI x COIw x COIs
-    run_comps = {1, 1, 1:2, 1:2;
-                 5, 2, 1:2, 1:2;
-                 3, 2, 1:2, 1:2;
-                 2, 2, 1:2, 1:2;
-                 6, 2, 1:2, 1:2;
-                 4, 2, 1:2, 1:2;
-                 1, 1, 3:4, 3:4;
-                 5, 2, 3:4, 3:4;
-                 3, 2, 3:4, 3:4;
-                 2, 2, 3:4, 3:4;
-                 6, 2, 3:4, 3:4;
-                 4, 2, 3:4, 3:4;
+    run_comps = {1, 2, 1:2, 1:2;
+                 2, 1, 1:2, 1:2;
+                 3, 1, 1:2, 1:2;
+                 1, 2, 1:2:4, 1:2:4;
+                 4, 2, 2:2:4, 2:2:4;
+                 5, 2, 2:2:4, 2:2:4;
                  };
 
     % setup labels for comparisons
     % x-label, y-label, title, figname
-    run_labs = {'Source power SFG by speaker (z-score)', 'Source power SFG by word (z-score)', 'Low-variability training \theta', 'mtmeg_sfg_low';
-                'Source power ACC by speaker (z-score)', 'Source power ACC by word (z-score)', 'Low-variability training \delta', 'mtmeg_acc_low';
-                'Source power HPC by speaker (z-score)', 'Source power HPC by word (z-score)', 'Low-variability training \delta', 'mtmeg_hpc_low';
-                'Source power PT by speaker (z-score)', 'Source power PT by word (z-score)', 'Low-variability training \delta', 'mtmeg_pt_low';
-                'Source power CN by speaker (z-score)', 'Source power CN by word (z-score)', 'Low-variability training \delta', 'mtmeg_cn_low';
-                'Source power PHC by speaker (z-score)', 'Source power PHC by word (z-score)', 'Low-variability training \delta', 'mtmeg_phc_low';
-                'Source power SFG by speaker (z-score)', 'Source power SFG by word (z-score)', 'High-variability training \theta', 'mtmeg_sfg_high';
-                'Source power ACC by speaker (z-score)', 'Source power ACC by word (z-score)', 'High-variability training \delta', 'mtmeg_acc_high';
-                'Source power HPC by speaker (z-score)', 'Source power HPC by word (z-score)', 'High-variability training \delta', 'mtmeg_hpc_high';
-                'Source power PT by speaker (z-score)', 'Source power PT by word (z-score)', 'High-variability training \delta', 'mtmeg_pt_high';
-                'Source power CN by speaker (z-score)', 'Source power CN by word (z-score)', 'High-variability training \delta', 'mtmeg_cn_high';
-                'Source power PHC by speaker (z-score)', 'Source power PHC by word (z-score)', 'High-variability training \delta', 'mtmeg_phc_high'};
+    run_labs = {'Source power SMG by speaker (z-score)', 'Source power SMG by word (z-score)', 'Low-variability training \beta', 'mtmeg_smg_low';
+                'Source power RO by speaker (z-score)', 'Source power RO by word (z-score)', 'Low-variability training \beta', 'mtmeg_ro_low';
+                'Source power PU by speaker (z-score)', 'Source power PU by word (z-score)', 'Low-variability training \beta', 'mtmeg_pu_low';
+                'Source power SMG by speaker (z-score)', 'Source power SMG by word (z-score)', 'Veridical conditions \beta', 'mtmeg_smg_ver';
+                'Source power MTG by speaker (z-score)', 'Source power MTG by word (z-score)', 'Statistical conditions \beta', 'mtmeg_mtg_stat';
+                'Source power IFG by speaker (z-score)', 'Source power IFG by word (z-score)', 'Statistical conditions \beta', 'mtmeg_ifg_stat'
+                };
     
     % compute and plot correlations between word- and speaker-
     % -averaged power to see if we see something similar to the
@@ -538,5 +526,5 @@ function group_roi_theta(subjects, rootdir)
     % save
     fprintf('\n*** Saving workspace. ***\n');
     clear f;
-    save(fullfile(rootdir, 'results', 'group_roi_delta.mat'));
+    save(fullfile(rootdir, 'results', 'group_roi_beta.mat'));
 end
