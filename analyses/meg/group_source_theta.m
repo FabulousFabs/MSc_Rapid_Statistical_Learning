@@ -47,8 +47,8 @@ function group_source_theta(subjects, rootdir)
     delta_norm = cat(2, delta_norm{:});
 
     %%
-    allsources = [delta_sources_late delta_norm];
-    %allsources = delta_sources_early;
+    %allsources = [delta_sources_late delta_norm];
+    allsources = delta_sources_early;
 
     %%
     load(sourcemodel_loc, 'sourcemodel');
@@ -87,8 +87,8 @@ function group_source_theta(subjects, rootdir)
     stat_l2p2_l2p3 = ft_sourcestatistics(cfg, allsources{:,3}, allsources{:,4});
     stat_l1p1_l2p2 = ft_sourcestatistics(cfg, allsources{:,1}, allsources{:,3});
     stat_l1p3_l2p3 = ft_sourcestatistics(cfg, allsources{:,2}, allsources{:,4});
-    stat_diff_l1l2 = ft_sourcestatistics(cfg, allsources{:,5}, allsources{:,6});
-    stat_avg_vesta = ft_sourcestatistics(cfg, allsources{:,7}, allsources{:,8});
+    %stat_diff_l1l2 = ft_sourcestatistics(cfg, allsources{:,5}, allsources{:,6});
+    %stat_avg_vesta = ft_sourcestatistics(cfg, allsources{:,7}, allsources{:,8});
 
     %%
     stat_theta_l1d = ft_sourcestatistics(cfg, allsources{:,1}, allsources{:,2});
@@ -106,8 +106,8 @@ function group_source_theta(subjects, rootdir)
     interp_l2p2_l2p3 = ft_sourceinterpolate(cfg, stat_l2p2_l2p3, mri);
     interp_l1p1_l2p2 = ft_sourceinterpolate(cfg, stat_l1p1_l2p2, mri);
     interp_l1p3_l2p3 = ft_sourceinterpolate(cfg, stat_l1p3_l2p3, mri);
-    interp_diff_l1l2 = ft_sourceinterpolate(cfg, stat_diff_l1l2, mri);
-    interp_avg_vesta = ft_sourceinterpolate(cfg, stat_avg_vesta, mri);
+    %interp_diff_l1l2 = ft_sourceinterpolate(cfg, stat_diff_l1l2, mri);
+    %interp_avg_vesta = ft_sourceinterpolate(cfg, stat_avg_vesta, mri);
 
     %%
     interp_theta_l1d = ft_sourceinterpolate(cfg, stat_theta_l1d, mri);
@@ -117,8 +117,8 @@ function group_source_theta(subjects, rootdir)
     interp_l2p2_l2p3.nice_mask = helper_make_mask(interp_l2p2_l2p3.stat, [.5 .8], 'pos');
     interp_l1p1_l2p2.nice_mask = helper_make_mask(interp_l1p1_l2p2.stat, [.5 .8], 'pos');
     interp_l1p3_l2p3.nice_mask = helper_make_mask(interp_l1p3_l2p3.stat, [.5 .8], 'pos');
-    interp_diff_l1l2.nice_mask = helper_make_mask(interp_diff_l1l2.stat, [.5 .8], 'neg');
-    interp_avg_vesta.nice_mask = helper_make_mask(interp_avg_vesta.stat, [.5 .8], 'pos');
+    %interp_diff_l1l2.nice_mask = helper_make_mask(interp_diff_l1l2.stat, [.5 .8], 'neg');
+    %interp_avg_vesta.nice_mask = helper_make_mask(interp_avg_vesta.stat, [.5 .8], 'pos');
 
     %%
     interp_theta_l1d.nice_mask = helper_make_mask(interp_theta_l1d.stat, [.5 .8], 'pos');

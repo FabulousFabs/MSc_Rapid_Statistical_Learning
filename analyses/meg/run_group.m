@@ -37,3 +37,11 @@ group_tfr_beta(subjects, rootdir);
 %% compute sources for selected TOIs/FOIs
 group_source_theta(subjects, rootdir);
 group_source_beta(subjects, rootdir);
+
+%% compute roi fun for selected TOIs/FOIs/COIs
+% please note that this requires some adjustment within the file (to
+% enter the relevant contrasts of interest and so on) so please make
+% sure that these are valid before proceeding.
+% Please run run_subject_qsub_ROI.m before proceeding.
+group_roi_theta(subjects, rootdir);
+group_roi_beta(subjects, rootdir);

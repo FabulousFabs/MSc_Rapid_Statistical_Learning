@@ -101,9 +101,11 @@ function group_tfr(subjects, rootdir)
     cfg.interactive = 'no';
     cfg.gridscale = 96;
     cfg.colormap = ft_colormap('*RdYlBu', 256);
+    cfg.zlim = "maxabs";
     cfg.colorbar = 'no';
     ft_singleplotTFR(cfg, ga_ind);
-    title(''); 
+    t = title({'Auditory, induced', ''});
+    t.Position(1) = t.Position(1) + 0.5;
     xlabel('Time (s)', 'FontWeight', 'bold'); 
     ylabel('Frequency (Hz)', 'FontWeight', 'bold'); 
     ax = gca; 
@@ -117,7 +119,7 @@ function group_tfr(subjects, rootdir)
     c.Label.FontSize = 8;
     c.Position(3) = c.Position(3) * 0.5;
     c.Position(4) = c.Position(4) * 0.5;
-    c.Position(1) = c.Position(1) + c.Position(3) * 0.5;
+    c.Position(1) = c.Position(1) + c.Position(3) * 0.15;
     c.Position(2) = c.Position(2) + 0.13;
     rectangle('Position', [0.1 1 0.2 6], 'EdgeColor', '#373737'); % rect theta
     rectangle('Position', [0.5 1 0.3 3], 'EdgeColor', '#373737'); % rect delta
@@ -125,6 +127,8 @@ function group_tfr(subjects, rootdir)
     text(0.2, 4, '\theta', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
     text(0.65, 2.5, '\delta', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
     text(0.7, 21.5, '\beta_{1}', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
+    xline(0, '--', {'Audio onset'}, 'FontSize', 7);
+    xline(0.965, '--', {'Prompt onset', '(median)'}, 'FontSize', 7);
     saveas(f1, fullfile(rootdir, 'results', 'tfr_ind_main.svg'), 'svg');
     saveas(f1, fullfile(rootdir, 'results', 'tfr_ind_main.png'), 'png');
     
@@ -140,9 +144,11 @@ function group_tfr(subjects, rootdir)
     cfg.interactive = 'no';
     cfg.gridscale = 96;
     cfg.colormap = ft_colormap('*RdYlBu', 256);
+    cfg.zlim = "maxabs";
     cfg.colorbar = 'no';
     ft_singleplotTFR(cfg, ga_evo);
-    title(''); 
+    t = title({'Auditory, evoked', ''});
+    t.Position(1) = t.Position(1) + 0.5;
     xlabel('Time (s)', 'FontWeight', 'bold'); 
     ylabel('Frequency (Hz)', 'FontWeight', 'bold'); 
     ax = gca; 
@@ -156,12 +162,14 @@ function group_tfr(subjects, rootdir)
     c.Label.FontSize = 8;
     c.Position(3) = c.Position(3) * 0.5;
     c.Position(4) = c.Position(4) * 0.5;
-    c.Position(1) = c.Position(1) + c.Position(3) * 0.5;
+    c.Position(1) = c.Position(1) + c.Position(3) * 0.15;
     c.Position(2) = c.Position(2) + 0.13;
     rectangle('Position', [0.1 1 0.2 6], 'EdgeColor', '#373737'); % rect theta
     rectangle('Position', [0.5 1 0.3 3], 'EdgeColor', '#373737'); % rect delta
     text(0.2, 4, '\theta', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
     text(0.65, 2.5, '\delta', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
+    xline(0, '--', {'Audio onset'}, 'FontSize', 7);
+    xline(0.965, '--', {'Prompt onset', '(median)'}, 'FontSize', 7);
     saveas(f2, fullfile(rootdir, 'results', 'tfr_evo_main.svg'), 'svg');
     saveas(f2, fullfile(rootdir, 'results', 'tfr_evo_main.png'), 'png');
     
@@ -177,9 +185,11 @@ function group_tfr(subjects, rootdir)
     cfg.interactive = 'no';
     cfg.gridscale = 96;
     cfg.colormap = ft_colormap('*RdYlBu', 256);
+    cfg.zlim = "maxabs";
     cfg.colorbar = 'no';
     ft_singleplotTFR(cfg, ga_prm);
-    title(''); 
+    t = title({'Prompt, induced', ''});
+    t.Position(1) = t.Position(1) + 0.41;
     xlabel('Time (s)', 'FontWeight', 'bold'); 
     ylabel('Frequency (Hz)', 'FontWeight', 'bold'); 
     ax = gca; 
@@ -193,10 +203,11 @@ function group_tfr(subjects, rootdir)
     c.Label.FontSize = 8;
     c.Position(3) = c.Position(3) * 0.5;
     c.Position(4) = c.Position(4) * 0.5;
-    c.Position(1) = c.Position(1) + c.Position(3) * 0.5;
+    c.Position(1) = c.Position(1) + c.Position(3) * 0.15;
     c.Position(2) = c.Position(2) + 0.13;
     rectangle('Position', [0.3 18 0.3 4], 'EdgeColor', '#373737'); % rect beta2
     text(0.45, 20, '\beta_{2}', 'HorizontalAlignment', 'center', 'Color', '#373737', 'FontWeight', 'bold');
+    xline(0, '--', {'Prompt onset'}, 'FontSize', 7);
     saveas(f3, fullfile(rootdir, 'results', 'tfr_prm_iti.svg'), 'svg');
     saveas(f3, fullfile(rootdir, 'results', 'tfr_prm_iti.png'), 'png');
 end
