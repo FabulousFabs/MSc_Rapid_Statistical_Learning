@@ -819,8 +819,9 @@ writeMat(file.path(outdir, "ws_scores.mat"), x = as.matrix(df_avail));
 # in statistical conditions (which should be true).
 
 data_vs <- subset(data, task == 'MEG' | task == '4AFC');
-data_vs$type <- ifelse(data_vs$condition == 'L1P1' | data_vs$condition == 'L2P2', 'V', 'S');
-data_vs$type <- factor(data_vs$type, c('V', 'S'));
+#data_vs$type <- ifelse(data_vs$condition == 'L1P1' | data_vs$condition == 'L1P3', 'V', 'S');
+#data_vs$type <- factor(data_vs$type, c('V', 'S'));
+data_vs$type <- 
 
 # model fitting
 vs.model <- lmer(rt ~ ppn:type + rep + reps + (rep:reps|task), data = data_vs);
