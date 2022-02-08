@@ -1,2 +1,0 @@
-# Write-up
-Everything in this directory is somehow included in the write-up (or older versions of it). For figures and scripts used in creating them, please refer to ```./graphics_general/*```. As of now, I am writing the thesis in Office 365. The document can be found [here](https://1drv.ms/w/s!AuzTCwHUrd_ugWcbCpIeGK-shsxu?e=VSqmjE), although I will, once I am done, rewrite this in TeX for convenience (the only reason I am not doing that from the get-go is that I need a docx version for submission with the CNS Journal).
