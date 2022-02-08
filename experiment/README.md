@@ -69,7 +69,15 @@ Again, task duration should come out as roughly 16 minutes. For specifics, pleas
 For testing phases, we use bigger subsets of the conditions. For more information, check the relevant subheadings.
 
 ### MEG semantic judgment
-***TODO:*** Write task + description.
+For the MEG task we use all stimuli from `pool1 x list1`, `pool3 x list1`, `pool2 x list2` and `pool3 x list2`. As such, we have `4*20*4=320` stimuli for the experiment. It should also be noted that we introduce periodic breaks during the experiment (i.e., blocks of 40 stimuli) to allow for participants to be repositioned in the MEG helmet. Procedure is as follows:
+
+1. Fixation cross&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(1200ms)*
+2. Audio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(~500ms)*
+3. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(300ms)*
+4. Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(<3000ms)*
+6. Delay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(1200ms, fixed)*
+
+In all, this talk should take approximately `4*20*4*6.2s=33m` (but may vary dramatically depending on participant speed and position in the MEG). For specifics of the procedure, please see `rslMEG.sce`, `rslMEG_main.pcl`, `rsl_SUBS.pcl` and `rsl_INFO.pcl`.
 
 ### 4AFC (cue = word)
 For the four-alternative forced choice task we use one variant from all nine conditions, yielding `9x1x20=180` stimuli in total. The task itself is essentially the same task as the 2AFC (cue = word) task employed during the learning phase, except that four alternatives are used and no feedback is given at the end of each trial. The full procedure is:
