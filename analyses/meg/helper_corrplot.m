@@ -23,8 +23,10 @@ function [f, R, P] = helper_corrplot(x, y, x_lim, y_lim, x_lab, y_lab, t)
     dist = arrayfun(@(xn, yn) d_d([xn, yn], d_A, d_B), x, y);
     
     f = figure('Position', [0 0 300 300]); hold on; grid on;
-    scatter(x, y, 15, dist, 'o', 'filled', 'MarkerFaceAlpha', 0.4);
-    scatter(x, y, 15, dist, 'o', 'MarkerFaceAlpha', 0.8);
+    %scatter(x, y, 15, dist, 'o', 'filled', 'MarkerFaceAlpha', 0.4);
+    %scatter(x, y, 15, dist, 'o', 'MarkerFaceAlpha', 0.8);
+    scatter(x, y, 15, 'black', 'o', 'filled', 'MarkerFaceAlpha', 0.4);
+    scatter(x, y, 15, 'black', 'o', 'MarkerFaceAlpha', 0.8)
     ft_colormap('viridis', 512);
     xlim(x_lim);
     ylim(y_lim);
